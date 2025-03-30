@@ -1,0 +1,1361 @@
+<html>
+
+<!-- NO EKF HERE PRE EKF-->
+
+<head>
+  <title>Advanced Augmented Reality</title>
+  
+
+  <script type="text/javascript" src="libs/Three.js"></script> 
+  <script type="text/javascript" src="svd.js"></script> 
+  <script type="text/javascript" src="posit1.js"></script> 
+  <script type="text/javascript" src="cv.js"></script> 
+  <script type="text/javascript" src="aruco.js"></script> 
+  <script type="text/javascript" src="kalman.js"></script>
+  <script type="text/javascript" src="atf.js"></script>
+  <script type="text/javascript" src="optic.js"></script>
+  <script type="text/javascript" src="multiS.js"></script>
+  <script type="text/javascript" src="bilateral.js"></script>
+
+  <script>
+    var video, canvas, context, imageData, detector, posit;
+    var renderers = [], scenes = [], cameras = [];
+    var plane1, plane2, model, texture;
+    var step = 0.0;
+    var positionKalman, rotationKalman;
+    var adaptiveFilter, opticalFlowTracker, multiScaleDetector;
+    var lastMarkerDetected = false;
+    var debugCanvas, debugContext;
+    var useAdaptiveFilter = true;
+    var useOpticalFlow = true;
+    var useMultiScale = true;
+    var modelSize = 35.0; //millimeters
+    var bilateralFilter;
+    var useBilateralFilter = true;
+    var filterStats = {
+      framesWithMarkers: 0,
+      totalFrames: 0,
+      framesWithTracking: 0,
+      framesWithMultiScale: 0,
+      lastResetTime: Date.now()
+    };
+    var detectionPipeline = {
+      start: 0,
+      atf: 0,
+      multi: 0,
+      optical: 0,
+      total: 0
+    };
+
+    function onLoad(){
+  // Initialize variables for model visibility tracking
+  modelVisible = true;
+  noMarkerFrameCount = 0;
+  markerLostThreshold = 15; // Number of frames before hiding model
+  
+  // Get DOM elements
+  video = document.getElementById("video");
+  canvas = document.getElementById("canvas");
+  context = canvas.getContext("2d");
+  debugCanvas = document.getElementById("debugCanvas");
+  debugContext = debugCanvas ? debugCanvas.getContext("2d") : null;
+
+  canvas.width = parseInt(canvas.style.width);
+  canvas.height = parseInt(canvas.style.height);
+  
+  if (debugCanvas) {
+    debugCanvas.width = canvas.width;
+    debugCanvas.height = canvas.height;
+    debugCanvas.style.display = 'none'; // Initially hidden
+  }
+  
+  initCamera();
+  
+  // Initialize base marker detector
+  detector = new AR.Detector();
+  posit = new POS.Posit(modelSize, canvas.width);
+  
+  // Initialize Kalman filters - 6 states (x,y,z,vx,vy,vz), 3 measurements (x,y,z)
+  positionKalman = new KalmanFilter(6, 3);
+  rotationKalman = new KalmanFilter(6, 3);
+  
+  // Initialize Adaptive Threshold Filter
+  adaptiveFilter = new AdaptiveThresholdFilter({
+    blockSize: 26,
+    C: 0.1,
+    useIntegralImage: true,
+    debug: false
+  });
+  
+  // Initialize Multi-Scale Detector
+  multiScaleDetector = new MultiScaleDetector({
+    detector: detector, 
+    scales: [1.0, 0.5, 2.0],
+    confidenceThreshold: 0.35,
+    preferLargerMarkers: true,
+    debug: debugCanvas !== null
+  });
+  
+  // Initialize Optical Flow Tracker
+  opticalFlowTracker = new OpticalFlowTracker({
+    winSize: 15,
+    maxError: 10000,
+    maxMotion: 50,
+    maxTrackedFrames: 45,
+    debug: debugCanvas !== null
+  });
+
+  // Initialize Bilateral Filter
+  bilateralFilter = new BilateralFilter({
+    diameter: 11, 
+    sigmaColor: 60,
+    sigmaSpace: 80,
+    useOptimizedKernel: true,
+    greyOnly: true,
+    debug: false
+  });
+      
+  // Set up UI controls
+  document.getElementById('useATF').checked = useAdaptiveFilter;
+  document.getElementById('useOpticalFlow').checked = useOpticalFlow;
+  document.getElementById('useMultiScale').checked = useMultiScale;
+  document.getElementById('blockSize').value = adaptiveFilter.blockSize;
+  document.getElementById('thresholdC').value = adaptiveFilter.C;
+  document.getElementById('maxTrackedFrames').value = 45;
+  document.getElementById('motionSensitivity').value = 89;
+  document.getElementById('scaleConfidence').value = multiScaleDetector.confidenceThreshold * 100;
+  document.getElementById('useBilateral').checked = useBilateralFilter;
+  
+  // Initialize statistics tracking
+  updateFilterStats();
+
+  // Create 3D renderers, scenes, and model
+  createRenderers();
+  createScenes();
+  
+  // Initialize model visibility UI and controls
+  initModelVisibility();
+
+  // Start the animation loop
+  requestAnimationFrame(tick);
+};
+
+// Function to add model status display
+function addModelStatusDisplay() {
+  var statusDiv = document.createElement('div');
+  statusDiv.id = 'modelStatus';
+  statusDiv.textContent = "Model: Visible";
+  statusDiv.style.backgroundColor = "#333";
+  statusDiv.style.color = "#44ff44";
+  statusDiv.style.padding = "5px 10px";
+  statusDiv.style.borderRadius = "3px";
+  statusDiv.style.fontFamily = "Arial, sans-serif";
+  statusDiv.style.fontWeight = "bold";
+  statusDiv.style.position = "absolute";
+  statusDiv.style.top = "10px";
+  statusDiv.style.right = "10px";
+  
+  document.body.appendChild(statusDiv);
+}
+
+// Function to add UI controls for model visibility
+function addModelVisibilityControls() {
+  var trackingTab = document.getElementById('tracking-tab');
+  
+  var controlGroup = document.createElement('div');
+  controlGroup.className = 'control-group';
+  
+  var html = `
+    <h4>Model Visibility</h4>
+    <div class="control-group">
+      <label class="control-label">Hide after frames:</label>
+      <input type="range" id="markerLostFrames" min="0" max="60" value="${markerLostThreshold}" 
+             onchange="updateMarkerLostThreshold()">
+      <span id="markerLostFramesValue">${markerLostThreshold}</span>
+      <span>(0 = never hide, higher = more delay)</span>
+    </div>
+    <div class="control-group">
+      <button id="toggleModel" onclick="toggleModelVisibility()">
+        Toggle Model Visibility
+      </button>
+    </div>
+  `;
+  
+  controlGroup.innerHTML = html;
+  trackingTab.appendChild(controlGroup);
+}
+
+// Function to update threshold based on slider
+function updateMarkerLostThreshold() {
+  markerLostThreshold = parseInt(document.getElementById('markerLostFrames').value);
+  document.getElementById('markerLostFramesValue').textContent = markerLostThreshold;
+}
+
+// Function to manually toggle model visibility
+function toggleModelVisibility() {
+  if (modelVisible) {
+    hideModel();
+  } else {
+    showModel();
+  }
+}
+
+// Initialize model visibility features
+function initModelVisibility() {
+  addModelStatusDisplay();
+  addModelVisibilityControls();
+}
+
+// Function to hide the 3D model
+function hideModel() {
+  model.visible = false;
+  modelVisible = false;
+  
+  // Update status display if it exists
+  var modelStatus = document.getElementById('modelStatus');
+  if (modelStatus) {
+    modelStatus.textContent = "Model: Hidden (no marker)";
+    modelStatus.style.color = "#ff4444";
+  }
+  
+  console.log("Model hidden - no marker detected for " + markerLostThreshold + " frames");
+}
+
+// Function to show the 3D model
+function showModel() {
+  model.visible = true;
+  modelVisible = true;
+  
+  // Update status display if it exists
+  var modelStatus = document.getElementById('modelStatus');
+  if (modelStatus) {
+    modelStatus.textContent = "Model: Visible";
+    modelStatus.style.color = "#44ff44";
+  }
+  
+  console.log("Model visible - marker detected");
+}
+
+    
+    
+    function initCamera() {
+      if (navigator.mediaDevices === undefined) {
+        navigator.mediaDevices = {};
+      }
+      
+      if (navigator.mediaDevices.getUserMedia === undefined) {
+        navigator.mediaDevices.getUserMedia = function(constraints) {
+          var getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+          
+          if (!getUserMedia) {
+            return Promise.reject(new Error('getUserMedia is not implemented in this browser'));
+          }
+
+          return new Promise(function(resolve, reject) {
+            getUserMedia.call(navigator, constraints, resolve, reject);
+          });
+        }
+      }
+      
+      navigator.mediaDevices
+        .getUserMedia({ video: true })
+        .then(function(stream) {
+          if ("srcObject" in video) {
+            video.srcObject = stream;
+          } else {
+            video.src = window.URL.createObjectURL(stream);
+          }
+        })
+        .catch(function(err) {
+          console.log(err.name + ": " + err.message);
+        }
+      );
+    }
+
+    function tick() {
+  requestAnimationFrame(tick);
+  
+  if (video.readyState === video.HAVE_ENOUGH_DATA) {
+    // Record performance timing
+    detectionPipeline.start = performance.now();
+    
+    snapshot();
+
+    // Original image data from camera
+    var originalImageData = context.getImageData(0, 0, canvas.width, canvas.height);
+    
+    // Process with adaptive threshold filter if enabled
+    var processedImageData = originalImageData;
+    if (useAdaptiveFilter) {
+      processedImageData = adaptiveFilter.process(originalImageData);
+      
+      // Display debug visualization if available
+      if (debugContext && adaptiveFilter.debug) {
+        adaptiveFilter.visualizeDebug(debugContext, 0, 0);
+      }
+    }
+    
+    detectionPipeline.atf = performance.now();
+    
+    // Apply bilateral filter if enabled
+    if (useBilateralFilter) {
+      processedImageData = bilateralFilter.process(processedImageData);
+      
+      // Display debug visualization if available
+      if (debugContext && bilateralFilter.debug) {
+        bilateralFilter.drawDebug(debugContext);
+      }
+    }
+    
+    detectionPipeline.bilateral = performance.now();
+    
+    // Basic detection or multi-scale detection
+    var detectedMarkers = [];
+    if (useMultiScale) {
+      detectedMarkers = multiScaleDetector.detect(processedImageData);
+      
+      // Track multi-scale statistics
+      if (detectedMarkers.length > 0) {
+        filterStats.framesWithMultiScale++;
+      }
+    } else {
+      detectedMarkers = detector.detect(processedImageData);
+    }
+    
+    detectionPipeline.multi = performance.now();
+    
+    // Use optical flow tracking if enabled
+    var markers = detectedMarkers;
+    if (useOpticalFlow) {
+      markers = opticalFlowTracker.track(originalImageData, detectedMarkers);
+      
+      // Display optical flow debug visualization
+      if (debugContext && opticalFlowTracker.debug) {
+        opticalFlowTracker.drawDebug(debugContext);
+      }
+      
+      // Update tracking statistics
+      if (markers.length > 0 && markers[0].id === -1) {
+        filterStats.framesWithTracking++;
+      }
+    }
+    
+    detectionPipeline.optical = performance.now();
+    
+    // Draw multi-scale debug info if enabled
+    if (debugContext && useMultiScale && multiScaleDetector.debug) {
+      multiScaleDetector.drawDebug(debugContext, markers);
+    }
+    
+    // Update detection statistics
+    filterStats.totalFrames++;
+    if (detectedMarkers.length > 0) {
+      filterStats.framesWithMarkers++;
+    }
+    
+    if (filterStats.totalFrames % 30 === 0) { // Update stats every 30 frames
+      updateFilterStats();
+    }
+    
+    // Draw marker outlines on original image
+    drawCorners(markers);
+    
+    // Update 3D scenes
+    updateScenes(markers);
+    
+    // Render all views
+    render();
+    
+    // Complete timing
+    detectionPipeline.total = performance.now() - detectionPipeline.start;
+    
+    // Update performance display
+    if (filterStats.totalFrames % 10 === 0) {
+      updatePerformanceStats();
+    }
+  }
+}
+
+    function snapshot(){
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+    };
+    
+    function drawCorners(markers){
+      var corners, corner, i, j;
+    
+      context.lineWidth = 3;
+
+      for (i = 0; i < markers.length; ++ i){
+        corners = markers[i].corners;
+        
+        // Determine marker type and set style accordingly
+        var isTracked = markers[i].id === -1;
+        var isMultiScaleDetected = markers[i].detectedAtScale !== undefined;
+        
+        if (isTracked) {
+          context.strokeStyle = "orange"; // Tracked marker
+        } else if (isMultiScaleDetected) {
+          // Color based on scale
+          if (markers[i].detectedAtScale === 1.0) {
+            context.strokeStyle = "red"; // Original scale
+          } else if (markers[i].detectedAtScale < 1.0) {
+            context.strokeStyle = "purple"; // Downscaled
+          } else {
+            context.strokeStyle = "cyan"; // Upscaled
+          }
+        } else {
+          context.strokeStyle = "red"; // Normal detection
+        }
+        
+        // Draw marker outline
+        context.beginPath();
+        for (j = 0; j < corners.length; ++ j){
+          corner = corners[j];
+          context.moveTo(corner.x, corner.y);
+          corner = corners[(j + 1) % corners.length];
+          context.lineTo(corner.x, corner.y);
+        }
+        context.stroke();
+        context.closePath();
+        
+        // Draw corner marker
+        context.strokeStyle = isTracked ? "yellow" : isMultiScaleDetected ? "lime" : "green";
+        context.strokeRect(corners[0].x - 2, corners[0].y - 2, 4, 4);
+        
+        // Add marker info
+        context.font = "bold 10px Arial";
+        
+        if (isTracked) {
+          // Tracked marker
+          context.fillStyle = "orange";
+          context.fillText("TRACKED", corners[0].x, corners[0].y - 15);
+          context.fillText(Math.round(markers[i].confidence * 100) + "% confident", 
+                        corners[0].x, corners[0].y - 5);
+        } else if (isMultiScaleDetected) {
+          // Multi-scale detected marker
+          context.fillStyle = "lime";
+          context.fillText("SCALE: " + markers[i].detectedAtScale.toFixed(1) + "x", 
+                        corners[0].x, corners[0].y - 15);
+          context.fillText("id: " + markers[i].id, corners[0].x, corners[0].y - 5);
+        } else {
+          // Standard detected marker
+          context.fillStyle = "blue";
+          context.fillText("id: " + markers[i].id, corners[0].x, corners[0].y - 5);
+        }
+      }
+    };
+
+    function createRenderers(){
+      // Create renderer 1 (model with normal material)
+      var renderer1 = new THREE.WebGLRenderer();
+      renderer1.setClearColor(0xffff00, 1);
+      renderer1.setSize(canvas.width, canvas.height);
+      document.getElementById("container1").appendChild(renderer1.domElement);
+      
+      var scene1 = new THREE.Scene();
+      var camera1 = new THREE.PerspectiveCamera(40, canvas.width / canvas.height, 1, 1000);
+      scene1.add(camera1);
+      
+      renderers.push(renderer1);
+      scenes.push(scene1);
+      cameras.push(camera1);
+      
+      // Create renderer 2 (alternative pose)
+      var renderer2 = new THREE.WebGLRenderer();
+      renderer2.setClearColor(0xffff00, 1);
+      renderer2.setSize(canvas.width, canvas.height);
+      document.getElementById("container2").appendChild(renderer2.domElement);
+      
+      var scene2 = new THREE.Scene();
+      var camera2 = new THREE.PerspectiveCamera(40, canvas.width / canvas.height, 1, 1000);
+      scene2.add(camera2);
+      
+      renderers.push(renderer2);
+      scenes.push(scene2);
+      cameras.push(camera2);
+      
+      // Create renderer 3 (combined view)
+      var renderer3 = new THREE.WebGLRenderer();
+      renderer3.setClearColor(0xffffff, 1);
+      renderer3.setSize(canvas.width, canvas.height);
+      document.getElementById("container").appendChild(renderer3.domElement);
+      
+      // Scene for video texture
+      var scene3 = new THREE.Scene();
+      var camera3 = new THREE.OrthographicCamera(-0.5, 0.5, 0.5, -0.5);
+      scene3.add(camera3);
+      
+      // Scene for 3D model
+      var scene4 = new THREE.Scene();
+      var camera4 = new THREE.PerspectiveCamera(40, canvas.width / canvas.height, 1, 1000);
+      scene4.add(camera4);
+      
+      renderers.push(renderer3);
+      scenes.push(scene3);
+      cameras.push(camera3);
+      scenes.push(scene4);
+      cameras.push(camera4);
+    };
+
+    function render(){
+      // Render first two views separately
+      for (var i = 0; i < 2; i++) {
+        renderers[i].clear();
+        renderers[i].render(scenes[i], cameras[i]);
+      }
+      
+      // Render combined view (video background + 3D model)
+      renderers[2].autoClear = false;
+      renderers[2].clear();
+      renderers[2].render(scenes[2], cameras[2]); // Video background
+      renderers[2].render(scenes[3], cameras[3]); // 3D model
+    };
+
+    function createScenes(){
+      // Create plane for first view
+      plane1 = createPlane();
+      scenes[0].add(plane1);
+
+      // Create plane for second view
+      plane2 = createPlane();
+      scenes[1].add(plane2);
+      
+      // Create video texture background
+      texture = createTexture();
+      scenes[2].add(texture);
+    
+      // Create 3D model
+      model = createModel();
+      scenes[3].add(model);
+    };
+    
+    function createPlane(){
+      var object = new THREE.Object3D(),
+          geometry = new THREE.PlaneGeometry(1.0, 1.0, 0.0),
+          material = new THREE.MeshNormalMaterial(),
+          mesh = new THREE.Mesh(geometry, material);
+      
+      object.eulerOrder = 'YXZ';
+      
+      object.add(mesh);
+      
+      return object;
+    };
+    
+    function createTexture(){
+      var texture = new THREE.Texture(video),
+          object = new THREE.Object3D(),
+          geometry = new THREE.PlaneGeometry(1.0, 1.0, 0.0),
+          material = new THREE.MeshBasicMaterial( {map: texture, depthTest: false, depthWrite: false} ),
+          mesh = new THREE.Mesh(geometry, material);
+      
+      object.position.z = -1;
+      
+      object.add(mesh);
+      
+      return object;
+    };
+    
+    function createModel(){
+      var object = new THREE.Object3D(),
+          geometry = new THREE.SphereGeometry(0.5, 15, 15, Math.PI),
+          texture = THREE.ImageUtils.loadTexture("textures/sedat.png"),
+          material = new THREE.MeshBasicMaterial( {map: texture} ),
+          mesh = new THREE.Mesh(geometry, material);
+      
+      object.add(mesh);
+      
+      return object;
+    };
+
+    // Simplified approach: directly tie model visibility to marker detection
+function updateScenes(markers) {
+  var corners, corner, pose, i;
+  
+  if (markers.length > 0) {
+    // Marker detected - make model visible
+    if (!model.visible) {
+      model.visible = true;
+      
+      // Update status indicator if it exists
+      var modelStatus = document.getElementById('modelStatus');
+      if (modelStatus) {
+        modelStatus.textContent = "Model: Visible";
+        modelStatus.style.color = "#44ff44";
+      }
+    }
+    
+    // Continue with normal pose estimation and rendering
+    lastMarkerDetected = true;
+    corners = markers[0].corners;
+    
+    // Check marker types
+    var isTracked = markers[0].id === -1;
+    var isMultiScaleDetected = markers[0].detectedAtScale !== undefined;
+    
+    // Apply motion prediction for optically tracked markers with low confidence
+    if (isTracked && markers[0].confidence < 0.7 && useOpticalFlow) {
+      const motionVector = opticalFlowTracker.getMotionVector();
+      
+      // Apply additional motion prediction based on velocity
+      for (i = 0; i < corners.length; i++) {
+        corners[i].x += motionVector.x * 0.5;
+        corners[i].y += motionVector.y * 0.5;
+      }
+    }
+    
+    // Convert corners to camera coordinate system
+    for (i = 0; i < corners.length; ++ i){
+      corner = corners[i];
+      
+      corner.x = corner.x - (canvas.width / 2);
+      corner.y = (canvas.height / 2) - corner.y;
+    }
+    
+    pose = posit.pose(corners);
+    
+    // Apply Kalman filtering for smoother pose tracking
+    var smoothedPosition = applyKalmanFilter(pose.bestTranslation, positionKalman);
+    var smoothedRotation = applyKalmanFilter(extractEulerAngles(pose.bestRotation), rotationKalman);
+    
+    // Update objects with smoothed positions and rotations
+    updateObject(plane1, pose.bestRotation, smoothedPosition);
+    updateObject(plane2, pose.alternativeRotation, pose.alternativeTranslation);
+    updateObjectWithEuler(model, smoothedRotation, smoothedPosition);
+
+    // For tracked markers, adjust confidence display
+    var displayError = isTracked ? 
+      (1.0 - markers[0].confidence) * 10 : pose.bestError;
+    
+    // Provide additional marker type information
+    var markerTypeInfo = "";
+    if (isTracked) {
+      markerTypeInfo = "TRACKED";
+    } else if (isMultiScaleDetected) {
+      markerTypeInfo = "MULTI-SCALE (" + markers[0].detectedAtScale.toFixed(1) + "x)";
+    }
+    
+    updatePose("pose1", displayError, pose.bestRotation, smoothedPosition, markerTypeInfo);
+    updatePose("pose2", pose.alternativeError, pose.alternativeRotation, pose.alternativeTranslation, "");
+    
+    step += 0.025;
+    
+    model.rotation.z -= step;
+  } else {
+    // No marker detected - immediately hide model
+    if (model.visible) {
+      model.visible = false;
+      
+      // Update status indicator if it exists
+      var modelStatus = document.getElementById('modelStatus');
+      if (modelStatus) {
+        modelStatus.textContent = "Model: Hidden (no marker)";
+        modelStatus.style.color = "#ff4444";
+      }
+    }
+    
+    // Still update pose prediction for debugging views, but don't show the model
+    if (lastMarkerDetected) {
+      positionKalman.predict();
+      rotationKalman.predict();
+      lastMarkerDetected = false;
+    }
+  }
+  
+  texture.children[0].material.map.needsUpdate = true;
+}
+
+// Ensure model is invisible when first created
+function createModel(){
+  var object = new THREE.Object3D(),
+      geometry = new THREE.SphereGeometry(0.5, 15, 15, Math.PI),
+      texture = THREE.ImageUtils.loadTexture("textures/sedat.png"),
+      material = new THREE.MeshBasicMaterial( {map: texture} ),
+      mesh = new THREE.Mesh(geometry, material);
+  
+  object.add(mesh);
+  
+  // Make sure model starts invisible
+  object.visible = false;
+  
+  return object;
+}
+
+// Add this to the end of onLoad function
+function ensureInitialModelInvisibility() {
+  // Make sure model is invisible initially
+  if (model) {
+    model.visible = false;
+    
+    // Create status indicator if it doesn't exist yet
+    if (!document.getElementById('modelStatus')) {
+      var statusDiv = document.createElement('div');
+      statusDiv.id = 'modelStatus';
+      statusDiv.textContent = "Model: Hidden (no marker)";
+      statusDiv.style.position = "absolute";
+      statusDiv.style.top = "10px";
+      statusDiv.style.right = "10px";
+      statusDiv.style.backgroundColor = "#333";
+      statusDiv.style.color = "#ff4444";
+      statusDiv.style.padding = "5px 10px";
+      statusDiv.style.borderRadius = "3px";
+      statusDiv.style.fontFamily = "Arial, sans-serif";
+      statusDiv.style.fontWeight = "bold";
+      document.body.appendChild(statusDiv);
+    }
+  }
+}
+    
+    // Extract Euler angles from rotation matrix
+    function extractEulerAngles(rotation) {
+      var yaw = -Math.atan2(rotation[0][2], rotation[2][2]);
+      var pitch = -Math.asin(-rotation[1][2]);
+      var roll = Math.atan2(rotation[1][0], rotation[1][1]);
+      
+      return [yaw, pitch, roll];
+    }
+    
+    // Apply Kalman filter to smooth values
+    function applyKalmanFilter(measurement, filter) {
+      // Predict next state
+      filter.predict();
+      
+      // Update with measurement
+      var smoothedState = filter.correct(measurement);
+      
+      // Return just the position part (first 3 elements for position)
+      return [smoothedState[0], smoothedState[1], smoothedState[2]];
+    }
+    
+    function updateObject(object, rotation, translation){
+      object.scale.x = modelSize;
+      object.scale.y = modelSize;
+      object.scale.z = modelSize;
+      
+      object.rotation.x = -Math.asin(-rotation[1][2]);
+      object.rotation.y = -Math.atan2(rotation[0][2], rotation[2][2]);
+      object.rotation.z = Math.atan2(rotation[1][0], rotation[1][1]);
+
+      object.position.x = translation[0];
+      object.position.y = translation[1];
+      object.position.z = -translation[2];
+    };
+    
+    // Update object using Euler angles directly
+    function updateObjectWithEuler(object, eulerAngles, translation){
+      object.scale.x = modelSize;
+      object.scale.y = modelSize;
+      object.scale.z = modelSize;
+      
+      object.rotation.y = eulerAngles[0]; // yaw
+      object.rotation.x = eulerAngles[1]; // pitch
+      object.rotation.z = eulerAngles[2]; // roll
+
+      object.position.x = translation[0];
+      object.position.y = translation[1];
+      object.position.z = -translation[2];
+    };
+    
+    function updatePose(id, error, rotation, translation, markerType){
+      var yaw = -Math.atan2(rotation[0][2], rotation[2][2]);
+      var pitch = -Math.asin(-rotation[1][2]);
+      var roll = Math.atan2(rotation[1][0], rotation[1][1]);
+      
+      var d = document.getElementById(id);
+      var content = "";
+      
+      if (markerType) {
+        var color = 
+          markerType === "TRACKED" ? "orange" : 
+          markerType.includes("MULTI-SCALE") ? "lime" : "blue";
+        
+        content += "<span style='color: " + color + ";'>" + markerType + "</span><br/>";
+      }
+      
+      content += " error: " + error.toFixed(2)
+              + "<br/>"
+              + " x: " + (translation[0] | 0)
+              + " y: " + (translation[1] | 0)
+              + " z: " + (translation[2] | 0)
+              + "<br/>"
+              + " yaw: " + Math.round(-yaw * 180.0/Math.PI)
+              + " pitch: " + Math.round(-pitch * 180.0/Math.PI)
+              + " roll: " + Math.round(roll * 180.0/Math.PI);
+      
+      d.innerHTML = content;
+    };
+    
+    // UI Control Functions
+    function toggleAdaptiveFilter() {
+      useAdaptiveFilter = document.getElementById('useATF').checked;
+    }
+    
+    function toggleOpticalFlow() {
+      useOpticalFlow = document.getElementById('useOpticalFlow').checked;
+      if (!useOpticalFlow) {
+        // Reset the optical flow tracker when disabled
+        opticalFlowTracker.reset();
+      }
+    }
+    
+    function toggleMultiScale() {
+      useMultiScale = document.getElementById('useMultiScale').checked;
+      if (!useMultiScale) {
+        // Reset the multi-scale detector stats when disabled
+        multiScaleDetector.resetStatistics();
+      }
+    }
+    
+    function updateBlockSize() {
+      var blockSize = parseInt(document.getElementById('blockSize').value);
+      // Ensure block size is odd
+      if (blockSize % 2 === 0) blockSize += 1;
+      adaptiveFilter.setOptions({ blockSize: blockSize });
+      document.getElementById('blockSize').value = blockSize;
+    }
+    
+    function updateThresholdC() {
+      var c = parseFloat(document.getElementById('thresholdC').value);
+      adaptiveFilter.setOptions({ C: c });
+    }
+    
+    function updateMaxTrackedFrames() {
+      var frames = parseInt(document.getElementById('maxTrackedFrames').value);
+      opticalFlowTracker.setOptions({ maxTrackedFrames: frames });
+    }
+    
+    function updateMotionSensitivity() {
+      var sensitivity = parseInt(document.getElementById('motionSensitivity').value);
+      
+      // Adjust search range based on sensitivity
+      const maxMotion = Math.round(sensitivity / 2);
+      
+      // Adjust error tolerance based on sensitivity
+      const errorThreshold = 10000 + (100 - sensitivity) * 500;
+      
+      // Update tracker settings
+      opticalFlowTracker.setOptions({
+        maxMotion: maxMotion,
+        maxError: errorThreshold
+      });
+    }
+    
+    function updateScaleConfidence() {
+      var confidence = parseInt(document.getElementById('scaleConfidence').value) / 100;
+      multiScaleDetector.setOptions({ confidenceThreshold: confidence });
+    }
+    
+    function updateScales() {
+      // Build scales array from the three scale inputs
+      var scale1 = parseFloat(document.getElementById('scale1').value);
+      var scale2 = parseFloat(document.getElementById('scale2').value);
+      var scale3 = parseFloat(document.getElementById('scale3').value);
+      
+      var scales = [1.0]; // Always include original scale
+      
+      // Add optional scales if they're valid and different from 1.0
+      if (scale1 !== 1.0 && scale1 > 0) scales.push(scale1);
+      if (scale2 !== 1.0 && scale2 > 0) scales.push(scale2);
+      if (scale3 !== 1.0 && scale3 > 0) scales.push(scale3);
+      
+      // Update the detector scales
+      multiScaleDetector.setOptions({ scales: scales });
+      
+      // Update UI to show active scales
+      document.getElementById('activeScales').textContent = 
+        "Active scales: " + scales.map(s => s.toFixed(1) + "x").join(", ");
+    }
+    
+    function togglePreferLargerMarkers() {
+      var prefer = document.getElementById('preferLarger').checked;
+      multiScaleDetector.setOptions({ preferLargerMarkers: prefer });
+    }
+    
+    function resetStats() {
+      filterStats.framesWithMarkers = 0;
+      filterStats.totalFrames = 0;
+      filterStats.framesWithTracking = 0;
+      filterStats.framesWithMultiScale = 0;
+      filterStats.lastResetTime = Date.now();
+      multiScaleDetector.resetStatistics();
+      updateFilterStats();
+    }
+    
+    function updateFilterStats() {
+      var detectionRate = filterStats.totalFrames > 0 ? 
+        (filterStats.framesWithMarkers / filterStats.totalFrames * 100).toFixed(1) : "0.0";
+      
+      var trackingRate = filterStats.totalFrames > 0 ? 
+        (filterStats.framesWithTracking / filterStats.totalFrames * 100).toFixed(1) : "0.0";
+      
+      var multiScaleRate = filterStats.totalFrames > 0 ? 
+        (filterStats.framesWithMultiScale / filterStats.totalFrames * 100).toFixed(1) : "0.0";
+        
+      var combinedRate = filterStats.totalFrames > 0 ?
+        ((filterStats.framesWithMarkers + filterStats.framesWithTracking + 
+          filterStats.framesWithMultiScale) / filterStats.totalFrames * 100).toFixed(1) : "0.0";
+      
+      var timeSinceReset = ((Date.now() - filterStats.lastResetTime) / 1000).toFixed(1);
+      
+      document.getElementById('detectionStats').innerHTML = 
+        "Base detection: " + detectionRate + "% (" + filterStats.framesWithMarkers + " frames)<br>" +
+        "Multi-scale: " + multiScaleRate + "% (" + filterStats.framesWithMultiScale + " frames)<br>" +
+        "Tracking: " + trackingRate + "% (" + filterStats.framesWithTracking + " frames)<br>" +
+        "Combined: " + combinedRate + "%<br>" +
+        "Time elapsed: " + timeSinceReset + "s";
+    }
+    
+    function updatePerformanceStats() {
+  var total = detectionPipeline.total;
+  var atf = detectionPipeline.atf - detectionPipeline.start;
+  var bilateral = detectionPipeline.bilateral - detectionPipeline.atf;
+  var multi = detectionPipeline.multi - detectionPipeline.bilateral;
+  var optical = detectionPipeline.optical - detectionPipeline.multi;
+  
+  document.getElementById('performanceStats').innerHTML = 
+    "Processing time: " + total.toFixed(1) + "ms<br>" +
+    "- Adaptive filter: " + atf.toFixed(1) + "ms<br>" +
+    "- Bilateral filter: " + bilateral.toFixed(1) + "ms<br>" +
+    "- Multi-scale: " + multi.toFixed(1) + "ms<br>" +
+    "- Optical flow: " + optical.toFixed(1) + "ms";
+    
+  // Calculate filter efficiency 
+  var detectionRate = filterStats.totalFrames > 0 ? 
+    (filterStats.framesWithMarkers / filterStats.totalFrames * 100).toFixed(1) : "0.0";
+  
+  // Update filter efficiency display if it exists
+  var efficiencyDisplay = document.getElementById('filterEfficiency');
+  if (efficiencyDisplay) {
+    var totalTime = atf + bilateral + multi + optical;
+    var efficiency = totalTime > 0 ? 
+      (filterStats.framesWithMarkers / filterStats.totalFrames) * (1000 / totalTime) : 0;
+    
+    efficiencyDisplay.innerHTML = 
+      "Filter efficiency: " + efficiency.toFixed(2) + "<br>" +
+      "Detection per ms: " + (detectionRate / totalTime).toFixed(3) + "%/ms";
+  }
+  
+  // Update visualization timing if debug features are enabled
+  if (bilateralFilter && bilateralFilter.debug) {
+    var bilateralSettings = bilateralFilter.getSettings();
+    var bilateralTiming = document.getElementById('bilateralTiming');
+    
+    if (bilateralTiming) {
+      bilateralTiming.innerHTML = 
+        "Bilateral filter: " + bilateralSettings.processingTime.toFixed(1) + "ms<br>" +
+        "Diameter: " + bilateralSettings.diameter + ", " +
+        "σColor: " + bilateralSettings.sigmaColor + ", " +
+        "σSpace: " + bilateralSettings.sigmaSpace;
+    }
+  }
+}
+
+function toggleBilateralFilter() {
+  useBilateralFilter = document.getElementById('useBilateral').checked;
+}
+
+function updateBilateralDiameter() {
+  var diameter = parseInt(document.getElementById('bilateralDiameter').value);
+  // Ensure diameter is odd
+  if (diameter % 2 === 0) diameter += 1;
+  bilateralFilter.setOptions({ diameter: diameter });
+  document.getElementById('bilateralDiameter').value = diameter;
+}
+
+function updateSigmaColor() {
+  var sigmaColor = parseFloat(document.getElementById('sigmaColor').value);
+  bilateralFilter.setOptions({ sigmaColor: sigmaColor });
+}
+
+function updateSigmaSpace() {
+  var sigmaSpace = parseFloat(document.getElementById('sigmaSpace').value);
+  bilateralFilter.setOptions({ sigmaSpace: sigmaSpace });
+}
+
+function toggleGreyOnly() {
+  var greyOnly = document.getElementById('greyOnly').checked;
+  bilateralFilter.setOptions({ greyOnly: greyOnly });
+}
+
+    window.onload = onLoad;
+  </script>
+
+  <style>
+    body {
+      font-family: monospace;
+      text-align: center;
+      margin: 0;
+      padding: 10px;
+    }
+    
+    .container {
+      width: 650px;
+      margin: 0 auto;
+    }
+    
+    .view {
+      float: left;
+      border: solid 1px black;
+      margin-bottom: 10px;
+    }
+    
+    .controls {
+      clear: both;
+      text-align: left;
+      background: #f0f0f0;
+      padding: 10px;
+      border-radius: 5px;
+      margin-bottom: 10px;
+    }
+    
+    .control-group {
+      margin-bottom: 10px;
+    }
+    
+    .control-label {
+      display: inline-block;
+      width: 140px;
+    }
+    
+    .stats {
+      font-family: Arial, sans-serif;
+      background: #e0e0e0;
+      padding: 8px;
+      border-radius: 4px;
+      margin-top: 10px;
+    }
+    
+    .legend {
+      clear: both;
+      text-align: left;
+      background: #f8f8f8;
+      padding: 8px;
+      border-radius: 4px;
+      margin-top: 10px;
+      font-size: 0.9em;
+    }
+    
+    .legend-item {
+      display: inline-block;
+      margin-right: 15px;
+    }
+    
+    .legend-color {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      margin-right: 5px;
+      vertical-align: middle;
+    }
+    
+    .credits {
+      margin-top: 15px;
+      font-size: 0.9em;
+    }
+    
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid #ccc;
+      margin-bottom: 10px;
+    }
+    
+    .tab {
+      padding: 8px 16px;
+      background: #e9e9e9;
+      border: 1px solid #ccc;
+      border-bottom: none;
+      margin-right: 5px;
+      cursor: pointer;
+      border-top-left-radius: 4px;
+      border-top-right-radius: 4px;
+    }
+    
+    .tab.active {
+      background: #f0f0f0;
+      border-bottom: 1px solid #f0f0f0;
+      margin-bottom: -1px;
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    .scale-inputs {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .scale-input {
+      width: 60px;
+    }
+    
+    #activeScales {
+      font-size: 0.9em;
+      color: #666;
+      margin-top: 5px;
+    }
+    
+    .two-column {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-gap: 10px;
+    }
+  </style>
+
+</head>
+
+</head>
+
+<body>
+  <h2>-= Enhanced Augmented Reality System =-</h2>
+  <div class="container">
+    <!-- Camera views -->
+    <div class="view">
+      <canvas id="canvas" style="width: 320px; height: 240px;"></canvas>
+      <div>Camera View</div>
+    </div>
+    <div class="view">
+      <div id="container" style="width: 320px; height: 240px; background: green;"></div>
+      <div>Combined AR View</div>
+    </div>
+    
+    <div style="clear: both;"></div>
+    
+    <div class="view">
+      <div id="container1" style="width: 320px; height: 240px; background: red;"></div>
+      <div id="pose1"></div>
+    </div>
+    <div class="view">
+      <div id="container2" style="width: 320px; height: 240px; background: blue;"></div>
+      <div id="pose2"></div>
+    </div>
+    
+    <div style="clear: both;"></div>
+    
+    <!-- Debug view -->
+    <div class="view">
+      <canvas id="debugCanvas" style="width: 320px; height: 240px;"></canvas>
+      <div>Filter Debug View</div>
+    </div>
+    
+    <!-- Marker color legend -->
+    <div class="legend">
+      <div class="legend-item"><span class="legend-color" style="background: red;"></span> Standard detection</div>
+      <div class="legend-item"><span class="legend-color" style="background: purple;"></span> Downscaled detection</div>
+      <div class="legend-item"><span class="legend-color" style="background: cyan;"></span> Upscaled detection</div>
+      <div class="legend-item"><span class="legend-color" style="background: orange;"></span> Optical flow tracking</div>
+    </div>
+    
+    <!-- Controls panel -->
+    <div class="controls">
+      <div class="tabs">
+        <div class="tab active" onclick="switchTab('detection-tab')">Detection Filters</div>
+        <div class="tab" onclick="switchTab('bilateral-tab')">Bilateral Filter</div>
+        <div class="tab" onclick="switchTab('tracking-tab')">Motion Tracking</div>
+        <div class="tab" onclick="switchTab('multiscale-tab')">Multi-Scale</div>
+      </div>
+      
+      <div id="detection-tab" class="tab-content active">
+        <h3>Detection Filters</h3>
+        
+        <div class="control-group">
+          <label class="control-label">
+            <input type="checkbox" id="useATF" onchange="toggleAdaptiveFilter()">
+            Use Adaptive Filter
+          </label>
+        </div>
+        
+        <div class="control-group">
+          <label class="control-label">Block Size:</label>
+          <input type="range" id="blockSize" min="3" max="31" step="2" onchange="updateBlockSize()">
+          <span>(Larger = more averaging)</span>
+        </div>
+        
+        <div class="control-group">
+          <label class="control-label">Threshold C:</label>
+          <input type="range" id="thresholdC" min="0" max="20" step="0.5" value="5" onchange="updateThresholdC()">
+          <span>(Lower = more sensitive)</span>
+        </div>
+      </div>
+      
+      <div id="bilateral-tab" class="tab-content">
+        <h3>Bilateral Filter <span class="new-badge">NEW</span></h3>
+        <p>Edge-preserving noise reduction to improve marker detection quality.</p>
+        
+        <div class="control-group">
+          <label class="control-label">
+            <input type="checkbox" id="useBilateral" onchange="toggleBilateralFilter()">
+            Use Bilateral Filter
+          </label>
+        </div>
+        
+        <div class="control-group">
+          <label class="control-label">Filter Diameter:</label>
+          <input type="range" id="bilateralDiameter" min="3" max="15" step="2" value="9" onchange="updateBilateralDiameter()">
+          <span>(Larger = more smoothing but slower)</span>
+        </div>
+        
+        <div class="control-group">
+          <label class="control-label">Sigma Color:</label>
+          <input type="range" id="sigmaColor" min="10" max="150" step="5" value="75" onchange="updateSigmaColor()">
+          <span>(Higher = more color blending)</span>
+        </div>
+        
+        <div class="control-group">
+          <label class="control-label">Sigma Space:</label>
+          <input type="range" id="sigmaSpace" min="10" max="150" step="5" value="75" onchange="updateSigmaSpace()">
+          <span>(Higher = more spatial blending)</span>
+        </div>
+        
+        <div class="control-group">
+          <label class="control-label">
+            <input type="checkbox" id="greyOnly" checked onchange="toggleGreyOnly()">
+            Greyscale Only
+          </label>
+          <span>(Faster processing)</span>
+        </div>
+        
+        <div class="control-group">
+          <label class="control-label">
+            <input type="checkbox" id="bilateralDebug" onchange="bilateralFilter.setOptions({debug: this.checked})">
+            Show Debug Visualization
+          </label>
+        </div>
+        
+        <div id="bilateralTiming" class="stats" style="margin-top: 15px; font-size: 0.9em;">
+          Bilateral filter: 0.0ms<br>
+          Diameter: 9, σColor: 75, σSpace: 75
+        </div>
+      </div>
+      
+      <div id="tracking-tab" class="tab-content">
+        <h3>Motion Tracking</h3>
+        
+        <div class="control-group">
+          <label class="control-label">
+            <input type="checkbox" id="useOpticalFlow" onchange="toggleOpticalFlow()">
+            Use Optical Flow Tracking
+          </label>
+        </div>
+        
+        <div class="control-group">
+          <label class="control-label">Motion Sensitivity:</label>
+          <input type="range" id="motionSensitivity" min="0" max="100" value="50" onchange="updateMotionSensitivity()">
+          <span>(Higher = tracks faster motion)</span>
+        </div>
+        
+        <div class="control-group">
+          <label class="control-label">Max Tracked Frames:</label>
+          <input type="range" id="maxTrackedFrames" min="5" max="60" value="30" onchange="updateMaxTrackedFrames()">
+          <span>(Higher = longer tracking without markers)</span>
+        </div>
+      </div>
+      
+      <div id="multiscale-tab" class="tab-content">
+        <h3>Multi-Scale Detection</h3>
+        
+        <div class="control-group">
+          <label class="control-label">
+            <input type="checkbox" id="useMultiScale" onchange="toggleMultiScale()">
+            Use Multi-Scale Detection
+          </label>
+        </div>
+        
+        <div class="control-group">
+          <label class="control-label">Confidence Threshold:</label>
+          <input type="range" id="scaleConfidence" min="0" max="100" value="60" onchange="updateScaleConfidence()">
+          <span>(%)</span>
+        </div>
+        
+        <div class="control-group">
+          <label class="control-label">
+            <input type="checkbox" id="preferLarger" checked onchange="togglePreferLargerMarkers()">
+            Prefer Larger Markers
+          </label>
+        </div>
+        
+        <div class="control-group">
+          <label class="control-label">Custom Scales:</label>
+          <div class="scale-inputs">
+            <input type="number" id="scale1" class="scale-input" value="0.5" min="0.1" max="3.0" step="0.1" onchange="updateScales()">
+            <input type="number" id="scale2" class="scale-input" value="2.0" min="0.1" max="3.0" step="0.1" onchange="updateScales()">
+            <input type="number" id="scale3" class="scale-input" value="0" min="0" max="3.0" step="0.1" onchange="updateScales()">
+          </div>
+          <div id="activeScales">Active scales: 1.0x, 0.5x, 2.0x</div>
+        </div>
+      </div>
+      
+      <div class="two-column">
+        <div class="stats">
+          <div id="detectionStats">Base detection: 0.0% (0 frames)<br>Multi-scale: 0.0% (0 frames)<br>Tracking: 0.0% (0 frames)<br>Combined: 0.0%<br>Time elapsed: 0.0s</div>
+          <button onclick="resetStats()">Reset Stats</button>
+        </div>
+        
+        <div class="stats">
+          <div id="performanceStats">Processing time: 0.0ms<br>- Adaptive filter: 0.0ms<br>- Bilateral filter: 0.0ms<br>- Multi-scale: 0.0ms<br>- Optical flow: 0.0ms</div>
+          <button onclick="debugCanvas.style.display = debugCanvas.style.display === 'none' ? 'block' : 'none'">Toggle Debug View</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <video id="video" width=320 height=240 autoplay="true" style="display:none;"></video>
+  
+  <div class="credits">
+    <strong>Powered by:</strong> 
+    <a href="http://code.google.com/p/js-aruco/">js-aruco</a> (marker detection), 
+    <a href="https://github.com/mrdoob/three.js">Three.js</a> (3D rendering), 
+    Kalman filtering (pose smoothing), 
+    Adaptive Threshold filtering (improved detection),
+    <span style="color: #ff6b6b; font-weight: bold;">Bilateral filtering (edge-preserving smoothing)</span>,
+    Optical Flow tracking (motion resilience), and
+    Multi-Scale detection (distance independence)
+  </div>
+  
+  <script>
+    // Tab switching functionality
+    function switchTab(tabId) {
+      // Hide all tab contents
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      
+      // Deactivate all tabs
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      
+      // Activate selected tab
+      document.getElementById(tabId).classList.add('active');
+      document.querySelector(`.tab[onclick="switchTab('${tabId}')"]`).classList.add('active');
+    }
+    
+    // Initialize debug visualization if bilateral debug is enabled
+    document.getElementById('bilateralDebug').addEventListener('change', function() {
+      if (this.checked) {
+        debugCanvas.style.display = 'block';
+      }
+    });
+    
+    // Add a filter comparison button
+    document.addEventListener('DOMContentLoaded', function() {
+      const compareButton = document.createElement('button');
+      compareButton.textContent = 'Compare Filter Effects';
+      compareButton.style.marginTop = '10px';
+      compareButton.onclick = function() {
+        alert('Use the different filter combinations to compare their effects on marker detection quality.');
+      };
+      
+      const bilateralTab = document.getElementById('bilateral-tab');
+      bilateralTab.appendChild(compareButton);
+    });
+  </script>
+</body>
+  
+</html>

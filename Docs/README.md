@@ -15,22 +15,39 @@ Mechanical systems are fundamental to engineering and robotics, yet many K-12 st
 AutomataAr/
 
 |── src/
+
 	├── MultiTagSystem.js
+ 
 	├── aruco.js
+ 
 	├── atf.js
+ 
 	├── bilateral.js
+ 
 	├── cv.js
+ 
 	├── debug-posit.html
+ 
 	├── edge.js
+ 
 	├── ekf.js
+ 
 	├── kalman.js
+ 
 	├── multiS.js
+ 
 	├── optic.js
+ 
 	├── posit1.js
+ 
 	├── posit2.js
+ 
 	├── svd.js
+ 
 |── Docs/
+
 	└── README.md
+ 
 |──README.md                
 
 ## Component Descriptions

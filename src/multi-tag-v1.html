@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Basic Multi-Marker AR</title>
+
+  <script type="text/javascript" src="libs/Three.js"></script> 
+  <script type="text/javascript" src="svd.js"></script> 
+  <script type="text/javascript" src="posit1.js"></script> 
+  <script type="text/javascript" src="cv.js"></script> 
+  <script type="text/javascript" src="aruco.js"></script> 
+  <script type="text/javascript" src="atf.js"></script>
+  <script type="text/javascript" src="multiS.js"></script>
+  <script type="text/javascript" src="optic.js"></script>
+
+  <script>
+    var video, canvas, context, imageData, detector, posit;
+    var renderer, scene, camera, backgroundScene, backgroundCamera, videoTexture;
+    var adaptiveFilter, multiScaleDetector, opticalFlowTracker;
+    var useAdaptiveFilter = false;
+    var useMultiScale = false;
+    var useOpticalFlow = false;
+    var modelSize = 35.0; // millimeters
+    var debugElement;
+
+    function onLoad() {
+      // Initialize DOM elements
+      video = document.getElementById("video");
+      canvas = document.getElementById("canvas");
+      context = canvas.getContext("2d");
+      debugElement = document.getElementById("debug");
+      
+      // Set canvas dimensions
+      canvas.width = 320;
+      canvas.height = 240;
+      
+      log("Initializing...");
+      
+      // Initialize camera
+      initCamera();
+      
+      // Initialize detector
+      detector = new AR.Detector();
+      posit = new POS.Posit(modelSize, canvas.width);
+      log("Base detector initialized");
+      
+      // Initialize filters
+      initFilters();
+      
+      // Initialize renderer and scene
+      initRenderer();
+      
+      // Start animation loop
+      requestAnimationFrame(tick);
+    }
+    
+    function initFilters() {
+      // Adaptive Threshold Filter
+      adaptiveFilter = new AdaptiveThresholdFilter({
+        blockSize: 21,
+        C: 5,
+        useIntegralImage: true
+      });
+      log("Adaptive threshold filter initialized");
+      
+      // Multi-Scale Detector
+      multiScaleDetector = new MultiScaleDetector({
+        detector: detector, 
+        scales: [1.0, 0.5, 1.5],
+        confidenceThreshold: 0.3
+      });
+      log("Multi-scale detector initialized");
+      
+      // Optical Flow Tracker
+      opticalFlowTracker = new OpticalFlowTracker({
+        winSize: 15,
+        maxError: 10000,
+        maxMotion: 50,
+        maxTrackedFrames: 30
+      });
+      log("Optical flow tracker initialized");
+      
+      // Set initial checkbox states
+      document.getElementById('useATF').checked = useAdaptiveFilter;
+      document.getElementById('useMultiScale').checked = useMultiScale;
+      document.getElementById('useOpticalFlow').checked = useOpticalFlow;
+      
+      log("Adaptive Threshold Filter: OFF");
+      log("Multi-Scale Detection: OFF");
+      log("Optical Flow Tracking: OFF");
+    }
+    
+    function initRenderer() {
+      // Set up renderer
+      renderer = new THREE.WebGLRenderer({antialias: true});
+      renderer.setClearColor(0xffffff, 1);
+      renderer.setSize(canvas.width, canvas.height);
+      document.getElementById("container").appendChild(renderer.domElement);
+      
+      // Set up video texture
+      videoTexture = new THREE.Texture(video);
+      videoTexture.minFilter = THREE.LinearFilter;
+      
+      // Create background scene with video texture
+      backgroundScene = new THREE.Scene();
+      backgroundCamera = new THREE.Camera();
+      
+      var plane = new THREE.Mesh(
+        new THREE.PlaneGeometry(2, 2, 0),
+        new THREE.MeshBasicMaterial({map: videoTexture, depthTest: false, depthWrite: false})
+      );
+      plane.material.side = THREE.DoubleSide;
+      plane.position.z = -1;
+      
+      backgroundScene.add(backgroundCamera);
+      backgroundScene.add(plane);
+      
+      // Create main AR scene
+      scene = new THREE.Scene();
+      camera = new THREE.PerspectiveCamera(40, canvas.width / canvas.height, 1, 1000);
+      scene.add(camera);
+      
+      // Add lights
+      var ambientLight = new THREE.AmbientLight(0x666666);
+      scene.add(ambientLight);
+      
+      var directionalLight = new THREE.DirectionalLight(0xffffff, 0.7);
+      directionalLight.position.set(0, 0, 1);
+      scene.add(directionalLight);
+      
+      log("Renderer initialized");
+    }
+    
+    function initCamera() {
+      log("Initializing camera...");
+      
+      if (navigator.mediaDevices === undefined) {
+        navigator.mediaDevices = {};
+      }
+      
+      if (navigator.mediaDevices.getUserMedia === undefined) {
+        navigator.mediaDevices.getUserMedia = function(constraints) {
+          var getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+          
+          if (!getUserMedia) {
+            return Promise.reject(new Error('getUserMedia is not implemented in this browser'));
+          }
+
+          return new Promise(function(resolve, reject) {
+            getUserMedia.call(navigator, constraints, resolve, reject);
+          });
+        }
+      }
+      
+      navigator.mediaDevices
+        .getUserMedia({ video: true })
+        .then(function(stream) {
+          log("Camera access granted");
+          if ("srcObject" in video) {
+            video.srcObject = stream;
+          } else {
+            video.src = window.URL.createObjectURL(stream);
+          }
+          video.play();
+        })
+        .catch(function(err) {
+          log("Camera error: " + err.message);
+        });
+    }
+    
+    function tick() {
+      requestAnimationFrame(tick);
+      
+      if (video.readyState === video.HAVE_ENOUGH_DATA) {
+        // Capture frame
+        snapshot();
+        
+        // Update video texture for AR view
+        videoTexture.needsUpdate = true;
+        
+        // Detect markers (base detection first)
+        var markers = detector.detect(imageData);
+        
+        // Apply active filters
+        markers = processFilters(markers);
+        
+        // Draw markers on canvas
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        drawMarkers(markers);
+        
+        // Update 3D scene
+        updateScene(markers);
+        
+        // Render
+        renderer.autoClear = false;
+        renderer.clear();
+        renderer.render(backgroundScene, backgroundCamera);
+        renderer.render(scene, camera);
+        
+        // Update info
+        updateMarkerInfo(markers);
+      }
+    }
+    
+    function processFilters(markers) {
+      // Make a copy of the original markers
+      var finalMarkers = markers.slice();
+      
+      // Apply adaptive threshold filter if enabled
+      if (useAdaptiveFilter) {
+        try {
+          var processedImageData = adaptiveFilter.process(imageData);
+          var atfMarkers = detector.detect(processedImageData);
+          
+          // Add new markers that weren't in the original set
+          for (var i = 0; i < atfMarkers.length; i++) {
+            var isNew = true;
+            for (var j = 0; j < finalMarkers.length; j++) {
+              if (atfMarkers[i].id === finalMarkers[j].id && areMarkersClose(atfMarkers[i], finalMarkers[j])) {
+                isNew = false;
+                break;
+              }
+            }
+            if (isNew) {
+              finalMarkers.push(atfMarkers[i]);
+            }
+          }
+        } catch (err) {
+          log("ATF error: " + err.message);
+        }
+      }
+      
+      // Apply multi-scale detection if enabled
+      if (useMultiScale) {
+        try {
+          var msMarkers = multiScaleDetector.detect(imageData);
+          
+          // Add new markers that weren't in the original set
+          for (var i = 0; i < msMarkers.length; i++) {
+            var isNew = true;
+            for (var j = 0; j < finalMarkers.length; j++) {
+              if (msMarkers[i].id === finalMarkers[j].id && areMarkersClose(msMarkers[i], finalMarkers[j])) {
+                isNew = false;
+                break;
+              }
+            }
+            if (isNew) {
+              finalMarkers.push(msMarkers[i]);
+            }
+          }
+        } catch (err) {
+          log("Multi-scale error: " + err.message);
+        }
+      }
+      
+      // Apply optical flow tracking if enabled
+      if (useOpticalFlow) {
+        try {
+          var ofMarkers = opticalFlowTracker.track(imageData, finalMarkers);
+          
+          // Replace markers with tracked ones
+          if (ofMarkers && ofMarkers.length > 0) {
+            finalMarkers = ofMarkers;
+          }
+        } catch (err) {
+          log("Optical flow error: " + err.message);
+        }
+      }
+      
+      return finalMarkers;
+    }
+    
+    function areMarkersClose(marker1, marker2) {
+      // Calculate centers
+      var center1 = {x: 0, y: 0};
+      var center2 = {x: 0, y: 0};
+      
+      for (var i = 0; i < 4; i++) {
+        center1.x += marker1.corners[i].x;
+        center1.y += marker1.corners[i].y;
+        center2.x += marker2.corners[i].x;
+        center2.y += marker2.corners[i].y;
+      }
+      
+      center1.x /= 4;
+      center1.y /= 4;
+      center2.x /= 4;
+      center2.y /= 4;
+      
+      // Calculate distance
+      var dx = center1.x - center2.x;
+      var dy = center1.y - center2.y;
+      var distance = Math.sqrt(dx*dx + dy*dy);
+      
+      // If distance is less than 20 pixels, consider them close
+      return distance < 20;
+    }
+    
+    function snapshot() {
+      try {
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+      } catch (err) {
+        log("Error taking snapshot: " + err.message);
+      }
+    }
+    
+    function drawMarkers(markers) {
+      if (!markers || markers.length === 0) return;
+      
+      for (var i = 0; i < markers.length; i++) {
+        var corners = markers[i].corners;
+        var id = markers[i].id;
+        
+        // Draw marker outline
+        context.lineWidth = 3;
+        context.strokeStyle = "green";
+        context.beginPath();
+        context.moveTo(corners[0].x, corners[0].y);
+        context.lineTo(corners[1].x, corners[1].y);
+        context.lineTo(corners[2].x, corners[2].y);
+        context.lineTo(corners[3].x, corners[3].y);
+        context.lineTo(corners[0].x, corners[0].y);
+        context.stroke();
+        context.closePath();
+        
+        // Draw marker ID
+        var centerX = 0, centerY = 0;
+        for (var j = 0; j < 4; j++) {
+          centerX += corners[j].x;
+          centerY += corners[j].y;
+        }
+        centerX /= 4;
+        centerY /= 4;
+        
+        context.fillStyle = "white";
+        context.font = "bold 12px Arial";
+        context.textAlign = "center";
+        context.textBaseline = "middle";
+        
+        // Draw white background
+        var text = "ID: " + id;
+        var textWidth = context.measureText(text).width;
+        context.fillRect(centerX - textWidth/2 - 2, centerY - 8, textWidth + 4, 16);
+        
+        // Draw text
+        context.fillStyle = "black";
+        context.fillText(text, centerX, centerY);
+      }
+    }
+    
+    function updateScene(markers) {
+      // Remove all children from scene except camera and lights
+      while (scene.children.length > 3) {
+        scene.remove(scene.children[3]);
+      }
+      
+      // Add a plane for each marker
+      for (var i = 0; i < markers.length; i++) {
+        var marker = markers[i];
+        
+        // Create a plane with color based on marker ID
+        var model = createModel(marker.id);
+        
+        // Convert corners to camera coordinate system
+        var corners = [];
+        for (var j = 0; j < marker.corners.length; j++) {
+          corners.push({
+            x: marker.corners[j].x - (canvas.width / 2),
+            y: (canvas.height / 2) - marker.corners[j].y
+          });
+        }
+        
+        // Calculate pose
+        var pose = posit.pose(corners);
+        
+        // Update model position and rotation
+        updateObject(model, pose.bestRotation, pose.bestTranslation);
+        
+        // Add to scene
+        scene.add(model);
+      }
+    }
+    
+    function createModel(id) {
+      // Create color based on ID
+      var hue = ((id * 137) % 360) / 360;
+      var color = new THREE.Color().setHSL(hue, 0.8, 0.6);
+      
+      // Create plane
+      var object = new THREE.Object3D();
+      var geometry = new THREE.PlaneGeometry(1.0, 1.0, 0.0);
+      var material = new THREE.MeshPhongMaterial({
+        color: color,
+        side: THREE.DoubleSide
+      });
+      
+      var mesh = new THREE.Mesh(geometry, material);
+      object.add(mesh);
+      
+      return object;
+    }
+    
+    function updateObject(object, rotation, translation) {
+      // Set scale
+      object.scale.x = modelSize;
+      object.scale.y = modelSize;
+      object.scale.z = modelSize;
+      
+      // Set rotation
+      object.rotation.x = -Math.asin(-rotation[1][2]);
+      object.rotation.y = -Math.atan2(rotation[0][2], rotation[2][2]);
+      object.rotation.z = Math.atan2(rotation[1][0], rotation[1][1]);
+      
+      // Set position
+      object.position.x = translation[0];
+      object.position.y = translation[1];
+      object.position.z = -translation[2];
+    }
+    
+    function updateMarkerInfo(markers) {
+      // Count markers by ID
+      var counts = {};
+      for (var i = 0; i < markers.length; i++) {
+        var id = markers[i].id;
+        counts[id] = (counts[id] || 0) + 1;
+      }
+      
+      // Create HTML
+      var html = "<strong>Detected Markers: " + markers.length + "</strong>";
+      
+      if (Object.keys(counts).length > 0) {
+        html += "<ul>";
+        for (var id in counts) {
+          html += "<li>ID " + id + ": " + counts[id] + " marker(s)</li>";
+        }
+        html += "</ul>";
+      }
+      
+      // Update element
+      document.getElementById("markerInfo").innerHTML = html;
+    }
+    
+    function toggleAdaptiveFilter() {
+      useAdaptiveFilter = document.getElementById("useATF").checked;
+      log("Adaptive Threshold Filter: " + (useAdaptiveFilter ? "ON" : "OFF"));
+    }
+    
+    function toggleMultiScale() {
+      useMultiScale = document.getElementById("useMultiScale").checked;
+      log("Multi-Scale Detection: " + (useMultiScale ? "ON" : "OFF"));
+    }
+    
+    function toggleOpticalFlow() {
+      useOpticalFlow = document.getElementById("useOpticalFlow").checked;
+      if (!useOpticalFlow) {
+        opticalFlowTracker.reset();
+      }
+      log("Optical Flow Tracking: " + (useOpticalFlow ? "ON" : "OFF"));
+    }
+    
+    function log(message) {
+      console.log(message);
+      if (debugElement) {
+        debugElement.innerHTML += message + "<br>";
+        var lines = debugElement.innerHTML.split("<br>");
+        if (lines.length > 12) {
+          debugElement.innerHTML = lines.slice(lines.length - 12).join("<br>");
+        }
+      }
+    }
+    
+    window.onload = onLoad;
+  </script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 10px;
+      background-color: #f0f0f0;
+    }
+    
+    .container {
+      width: 650px;
+      margin: 0 auto;
+      background-color: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    h2 {
+      color: #00aa00;
+      margin-top: 0;
+    }
+    
+    .filter-controls {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin: 10px 0;
+      padding: 10px;
+      background-color: #f0f0f0;
+      border-radius: 5px;
+    }
+    
+    .filter-control {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .views {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    
+    .view {
+      border: solid 2px #00aa00;
+      border-radius: 5px;
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .view-label {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: rgba(0,0,0,0.5);
+      color: white;
+      padding: 5px;
+      font-size: 12px;
+    }
+    
+    .info {
+      background: #f8f8f8;
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid #ddd;
+      text-align: left;
+      margin-bottom: 10px;
+      min-height: 100px;
+    }
+    
+    .debug-panel {
+      background: #333;
+      color: #0f0;
+      font-family: monospace;
+      padding: 10px;
+      border-radius: 5px;
+      text-align: left;
+      margin-top: 10px;
+      height: 150px;
+      overflow-y: auto;
+      font-size: 12px;
+    }
+    
+    #canvas {
+      width: 100%;
+      height: 100%;
+    }
+    
+    #container {
+      width: 320px;
+      height: 240px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h2>Simple AR System with Filter Controls</h2>
+    
+    <div class="filter-controls">
+      <div class="filter-control">
+        <input type="checkbox" id="useATF" onchange="toggleAdaptiveFilter()">
+        <label for="useATF">Adaptive Threshold</label>
+      </div>
+      
+      <div class="filter-control">
+        <input type="checkbox" id="useMultiScale" onchange="toggleMultiScale()">
+        <label for="useMultiScale">Multi-Scale</label>
+      </div>
+      
+      <div class="filter-control">
+        <input type="checkbox" id="useOpticalFlow" onchange="toggleOpticalFlow()">
+        <label for="useOpticalFlow">Optical Flow</label>
+      </div>
+    </div>
+    
+    <div class="views">
+      <div class="view">
+        <canvas id="canvas"></canvas>
+        <div class="view-label">Camera View</div>
+      </div>
+      
+      <div class="view">
+        <div id="container"></div>
+        <div class="view-label">AR View</div>
+      </div>
+    </div>
+    
+    <div class="info">
+      <div id="markerInfo">Waiting for markers...</div>
+    </div>
+    
+    <div class="debug-panel">
+      <div id="debug">System initializing...</div>
+    </div>
+  </div>
+  
+  <video id="video" width="320" height="240" autoplay="true" style="display:none;"></video>
+</body>
+</html>

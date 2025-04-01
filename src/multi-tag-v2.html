@@ -383,23 +383,86 @@
     }
     
     function createModel(id) {
-      // Create color based on ID
-      var hue = ((id * 137) % 360) / 360;
-      var color = new THREE.Color().setHSL(hue, 0.8, 0.6);
-      
-      // Create plane
-      var object = new THREE.Object3D();
-      var geometry = new THREE.PlaneGeometry(1.0, 1.0, 0.0);
-      var material = new THREE.MeshPhongMaterial({
-        color: color,
-        side: THREE.DoubleSide
-      });
-      
-      var mesh = new THREE.Mesh(geometry, material);
-      object.add(mesh);
-      
-      return object;
-    }
+  // Unique base hue per ID
+  const hue = ((id * 137) % 360) / 360;
+  const accentColor = new THREE.Color().setHSL(hue, 0.5, 0.4);
+
+  const object = new THREE.Object3D();
+  const boatContainer = new THREE.Object3D();
+  object.add(boatContainer);
+
+  // --- Hull using LatheGeometry (realistic boat shape) ---
+  const points = [];
+  points.push(new THREE.Vector2(0, 0));     // Bottom center
+  points.push(new THREE.Vector2(0.05, 0.05));
+  points.push(new THREE.Vector2(0.1, 0.1));
+  points.push(new THREE.Vector2(0.12, 0.15));
+  points.push(new THREE.Vector2(0.1, 0.3));
+  points.push(new THREE.Vector2(0.05, 0.4));
+  points.push(new THREE.Vector2(0, 0.45));   // Top tip
+
+  const hullGeometry = new THREE.LatheGeometry(points, 32);
+  const hullMaterial = new THREE.MeshPhongMaterial({
+    color: 0x8B5A2B, // Rich wood brown
+    shininess: 30,
+    flatShading: true
+  });
+
+  const hull = new THREE.Mesh(hullGeometry, hullMaterial);
+  hull.scale.set(2.5, 1, 1);           // Stretch it to boat proportions
+  hull.rotation.z = Math.PI;          // Flip to have pointy front
+  hull.rotation.x = Math.PI / 2;      // Lay flat on marker
+  hull.position.set(0, -0.05, 0);
+  boatContainer.add(hull);
+
+  // --- Deck (light color to contrast) ---
+  const deckGeometry = new THREE.BoxGeometry(0.7, 0.2, 0.2);
+  const deckMaterial = new THREE.MeshPhongMaterial({ color: 0xD2B48C });
+  const deck = new THREE.Mesh(deckGeometry, deckMaterial);
+  deck.position.set(0, 0.05, 0);
+  boatContainer.add(deck);
+
+  // --- Mast ---
+  const mastGeometry = new THREE.CylinderGeometry(0.05, 0.05, 0.7, 16);
+  const mastMaterial = new THREE.MeshPhongMaterial({ color: 0x654321 });
+  const mast = new THREE.Mesh(mastGeometry, mastMaterial);
+  mast.position.set(0, 0.4, 0);
+  boatContainer.add(mast);
+
+  // --- Sail (rotated 90 degrees) ---
+  const sailShape = new THREE.Shape();
+  sailShape.moveTo(0, 0);
+  sailShape.lineTo(0.5, 0);
+  sailShape.lineTo(0, 0.6);
+  sailShape.lineTo(0, 0);
+
+  const sailGeometry = new THREE.ShapeGeometry(sailShape);
+  const sailMaterial = new THREE.MeshBasicMaterial({
+    color: 0xFFFFFF,
+    side: THREE.DoubleSide
+  });
+
+  const sail = new THREE.Mesh(sailGeometry, sailMaterial);
+  sail.position.set(0, 0.36, 0.01);
+  boatContainer.add(sail);
+
+  // --- Optional jib (front sail) ---
+  const jibShape = new THREE.Shape();
+  jibShape.moveTo(0, 0);
+  jibShape.lineTo(0.3, 0);
+  jibShape.lineTo(0, 0.3);
+  jibShape.lineTo(0, 0);
+
+  const jib = new THREE.Mesh(new THREE.ShapeGeometry(jibShape), sailMaterial.clone());
+  jib.position.set(0, 0.36, -0.2);
+  boatContainer.add(jib);
+
+  // Rotate whole boat to face up from marker
+  boatContainer.rotation.x = Math.PI / 2;
+
+  return object;
+}
+
     
     function updateObject(object, rotation, translation) {
       // Set scale

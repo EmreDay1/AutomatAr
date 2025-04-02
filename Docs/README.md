@@ -14,65 +14,65 @@ Mechanical systems are fundamental to engineering and robotics, yet many K-12 st
 ## Scenarios
 ---
 
-### Scenario 1: Cam-A
+### Scenario 1: Cam-A
 
-Identifier Tag: Tag #0
+**Identifier Tag:** Tag #0
 
-Object Tags: Tag #6 and Tag #7
+**Object Tags:** Tag #6 and Tag #7
 
-Object 1: Cube_1.stl
+**Object 1:** Cube_1.stl
 
-Object 2: Cube_2.stl
+**Object 2:** Cube_2.stl
 
 ### Scenario 2: Cam-B (Geneva Stop)
 
-Identifier Tag: Tag #1
+**Identifier Tag:** Tag #1
 
-Object Tags: Tag #8 and Tag #9
+**Object Tags:** Tag #8 and Tag #9
 
-Object 1: Cube_2.stl
+**Object 1:** Cube_2.stl
 
-Object 2: Cube_3.stl
+**Object 2:** Cube_3.stl
 
 ### Scenario 3: Crank
 
-Identifier Tag: Tag #2
+**Identifier Tag:** Tag #2
 
-Object Tags: Tag #10 and Tag #11
+**Object Tags:** Tag #10 and Tag #11
 
-Object 1: Cube_3.stl
+**Object 1:** Cube_3.stl
 
-Object 2: Cube_4.stl
+**Object 2:** Cube_4.stl
 
 ### Scenario 4: Gear-A
 
-Identifier Tag: Tag #3
+**Identifier Tag:** Tag #3
 
-Object Tags: Tag #12 and Tag #13
+**Object Tags:** Tag #12 and Tag #13
 
-Object 1: Cube_4.stl
+**Object 1:** Cube_4.stl
 
-Object 2: Cube_5.stl
+**Object 2:** Cube_5.stl
 
 ### Scenario 5: Gear-B
 
-Identifier Tag: Tag #4
+**Identifier Tag:** Tag #4
 
-Object Tags: Tag #14 and Tag #15
+**Object Tags:** Tag #14 and Tag #15
 
-Object 1: Cube_5.stl
+**Object 1:** Cube_5.stl
 
-Object 2: Cube_6.stl
+**Object 2:** Cube_6.stl
 
 ### Scenario 6: Gear-C
 
-Identifier Tag: Tag #5
+**Identifier Tag:** Tag #5
 
-Object Tags: Tag #16 and Tag #17
+**Object Tags:** Tag #16 and Tag #17
 
-Object 1: Cube_6.stl
+**Object 1:** Cube_6.stl
 
-Object 2: Cube_1.stl
+**Object 2:** Cube_1.stl
 
 ## Project Structure
 ---

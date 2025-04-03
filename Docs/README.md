@@ -18,61 +18,49 @@ Mechanical systems are fundamental to engineering and robotics, yet many K-12 st
 
 **Identifier Tag:** Tag #0
 
-**Object Tags:** Tag #6 and Tag #7
+**Object Tag:** Tag #6
 
-**Object 1:** seamodels/stringray
+**Object:** seamodels/stringray
 
-**Object 2:** Cube_2.stl
-
-### Scenario 2: Cam-B (Geneva Stop)
+### Scenario 2: Cam-C
 
 **Identifier Tag:** Tag #1
 
-**Object Tags:** Tag #8 and Tag #9
+**Object Tag:** Tag #7
 
-**Object 1:** seamodels/jellyfish
-
-**Object 2:** Cube_3.stl
+**Object:** seamodels/jellyfish
 
 ### Scenario 3: Crank
 
 **Identifier Tag:** Tag #2
 
-**Object Tags:** Tag #10 and Tag #11
+**Object Tag:** Tag #8
 
-**Object 1:** seamodels/dolphin
-
-**Object 2:** Cube_4.stl
+**Object:** seamodels/dolphin
 
 ### Scenario 4: Gear-A
 
 **Identifier Tag:** Tag #3
 
-**Object Tags:** Tag #12 and Tag #13
+**Object Tags:** Tag #9
 
 **Object 1:** seamodels/octopus
-
-**Object 2:** Cube_5.stl
 
 ### Scenario 5: Gear-B
 
 **Identifier Tag:** Tag #4
 
-**Object Tags:** Tag #14 and Tag #15
+**Object Tag:** Tag #10
 
-**Object 1:** seamodels/fishes
-
-**Object 2:** Cube_6.stl
+**Object:** seamodels/fishes
 
 ### Scenario 6: Gear-C
 
 **Identifier Tag:** Tag #5
 
-**Object Tags:** Tag #16 and Tag #17
+**Object Tag:** Tag #11
 
-**Object 1:** seamodels/sea_turtles
-
-**Object 2:** Cube_1.stl
+**Object:** seamodels/sea_turtles
 
 ## Project Structure
 ---

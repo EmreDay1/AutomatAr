@@ -20,7 +20,7 @@ Mechanical systems are fundamental to engineering and robotics, yet many K-12 st
 
 **Object Tags:** Tag #6 and Tag #7
 
-**Object 1:** Cube_1.stl
+**Object 1:** seamodels/stringray
 
 **Object 2:** Cube_2.stl
 
@@ -30,7 +30,7 @@ Mechanical systems are fundamental to engineering and robotics, yet many K-12 st
 
 **Object Tags:** Tag #8 and Tag #9
 
-**Object 1:** Cube_2.stl
+**Object 1:** seamodels/jellyfish
 
 **Object 2:** Cube_3.stl
 
@@ -40,7 +40,7 @@ Mechanical systems are fundamental to engineering and robotics, yet many K-12 st
 
 **Object Tags:** Tag #10 and Tag #11
 
-**Object 1:** Cube_3.stl
+**Object 1:** seamodels/dolphin
 
 **Object 2:** Cube_4.stl
 
@@ -50,7 +50,7 @@ Mechanical systems are fundamental to engineering and robotics, yet many K-12 st
 
 **Object Tags:** Tag #12 and Tag #13
 
-**Object 1:** Cube_4.stl
+**Object 1:** seamodels/octopus
 
 **Object 2:** Cube_5.stl
 
@@ -60,7 +60,7 @@ Mechanical systems are fundamental to engineering and robotics, yet many K-12 st
 
 **Object Tags:** Tag #14 and Tag #15
 
-**Object 1:** Cube_5.stl
+**Object 1:** seamodels/fishes
 
 **Object 2:** Cube_6.stl
 
@@ -70,7 +70,7 @@ Mechanical systems are fundamental to engineering and robotics, yet many K-12 st
 
 **Object Tags:** Tag #16 and Tag #17
 
-**Object 1:** Cube_6.stl
+**Object 1:** seamodels/sea_turtles
 
 **Object 2:** Cube_1.stl
 

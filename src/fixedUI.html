@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Automata AR</title>
+
+  <!-- Same library references as your working index.html -->
+  <script src="libs/Three.js"></script>
+  <script src="libs/STLLoader.js"></script>
+  <script src="src/svd.js"></script>
+  <script src="src/posit1.js"></script>
+  <script src="src/cv.js"></script>
+  <script src="src/aruco.js"></script>
+  <script src="src/atf.js"></script>
+  <script src="src/multiS.js"></script>
+  <script src="src/optic.js"></script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: #1a237e;
+      color: #ffffff;
+      line-height: 1.6;
+    }
+
+    /* Header */
+    .header-bar {
+      background-color: #1a237e;
+      border-bottom: 1px solid #ffffff;
+      padding: 1.5rem 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 4px rgba(255, 255, 255, 0.1);
+    }
+
+    .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+    }
+
+    .header-bar h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: 2px;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    }
+
+    .header-buttons {
+      position: static;
+    }
+
+    .header-ar-button {
+      background: #ffffff;
+      color: #1a237e;
+      border: 2px solid #ffffff;
+      padding: 0.8rem 1.5rem;
+      font-size: 0.9rem;
+      font-weight: 700;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .header-ar-button:hover {
+      background: #1a237e;
+      color: #ffffff;
+      transform: translateY(-1px);
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+    }
+
+
+
+    /* Container */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    /* Home Screen */
+    #homeScreen {
+      display: none;
+      min-height: 100vh;
+      padding: 4rem 0;
+      background-color: #1a237e;
+    }
+
+    .intro-section {
+      text-align: center;
+      margin-bottom: 6rem;
+      padding: 2rem 0;
+    }
+
+    .intro-section h2 {
+      font-size: 2.8rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 1.5rem;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    }
+
+    .intro-section p {
+      font-size: 1.2rem;
+      color: #ffffff;
+      max-width: 700px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+
+    /* Kit sections */
+    .kit-section {
+      margin-bottom: 6rem;
+      padding: 3rem 0;
+      background-color: #283593;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .kit-content {
+      display: grid;
+      grid-template-columns: 1fr 450px;
+      gap: 4rem;
+      align-items: center;
+      padding: 2rem;
+    }
+
+    .kit-content.reverse {
+      grid-template-columns: 450px 1fr;
+    }
+
+    .kit-text h3 {
+      font-size: 2rem;
+      font-weight: 600;
+      color: #ffffff;
+      margin-bottom: 1.5rem;
+      line-height: 1.3;
+      text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+    }
+
+    .kit-text p {
+      color: #ffffff;
+      font-size: 1.05rem;
+      line-height: 1.8;
+      text-align: justify;
+    }
+
+    .kit-image {
+      width: 100%;
+      height: 350px;
+      background: linear-gradient(135deg, #D4A574 0%, #E6C89C 100%);
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      border: 2px solid #ffffff;
+    }
+
+    .kit-image:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px rgba(255, 255, 255, 0.2), 0 0 20px rgba(255, 255, 255, 0.1);
+    }
+
+    .placeholder-img {
+      color: #ffffff;
+      font-size: 1.1rem;
+      font-weight: 600;
+      text-align: center;
+      z-index: 1;
+      position: relative;
+      text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+    }
+
+    /* AR Instructions Overlay */
+    .ar-instructions-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      display: none;
+      z-index: 25;
+      padding: 2rem;
+      overflow-y: auto;
+      backdrop-filter: blur(5px);
+    }
+
+    .ar-instructions-overlay.visible {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+    }
+
+    .ar-instructions-content {
+      max-width: 600px;
+      margin: 2rem auto;
+      text-align: left;
+      background: rgba(25, 25, 112, 0.95);
+      padding: 2rem;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .ar-instructions-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+      padding-bottom: 1rem;
+    }
+
+    .ar-instructions-header h3 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: white;
+      margin: 0;
+    }
+
+    .ar-instructions-close {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      padding: 0.6rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      text-transform: uppercase;
+      transition: all 0.3s ease;
+      font-size: 0.9rem;
+    }
+
+    .ar-instructions-close:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .ar-instructions-section {
+      margin-bottom: 1.5rem;
+    }
+
+    .ar-instructions-section h4 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: white;
+      margin-bottom: 0.8rem;
+      border-left: 3px solid rgba(255, 255, 255, 0.5);
+      padding-left: 0.8rem;
+    }
+
+    .ar-instructions-section p {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      margin-bottom: 0.8rem;
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    .ar-instructions-section ul {
+      margin-left: 1rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .ar-instructions-section li {
+      font-size: 0.9rem;
+      line-height: 1.5;
+      margin-bottom: 0.4rem;
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    .ar-help-button {
+      position: absolute;
+      top: 1.5rem;
+      right: 1.5rem;
+      background: rgba(25, 25, 112, 0.8);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      padding: 0.8rem 1.2rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      z-index: 15;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      font-size: 0.9rem;
+    }
+
+    .ar-help-button:hover {
+      background: rgba(25, 25, 112, 0.9);
+      transform: translateY(-1px);
+    }
+
+    /* Kit Detail Screen */
+    #kitDetailScreen {
+      display: none;
+      min-height: 100vh;
+      padding: 4rem 0;
+      background-color: #1a237e;
+    }
+
+    .kit-detail {
+      display: grid;
+      grid-template-columns: 500px 1fr;
+      gap: 5rem;
+      align-items: start;
+      background: #283593;
+      padding: 3rem;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .kit-detail-image {
+      width: 100%;
+      height: 400px;
+      background: linear-gradient(135deg, #D4A574 0%, #E6C89C 100%);
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      border: 2px solid #ffffff;
+    }
+
+    .kit-detail-text h2 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 2rem;
+      line-height: 1.2;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    }
+
+    .kit-detail-text p {
+      font-size: 1.1rem;
+      color: #ffffff;
+      line-height: 1.8;
+      margin-bottom: 2.5rem;
+      text-align: justify;
+    }
+
+    .back-button {
+      background: #ffffff;
+      color: #1a237e;
+      border: 2px solid #ffffff;
+      padding: 1rem 2rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 700;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+    }
+
+    .back-button:hover {
+      background: #1a237e;
+      color: #ffffff;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+    }
+
+    /* AR Screen */
+    #arScreen {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100vh;
+      background: #000000;
+      z-index: 1000;
+    }
+
+    .ar-header {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0, 0, 0, 0.9);
+      color: #ff00ff;
+      padding: 1.5rem;
+      text-align: center;
+      z-index: 10;
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid #ff00ff;
+    }
+
+    .ar-back-button {
+      position: absolute;
+      top: 1.5rem;
+      left: 1.5rem;
+      background: #ff00ff;
+      color: #000000;
+      border: 2px solid #ff00ff;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 700;
+      z-index: 20;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      box-shadow: 0 0 10px rgba(255, 0, 255, 0.3);
+    }
+
+    .ar-back-button:hover {
+      background: #000000;
+      color: #ff00ff;
+      transform: translateY(-1px);
+      box-shadow: 0 0 20px rgba(255, 0, 255, 0.5);
+    }
+
+    .ar-container {
+      width: 100%;
+      height: 100%;
+      position: relative;
+    }
+
+    #video { display: none; }
+    #canvas { display: none; }
+
+    #threeContainer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: calc(100% - 320px);
+      height: 100%;
+    }
+
+    .ar-sidebar {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 320px;
+      height: 100%;
+      background: #283593;
+      padding: 2rem;
+      box-shadow: -4px 0 16px rgba(255, 255, 255, 0.1);
+      display: flex;
+      flex-direction: column;
+      z-index: 15;
+      border-left: 2px solid #ffffff;
+    }
+
+    .ar-sidebar h3 {
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: #ffffff;
+      margin-bottom: 1.5rem;
+      text-align: center;
+      text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+    }
+
+    .ar-kit-info {
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .ar-kit-name {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #ffffff;
+      margin-bottom: 1rem;
+      text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+    }
+
+    .ar-kit-desc {
+      font-size: 0.95rem;
+      color: #ffffff;
+      line-height: 1.6;
+    }
+
+    .debug-button {
+      background: #ffffff;
+      color: #1a237e;
+      border: 2px solid #ffffff;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 700;
+      margin-top: 2rem;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+    }
+
+    .debug-button:hover {
+      background: #1a237e;
+      color: #ffffff;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+    }
+
+    /* Debug overlay */
+    .debug-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.95);
+      color: white;
+      display: none;
+      z-index: 1001;
+      padding: 2rem;
+      overflow-y: auto;
+    }
+
+    .debug-overlay.visible {
+      display: block;
+    }
+
+    .debug-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+
+    .debug-header h3 {
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+
+    .debug-close {
+      background: #666666;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .marker-info {
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+      white-space: pre-wrap;
+      margin-bottom: 2rem;
+      background: rgba(255,255,255,0.1);
+      padding: 1rem;
+      border-radius: 8px;
+    }
+
+    .debug-canvas-container {
+      text-align: center;
+      background: rgba(255,255,255,0.1);
+      padding: 1rem;
+      border-radius: 8px;
+    }
+
+    #debugCanvas {
+      border: 1px solid #666666;
+      max-width: 100%;
+      height: auto;
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+      .header-content {
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .header-buttons {
+        order: -1;
+      }
+
+      .header-bar h1 {
+        font-size: 1.5rem;
+      }
+
+      .header-ar-button {
+        padding: 0.6rem 1rem;
+        font-size: 0.8rem;
+      }
+
+      .ar-instructions-content {
+        margin: 1rem;
+        padding: 1.5rem;
+      }
+
+      .ar-instructions-header {
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .ar-help-button {
+        top: 1rem;
+        right: 1rem;
+        padding: 0.6rem 1rem;
+        font-size: 0.8rem;
+      }
+
+      .kit-content,
+      .kit-content.reverse {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+
+      .kit-detail {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+        padding: 2rem;
+      }
+
+      #threeContainer {
+        width: 100%;
+      }
+
+      .ar-sidebar {
+        position: fixed;
+        bottom: 0;
+        right: 0;
+        width: 100%;
+        height: 200px;
+        padding: 1rem;
+      }
+
+      .intro-section h2 {
+        font-size: 2.2rem;
+      }
+
+      .kit-text h3 {
+        font-size: 1.6rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <div class="header-bar" id="mainHeader" style="display: flex;">
+    <div class="header-content">
+      <div></div> <!-- Empty div for spacing -->
+      <h1>AUTOMATA AR</h1>
+      <div class="header-buttons">
+        <button class="header-ar-button" id="openARBtn">Open AR</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Home Screen -->
+  <section id="homeScreen" style="display: block;">
+    <div class="container">
+      <!-- Intro -->
+      <div class="intro-section">
+        <h2>Welcome to Automata AR</h2>
+        <p>Explore mechanical engineering concepts through augmented reality. Point your camera at kit markers to see interactive 3D demonstrations of gears, cams, cranks, and other mechanical systems.</p>
+      </div>
+
+      <!-- Cam-A Kit -->
+      <div class="kit-section">
+        <div class="kit-content">
+          <div class="kit-text">
+            <h3>Cam-A: Learn the details of rotational motion</h3>
+            <p>Cam-A illustrates how cams convert rotational motion into linear oscillatory motion. The cam is a rotating or sliding piece in a mechanical linkage that drives the follower. The cam's surface can be contoured (circular, elliptical, etc.) to create different motion in the follower as the cam rotates. The cam mechanism's ability to produce precise, complex motion from simple rotational input makes it invaluable in mechanical design. It's used in internal engines, filling/packing machines, and more.</p>
+          </div>
+          <div class="kit-image" onclick="showKitDetail(0)" style="background-image: url('images/kit1.png');">
+          </div>
+        </div>
+      </div>
+
+      <!-- Cam-C Kit -->
+      <div class="kit-section">
+        <div class="kit-content reverse">
+          <div class="kit-image" onclick="showKitDetail(1)" style="background-image: url('images/kit2.png');">
+          </div>
+          <div class="kit-text">
+            <h3>Cam-C: Get to know more about intermittent motion</h3>
+            <p>Cam-C illustrates how cams convert rotational motion to arranged, paused (intermittent) motion. It's a rotating drive wheel (driver) with a pin engaging slots in a driven wheel (Geneva wheel). This engagement causes precise timing & indexing. Between steps, the Geneva wheel remains locked in place. Widely used in clockwork, film projectors, assembly lines, etc., for controlled, intermittent motion from continuous input.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Crank Kit -->
+      <div class="kit-section">
+        <div class="kit-content">
+          <div class="kit-text">
+            <h3>Crank: Understanding reciprocating motion</h3>
+            <p>Crank kit illustrates how a crank mechanism converts rotational motion into linear reciprocating motion. A rotating arm (the crank) pushes/pulls a connecting rod, creating back-and-forth movement. This simple but effective design ensures consistent rotation-to-reciprocation transfer. Used in engines, pumps, and presses, whenever converting rotary motion into linear is essential.</p>
+          </div>
+          <div class="kit-image" onclick="showKitDetail(2)" style="background-image: url('images/kit3.png');">
+          </div>
+        </div>
+      </div>
+
+      <!-- Gear-A Kit -->
+      <div class="kit-section">
+        <div class="kit-content reverse">
+          <div class="kit-image" onclick="showKitDetail(3)" style="background-image: url('images/kit4.png');">
+          </div>
+          <div class="kit-text">
+            <h3>Gear-A: Exploring perpendicular power transmission</h3>
+            <p>Gear-A demonstrates how bevel gears transfer rotational motion between perpendicular shafts, turning horizontal circular motion into vertical. Bevel gears have cone-shaped teeth meeting at 90°, redirecting motion while maintaining power transmission. Widely used in automobiles, drills, and other machinery needing efficient angled power transfer.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gear-B Kit -->
+      <div class="kit-section">
+        <div class="kit-content">
+          <div class="kit-text">
+            <h3>Gear-B: Variable speed and torque systems</h3>
+            <p>Gear-B shows how gear alignment & shape affect torque/speed, even with a constant driver. This mechanism can cause continuous speed variation due to shifting alignment of the gears. The driver's turning changes load distribution, resulting in dynamic acceleration/deceleration. These "weird" gears are useful for specialized systems needing variable torque & non-uniform motion, e.g. adaptive transmissions.</p>
+          </div>
+          <div class="kit-image" onclick="showKitDetail(4)" style="background-image: url('images/kit5.png');">
+          </div>
+        </div>
+      </div>
+
+      <!-- Gear-C Kit -->
+      <div class="kit-section">
+        <div class="kit-content reverse">
+          <div class="kit-image" onclick="showKitDetail(5)" style="background-image: url('images/kit6.png');">
+          </div>
+          <div class="kit-text">
+            <h3>Gear-C: Mastering worm gear systems</h3>
+            <p>Gear-C is a worm gear system that converts rotational motion while significantly reducing speed & increasing torque. A screw-like worm drives a worm wheel, transferring motion at 90°. This design offers high torque output & a self-locking feature, so it can't be back-driven. Used in elevators, conveyors, tuning mechanisms—anywhere controlled motion & torque multiplication are vital.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Kit Detail Screen -->
+  <section id="kitDetailScreen">
+    <div class="container">
+      <div class="kit-detail">
+        <div class="kit-detail-image kit-detail-img">
+          <div class="placeholder-img" id="kitDetailImg">Kit Image</div>
+        </div>
+        <div class="kit-detail-text">
+          <h2 id="kitDetailTitle">Kit Name</h2>
+          <p id="kitDetailDesc">Kit description will appear here.</p>
+          <button class="back-button" id="kitBackHomeBtn">Back to Home</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- AR Screen -->
+  <section id="arScreen">
+    <!-- AR Initial Overlay -->
+    <div class="ar-initial-overlay" id="arInitialOverlay">
+      <div class="ar-initial-content">
+        <h3>Ready to Start AR?</h3>
+        <p>This will activate your camera to detect kit markers and display 3D models. Make sure you have good lighting and a clear view of your markers.</p>
+        <button class="ar-start-button" id="arStartButton">Start AR Experience</button>
+      </div>
+    </div>
+
+    <div class="ar-header" style="background: rgba(26, 35, 126, 0.9) !important; color: #ffffff !important; border-bottom: 1px solid #ffffff !important;">
+      <p><strong>Instructions:</strong> Point your camera at a kit marker to see the 3D demonstration</p>
+    </div>
+    <button class="ar-back-button" id="backHomeBtn" style="background: #ffffff !important; color: #1a237e !important; border: 2px solid #ffffff !important;">← Back to Home</button>
+    <button class="ar-help-button" id="arHelpBtn">Help</button>
+
+    <div class="ar-container">
+      <video id="video" width="320" height="240" autoplay playsinline muted></video>
+      <canvas id="canvas" width="320" height="240"></canvas>
+      <div id="threeContainer"></div>
+    </div>
+
+    <div class="ar-sidebar">
+      <h3>Kit Information</h3>
+      <div class="ar-kit-info">
+        <div class="ar-kit-name" id="arKitName">No kits detected</div>
+        <div class="ar-kit-desc" id="arKitDesc">Point your camera at a marker to see kit information</div>
+      </div>
+      <button class="debug-button" id="debugSideBtn">Debug View</button>
+    </div>
+
+    <!-- AR Instructions Overlay -->
+    <div class="ar-instructions-overlay" id="arInstructionsOverlay">
+      <div class="ar-instructions-content">
+        <div class="ar-instructions-header">
+          <h3>AR Instructions</h3>
+          <button class="ar-instructions-close" id="arInstructionsClose">Close</button>
+        </div>
+        
+        <div class="ar-instructions-section">
+          <h4>How to Use</h4>
+          <ul>
+            <li>Allow camera access when prompted</li>
+            <li>Point your camera at a kit marker (ArUco marker)</li>
+            <li>Keep the marker flat and fully visible</li>
+            <li>Move the marker to see the 3D model from different angles</li>
+          </ul>
+        </div>
+
+        <div class="ar-instructions-section">
+          <h4>Available Kits</h4>
+          <p><strong>Cam-A:</strong> Rotational to linear motion</p>
+          <p><strong>Cam-C:</strong> Intermittent motion (Geneva wheel)</p>
+          <p><strong>Crank:</strong> Reciprocating motion</p>
+          <p><strong>Gear-A:</strong> Bevel gears (90° transmission)</p>
+          <p><strong>Gear-B:</strong> Variable speed gears</p>
+          <p><strong>Gear-C:</strong> Worm gear systems</p>
+        </div>
+
+        <div class="ar-instructions-section">
+          <h4>Troubleshooting</h4>
+          <ul>
+            <li>Ensure good lighting conditions</li>
+            <li>Keep markers flat and steady</li>
+            <li>Try adjusting distance to marker</li>
+            <li>Use Debug view to check marker detection</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Debug overlay -->
+    <div class="debug-overlay" id="debugOverlay">
+      <div class="debug-header">
+        <h3>Debug Information</h3>
+        <button class="debug-close" onclick="toggleDebugOverlay()">Close</button>
+      </div>
+      <div class="marker-info" id="markerInfo">No debug information available</div>
+      <div class="debug-canvas-container">
+        <canvas id="debugCanvas" width="320" height="240"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    // Your existing AR JavaScript code here
+    const PAGE_HOME = "HOME";
+    const PAGE_KIT_DETAIL = "KITDETAIL";
+    const PAGE_AR = "AR";
+
+    // Global AR variables
+    var video, canvas, context, imageData;
+    var renderer, scene, camera, backgroundScene, backgroundCamera, videoTexture;
+    var detector, posit;
+    var adaptiveFilter, multiScaleDetector, opticalFlowTracker;
+    var useAdaptiveFilter=false, useMultiScale=false, useOpticalFlow=false;
+    var modelSize=35.0;
+    var lastActiveIdentifierTag=null;
+    var scenarioConfidence = {
+      0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0,
+      6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0,
+      12: 0, 13: 0, 14: 0, 15: 0, 16: 0, 17: 0,
+      18: 0, 19: 0, 20: 0, 21: 0, 22: 0, 23: 0,
+      24: 0, 25: 0, 26: 0, 27: 0, 28: 0, 29: 0, 30: 0, 31: 0
+    };
+    var SCENARIO_CONFIDENCE_THRESHOLD=3;
+    var stlLoader=null;
+    var stlCache={};
+    var lastFrameMarkers=[];
+
+    // Scenarios data
+    var scenarios = [
+      {
+        name: "Cam-A",
+        identifierTag: 0,
+        desc: `Cam-A illustrates how cams convert rotational motion into linear oscillatory motion. The cam is a rotating or sliding piece in a mechanical linkage that drives the follower. The cam's surface can be contoured (circular, elliptical, etc.) to create different motion in the follower as the cam rotates.`,
+        objects: [{ tag: 6, stl: "sea_models/stringray.stl" }]
+      },
+      {
+        name: "Cam-C",
+        identifierTag: 1,
+        desc: `Cam-C illustrates how cams convert rotational motion to arranged, paused (intermittent) motion. It's a rotating drive wheel (driver) with a pin engaging slots in a driven wheel (Geneva wheel).`,
+        objects: [{ tag: 7, stl: "sea_models/jellyfish.stl" }]
+      },
+      {
+        name: "Crank",
+        identifierTag: 2,
+        desc: `Crank kit illustrates how a crank mechanism converts rotational motion into linear reciprocating motion. A rotating arm (the crank) pushes/pulls a connecting rod, creating back-and-forth movement.`,
+        objects: [{ tag: 8, stl: "sea_models/dolphin.stl" }]
+      },
+      {
+        name: "Gear-A",
+        identifierTag: 3,
+        desc: `Gear-A demonstrates how bevel gears transfer rotational motion between perpendicular shafts, turning horizontal circular motion into vertical.`,
+        objects: [{ tag: 9, stl: "sea_models/octopus.stl" }]
+      },
+      {
+        name: "Gear-B",
+        identifierTag: 4,
+        desc: `Gear-B shows how gear alignment & shape affect torque/speed, even with a constant driver. This mechanism can cause continuous speed variation due to shifting alignment of the gears.`,
+        objects: [{ tag: 10, stl: "sea_models/fishes.stl" }]
+      },
+      {
+        name: "Gear-C",
+        identifierTag: 5,
+        desc: `Gear-C is a worm gear system that converts rotational motion while significantly reducing speed & increasing torque.`,
+        objects: [{ tag: 11, stl: "sea_models/sea_turtle.stl" }]
+      }
+    ];
+
+    // Initialize on load
+    window.onload = function() {
+      setupUI();
+      showHomeScreen();
+    };
+
+    function setupUI() {
+      document.getElementById("openARBtn").onclick = function() {
+        showARScreen();
+      };
+      document.getElementById("kitBackHomeBtn").onclick = function() {
+        showHomeScreen();
+      };
+      document.getElementById("backHomeBtn").onclick = function() {
+        showHomeScreen();
+      };
+      document.getElementById("debugSideBtn").onclick = toggleDebugOverlay;
+      
+      // AR instructions overlay handlers
+      document.getElementById("arHelpBtn").onclick = toggleARInstructionsOverlay;
+      document.getElementById("arInstructionsClose").onclick = toggleARInstructionsOverlay;
+    }
+
+    function toggleARInstructionsOverlay() {
+      const overlay = document.getElementById("arInstructionsOverlay");
+      overlay.classList.toggle("visible");
+    }
+
+    function showHomeScreen() {
+      document.getElementById("mainHeader").style.display = "flex";
+      document.getElementById("homeScreen").style.display = "block";
+      document.getElementById("kitDetailScreen").style.display = "none";
+      document.getElementById("arScreen").style.display = "none";
+    }
+
+    function showKitDetailScreen(kitID) {
+      document.getElementById("mainHeader").style.display = "none";
+      // Fill placeholders
+      const kit = scenarios[kitID];
+      document.getElementById("kitDetailTitle").textContent = kit ? kit.name : "Unknown Kit";
+      document.getElementById("kitDetailDesc").textContent = kit ? kit.desc : "No description found.";
+      document.querySelector(".kit-detail-img").style.backgroundImage = `url("images/kit${kitID+1}.png")`;
+      // Hide placeholder text when image is loaded
+      document.getElementById("kitDetailImg").style.display = "none";
+      
+      document.getElementById("homeScreen").style.display = "none";
+      document.getElementById("kitDetailScreen").style.display = "block";
+      document.getElementById("arScreen").style.display = "none";
+    }
+
+    function showKitDetail(kitID) {
+      showKitDetailScreen(kitID);
+    }
+
+    function showARScreen() {
+      document.getElementById("homeScreen").style.display = "none";
+      document.getElementById("kitDetailScreen").style.display = "none";
+      document.getElementById("arScreen").style.display = "block";
+      
+      if (!video) initAR();
+    }
+
+    // AR initialization and processing functions
+    function initAR() {
+      video = document.getElementById("video");
+      canvas = document.getElementById("canvas");
+      context = canvas.getContext("2d");
+      detector = new AR.Detector();
+      posit = new POS.Posit(modelSize, canvas.width);
+
+      adaptiveFilter = new AdaptiveThresholdFilter({ blockSize:21, C:5, useIntegralImage:true });
+      multiScaleDetector = new MultiScaleDetector({ 
+        detector: detector, 
+        scales:[1.0,0.5,1.5], 
+        confidenceThreshold:0.3 
+      });
+      opticalFlowTracker = new OpticalFlowTracker({
+        winSize:15, maxError:10000, maxMotion:50, maxTrackedFrames:30
+      });
+
+      initCamera();
+      initRenderer();
+      stlLoader = new THREE.STLLoader();
+      requestAnimationFrame(tick);
+    }
+
+    function initCamera() {
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ 
+          video: { facingMode: "environment" } 
+        })
+        .then(function(stream) {
+          if ("srcObject" in video) {
+            video.srcObject = stream;
+          } else {
+            video.src = window.URL.createObjectURL(stream);
+          }
+          video.play();
+        })
+        .catch(function(err) {
+          console.log("Camera error:", err);
+        });
+      }
+    }
+
+    function initRenderer() {
+      const threeContainer = document.getElementById("threeContainer");
+      const containerWidth = threeContainer.offsetWidth;
+      const containerHeight = threeContainer.offsetHeight;
+      
+      renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setClearColor(0x000000, 1);
+      renderer.setSize(containerWidth, containerHeight);
+      threeContainer.appendChild(renderer.domElement);
+      
+      videoTexture = new THREE.Texture(video);
+      videoTexture.minFilter = THREE.LinearFilter;
+      
+      backgroundScene = new THREE.Scene();
+      backgroundCamera = new THREE.Camera();
+      
+      const plane = new THREE.Mesh(
+        new THREE.PlaneGeometry(1.68, 2.4),
+        new THREE.MeshBasicMaterial({ map: videoTexture, depthTest: false, depthWrite: false })
+      );
+      plane.material.side = THREE.DoubleSide;
+      plane.position.z = -1;
+      backgroundScene.add(backgroundCamera);
+      backgroundScene.add(plane);
+      
+      scene = new THREE.Scene();
+      camera = new THREE.PerspectiveCamera(40, containerWidth / containerHeight, 1, 1000);
+      scene.add(camera);
+      
+      const ambientLight = new THREE.AmbientLight(0x666666);
+      scene.add(ambientLight);
+      
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 0.7);
+      directionalLight.position.set(0, 0, 1);
+      scene.add(directionalLight);
+    }
+
+    function tick() {
+      requestAnimationFrame(tick);
+      if (video.readyState === video.HAVE_ENOUGH_DATA) {
+        try {
+          context.drawImage(video, 0, 0, canvas.width, canvas.height);
+          imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+        } catch(e) { return; }
+
+        if (videoTexture) videoTexture.needsUpdate = true;
+
+        let markers = detector.detect(imageData);
+        markers = processFilters(markers);
+        updateScene(markers);
+
+        renderer.autoClear = false;
+        renderer.clear();
+        renderer.render(backgroundScene, backgroundCamera);
+        renderer.render(scene, camera);
+
+        lastFrameMarkers = markers.slice();
+
+        let overlay = document.getElementById("debugOverlay");
+        if (overlay.classList.contains("visible")) {
+          drawDebugCanvas();
+        }
+      }
+    }
+
+    function processFilters(markers) {
+      let finalMarkers = markers.slice();
+      if (useAdaptiveFilter) {
+        try {
+          const processed = adaptiveFilter.process(imageData);
+          const atf = detector.detect(processed);
+          atf.forEach(m => {
+            if (!markerExists(finalMarkers, m)) finalMarkers.push(m);
+          });
+        } catch(e) {}
+      }
+      return finalMarkers;
+    }
+
+    function markerExists(list, marker) {
+      return list.some(m => (m.id === marker.id && areMarkersClose(m, marker)));
+    }
+
+    function areMarkersClose(m1, m2) {
+      let c1 = {x:0, y:0}, c2 = {x:0, y:0};
+      for (let i = 0; i < 4; i++) {
+        c1.x += m1.corners[i].x; c1.y += m1.corners[i].y;
+        c2.x += m2.corners[i].x; c2.y += m2.corners[i].y;
+      }
+      c1.x /= 4; c1.y /= 4; c2.x /= 4; c2.y /= 4;
+      let dx = c1.x - c2.x, dy = c1.y - c2.y;
+      return (Math.sqrt(dx * dx + dy * dy) < 20);
+    }
+
+    function updateScene(markers) {
+      while (scene.children.length > 3) {
+        scene.remove(scene.children[3]);
+      }
+      
+      const markerMap = {};
+      markers.forEach(m => { markerMap[m.id] = m; });
+
+      let visibleScenarioIDs = [];
+      scenarios.forEach(s => {
+        if (markerMap[s.identifierTag]) visibleScenarioIDs.push(s.identifierTag);
+      });
+
+      for (let sid in scenarioConfidence) {
+        if (visibleScenarioIDs.includes(parseInt(sid))) scenarioConfidence[sid]++;
+        else scenarioConfidence[sid] = 0;
+      }
+
+      let bestScenarioID = null, bestConfidence = 0;
+      for (let sid in scenarioConfidence) {
+        let val = scenarioConfidence[sid];
+        if (val >= SCENARIO_CONFIDENCE_THRESHOLD && val > bestConfidence) {
+          bestConfidence = val; 
+          bestScenarioID = parseInt(sid);
+        }
+      }
+      if (bestScenarioID !== null) {
+        lastActiveIdentifierTag = bestScenarioID;
+      }
+
+      let activeScenario = null;
+      if (lastActiveIdentifierTag !== null) {
+        activeScenario = scenarios.find(s => s.identifierTag === lastActiveIdentifierTag);
+      }
+
+      if (activeScenario) {
+        activeScenario.objects.forEach(obj => {
+          if (markerMap[obj.tag]) {
+            placeObject(markerMap[obj.tag], obj.stl);
+          }
+        });
+      }
+
+      // Update sidebar
+      const kitNameEl = document.getElementById("arKitName");
+      const kitDescEl = document.getElementById("arKitDesc");
+      if (activeScenario && visibleScenarioIDs.includes(activeScenario.identifierTag)) {
+        kitNameEl.textContent = activeScenario.name;
+        kitDescEl.textContent = activeScenario.desc;
+      } else {
+        kitNameEl.textContent = "No kits detected";
+        kitDescEl.textContent = "Point your camera at a marker to see kit information";
+      }
+    }
+
+    function placeObject(marker, stlRelativePath) {
+      let stlFullPath = "models/" + stlRelativePath;
+      let corners = [];
+      for (let i = 0; i < marker.corners.length; i++) {
+        corners.push({
+          x: marker.corners[i].x - (canvas.width / 2),
+          y: (canvas.height / 2) - marker.corners[i].y
+        });
+      }
+      let pose = posit.pose(corners);
+
+      loadStl(stlFullPath, function(geometry) {
+        geometry.computeBoundingBox();
+        let min = geometry.boundingBox.min, max = geometry.boundingBox.max;
+        let center = new THREE.Vector3().addVectors(min, max).multiplyScalar(0.5);
+        let offset = center.clone().multiplyScalar(-1);
+
+        if (geometry.isBufferGeometry) {
+          geometry.translate(offset.x, offset.y, offset.z);
+        } else {
+          let mat = new THREE.Matrix4().makeTranslation(offset.x, offset.y, offset.z);
+          geometry.applyMatrix(mat);
+        }
+
+        let material = new THREE.MeshPhongMaterial({color: 0xD4A574});
+        let mesh = new THREE.Mesh(geometry, material);
+
+        let scaleFactor = 0.05 * modelSize * 0.02;
+        mesh.scale.set(scaleFactor, scaleFactor, scaleFactor);
+
+        let r = pose.bestRotation;
+        mesh.rotation.x = -Math.asin(-r[1][2]);
+        mesh.rotation.y = -Math.atan2(r[0][2], r[2][2]);
+        mesh.rotation.z = Math.atan2(r[1][0], r[1][1]);
+
+        mesh.position.x = pose.bestTranslation[0];
+        mesh.position.y = pose.bestTranslation[1];
+        mesh.position.z = -pose.bestTranslation[2];
+
+        scene.add(mesh);
+      });
+    }
+
+    function loadStl(path, cb) {
+      if (stlCache[path]) {
+        cb(stlCache[path]);
+        return;
+      }
+      stlLoader.load(path, function(geom) {
+        stlCache[path] = geom;
+        cb(geom);
+      });
+    }
+
+    function toggleDebugOverlay() {
+      let overlay = document.getElementById("debugOverlay");
+      overlay.classList.toggle("visible");
+    }
+
+    function drawDebugCanvas() {
+      let dbgCanvas = document.getElementById("debugCanvas");
+      let dbgCtx = dbgCanvas.getContext("2d");
+      dbgCtx.clearRect(0, 0, dbgCanvas.width, dbgCanvas.height);
+      dbgCtx.drawImage(canvas, 0, 0);
+
+      dbgCtx.strokeStyle = "lime";
+      dbgCtx.lineWidth = 2;
+      lastFrameMarkers.forEach(m => {
+        let c = m.corners;
+        dbgCtx.beginPath();
+        dbgCtx.moveTo(c[0].x, c[0].y);
+        dbgCtx.lineTo(c[1].x, c[1].y);
+        dbgCtx.lineTo(c[2].x, c[2].y);
+        dbgCtx.lineTo(c[3].x, c[3].y);
+        dbgCtx.closePath();
+        dbgCtx.stroke();
+      });
+
+      let txt = (lastFrameMarkers.length === 0) ? "No markers detected.\n" : "";
+      lastFrameMarkers.forEach(m => {
+        txt += "Marker ID " + m.id + "\n";
+      });
+      document.getElementById("markerInfo").textContent = txt;
+    }
+  </script>
+</body>
+</html>

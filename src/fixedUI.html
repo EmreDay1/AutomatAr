@@ -197,7 +197,113 @@
       text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
     }
 
-    /* AR Instructions Overlay */
+    /* AR Initial Overlay */
+    .ar-initial-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(10px);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+      padding: 2rem;
+    }
+
+    .ar-initial-overlay.hidden {
+      display: none;
+    }
+
+    .ar-initial-content {
+      max-width: 600px;
+      text-align: left;
+      background: rgba(26, 35, 126, 0.95);
+      padding: 2.5rem;
+      border-radius: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .ar-initial-content h3 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      color: #ffffff;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+      text-align: center;
+    }
+
+    .ar-initial-instructions {
+      margin-bottom: 2rem;
+    }
+
+    .ar-initial-instructions h4 {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #ffffff;
+      margin: 1.5rem 0 1rem 0;
+      border-left: 3px solid rgba(255, 255, 255, 0.6);
+      padding-left: 1rem;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 0.5rem 0 0.5rem 1rem;
+      border-radius: 4px;
+    }
+
+    .ar-initial-instructions p {
+      font-size: 1rem;
+      line-height: 1.6;
+      margin-bottom: 1rem;
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    .ar-initial-instructions ul {
+      margin-left: 1.5rem;
+      margin-bottom: 1.5rem;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 1rem;
+      border-radius: 6px;
+    }
+
+    .ar-initial-instructions li {
+      font-size: 0.95rem;
+      line-height: 1.5;
+      margin-bottom: 0.6rem;
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    .ar-initial-instructions li strong {
+      color: #ffffff;
+      font-weight: 600;
+    }
+
+    .ar-start-button {
+      background: #ffffff;
+      color: #1a237e;
+      border: 2px solid #ffffff;
+      padding: 1.2rem 2.5rem;
+      font-size: 1rem;
+      font-weight: 700;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+      display: block;
+      margin: 2rem auto 0 auto;
+      width: fit-content;
+    }
+
+    .ar-start-button:hover {
+      background: #1a237e;
+      color: #ffffff;
+      transform: translateY(-2px);
+      box-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+    }
     .ar-instructions-overlay {
       position: absolute;
       top: 0;
@@ -654,6 +760,24 @@
         font-size: 0.8rem;
       }
 
+      .ar-initial-content {
+        padding: 2rem 1rem;
+      }
+
+      .ar-initial-content h3 {
+        font-size: 2rem;
+      }
+
+      .ar-instructions-grid {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+
+      .ar-start-button {
+        padding: 1rem 2rem;
+        font-size: 1rem;
+      }
+
       .ar-instructions-content {
         margin: 1rem;
         padding: 1.5rem;
@@ -825,6 +949,37 @@
 
   <!-- AR Screen -->
   <section id="arScreen">
+    <!-- AR Initial Overlay -->
+    <div class="ar-initial-overlay" id="arInitialOverlay">
+      <div class="ar-initial-content">
+        <h3>AR Instructions</h3>
+        
+        <div class="ar-instructions-grid">
+          <div class="ar-instruction-item">
+            <h4>Setup</h4>
+            <p>Hold device steady. Point camera at ArUco marker (black/white square pattern). Keep marker flat and fully visible.</p>
+          </div>
+          
+          <div class="ar-instruction-item">
+            <h4>Distance</h4>
+            <p>Stay 6-18 inches from marker. Ensure good lighting. Avoid shadows on markers.</p>
+          </div>
+          
+          <div class="ar-instruction-item">
+            <h4>Usage</h4>
+            <p>3D models appear on detected markers. Move marker or camera to view different angles. Each kit has unique marker.</p>
+          </div>
+          
+          <div class="ar-instruction-item">
+            <h4>Troubleshooting</h4>
+            <p>If detection fails, adjust distance/angle. Use Debug View button to see camera detection. Keep markers flat.</p>
+          </div>
+        </div>
+        
+        <button class="ar-start-button" id="arStartButton">Start Camera</button>
+      </div>
+    </div>
+
     <!-- AR Background to cover black void -->
     <div class="ar-background"></div>
     
@@ -923,6 +1078,9 @@
       document.getElementById("homeScreen").style.display = "block";
       document.getElementById("kitDetailScreen").style.display = "none";
       document.getElementById("arScreen").style.display = "none";
+      
+      // Reset AR overlay for next time
+      document.getElementById("arInitialOverlay").classList.remove("hidden");
     }
 
     function showKitDetailScreen(kitID){
@@ -950,8 +1108,19 @@
       document.getElementById("homeScreen").style.display = "none";
       document.getElementById("kitDetailScreen").style.display = "none";
       document.getElementById("arScreen").style.display = "block";
+      
+      // Show the initial overlay - don't start AR yet
+      document.getElementById("arInitialOverlay").classList.remove("hidden");
+    }
 
-      if(!video) initAR();
+    function startARExperience(){
+      // Hide the initial overlay
+      document.getElementById("arInitialOverlay").classList.add("hidden");
+      
+      // Now initialize AR with camera
+      if(!video) {
+        initAR();
+      }
     }
 
     function setupUI(){
@@ -973,6 +1142,11 @@
       // AR instructions overlay handlers
       document.getElementById("arHelpBtn").onclick = toggleARInstructionsOverlay;
       document.getElementById("arInstructionsClose").onclick = toggleARInstructionsOverlay;
+      
+      // AR start button
+      document.getElementById("arStartButton").onclick = function(){
+        startARExperience();
+      };
     }
 
     function toggleARInstructionsOverlay() {

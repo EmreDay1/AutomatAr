@@ -330,22 +330,46 @@
     }
 
     .kit-content {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 6rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: clamp(2rem, 5vw, 6rem);
       align-items: center;
-      padding: 0 4rem;
+      justify-content: center;
+      padding: 0 clamp(1rem, 4vw, 4rem);
       max-width: 1400px;
       margin: 0 auto;
       width: 100%;
     }
 
     .kit-content.reverse {
-      grid-template-columns: 1fr 1fr;
+      flex-direction: row-reverse;
     }
 
     .kit-text {
+      flex: 1 1 clamp(300px, 45%, 600px);
+      min-width: 280px;
       padding: 2rem 0;
+    }
+
+    .kit-image {
+      flex: 1 1 clamp(300px, 45%, 600px);
+      min-width: 280px;
+      width: 100%;
+      height: clamp(300px, 40vw, 500px);
+      background: linear-gradient(135deg, #D4A574 0%, #E6C89C 100%);
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      position: relative;
+      overflow: hidden;
+      border: 3px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
     }
 
     .kit-text h3 {
@@ -364,25 +388,6 @@
       line-height: 1.8;
       text-align: left;
       opacity: 0.9;
-    }
-
-    .kit-image {
-      width: 100%;
-      height: 500px;
-      background: linear-gradient(135deg, #D4A574 0%, #E6C89C 100%);
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      border-radius: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-      position: relative;
-      overflow: hidden;
-      border: 3px solid rgba(255, 255, 255, 0.2);
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
     }
 
     .kit-image:hover {
@@ -956,8 +961,8 @@
       transform: translateZ(0);
     }
 
-    /* Mobile Responsive - Apple Style */
-    @media (max-width: 768px) {
+    /* Mobile Responsive - Enhanced Flexbox */
+    @media (max-width: 900px) {
       .header-content {
         flex-direction: column;
         gap: 1rem;
@@ -990,41 +995,38 @@
         margin-bottom: 2rem;
       }
 
+      /* Flexbox mobile adjustments */
       .kit-content,
       .kit-content.reverse {
-        grid-template-columns: 1fr;
-        gap: 3rem;
-        padding: 0 2rem;
+        flex-direction: column;
+        gap: clamp(1.5rem, 4vw, 3rem);
+        text-align: center;
+        padding: 0 clamp(1rem, 3vw, 2rem);
+      }
+
+      .kit-text {
+        order: 2;
+        flex: none;
+        padding: 1rem 0;
+        min-width: unset;
+      }
+
+      .kit-image {
+        order: 1;
+        flex: none;
+        height: clamp(250px, 50vw, 350px);
+        margin-bottom: 1rem;
+        min-width: unset;
       }
 
       .kit-section {
         padding: 2rem 0;
-        min-height: 100vh;
-      }
-
-      .kit-text {
-        padding: 1rem 0;
-        order: 2;
-      }
-
-      .kit-text h3 {
-        font-size: clamp(1.5rem, 6vw, 2rem);
-        margin-bottom: 1.5rem;
-      }
-
-      .kit-text p {
-        font-size: clamp(0.9rem, 3.5vw, 1.1rem);
-        line-height: 1.7;
-      }
-
-      .kit-image {
-        height: 300px;
-        order: 1;
-        margin-bottom: 1rem;
+        min-height: auto;
       }
 
       .kit-detail {
-        grid-template-columns: 1fr;
+        display: flex;
+        flex-direction: column;
         gap: 2rem;
         padding: 2rem;
       }
@@ -1083,6 +1085,22 @@
       }
     }
 
+    /* Ultra-small screens */
+    @media (max-width: 480px) {
+      .kit-content {
+        padding: 0 1rem;
+        gap: 1.5rem;
+      }
+
+      .kit-image {
+        height: 200px;
+      }
+
+      .intro-section {
+        padding: 1.5rem 0.5rem;
+      }
+    }
+
     /* Apple-style enhancements */
     .kit-content {
       will-change: transform, opacity;
@@ -1128,7 +1146,7 @@
       <div class="kit-content scroll-content">
         <div class="kit-text progressive-reveal">
           <h3>Cam-A: Learn the details of rotational motion</h3>
-          <p>Cam-A illustrates how cams convert rotational motion into linear oscillatory motion. The cam is a rotating or sliding piece in a mechanical linkage that drives the follower. The cam's surface can be contoured (circular, elliptical, etc.) to create different motion in the follower as the cam rotates. The cam mechanism's ability to produce precise, complex motion from simple rotational input makes it invaluable in mechanical design. It's used in internal engines, filling/packing machines, and more.</p>
+          <p>Demonstrates how cams convert rotational motion into linear oscillatory motion using contoured surfaces to drive followers in precise, complex patterns.</p>
         </div>
         <div class="kit-image parallax-element" onclick="showKitDetail(0)" style="background-image: url('images/kit1.png');">
         </div>
@@ -1142,7 +1160,7 @@
         </div>
         <div class="kit-text progressive-reveal">
           <h3>Cam-C: Get to know more about intermittent motion</h3>
-          <p>Cam-C illustrates how cams convert rotational motion to arranged, paused (intermittent) motion. It's a rotating drive wheel (driver) with a pin engaging slots in a driven wheel (Geneva wheel). This engagement causes precise timing & indexing. Between steps, the Geneva wheel remains locked in place. Widely used in clockwork, film projectors, assembly lines, etc., for controlled, intermittent motion from continuous input.</p>
+          <p>Shows how a Geneva wheel mechanism creates precise, timed intermittent motion from continuous rotational input using pins and slots.</p>
         </div>
       </div>
     </div>
@@ -1152,7 +1170,7 @@
       <div class="kit-content scroll-content">
         <div class="kit-text progressive-reveal">
           <h3>Crank: Understanding reciprocating motion</h3>
-          <p>Crank kit illustrates how a crank mechanism converts rotational motion into linear reciprocating motion. A rotating arm (the crank) pushes/pulls a connecting rod, creating back-and-forth movement. This simple but effective design ensures consistent rotation-to-reciprocation transfer. Used in engines, pumps, and presses, whenever converting rotary motion into linear is essential.</p>
+          <p>Illustrates how a rotating crank arm converts rotational motion into linear back-and-forth movement through connecting rods.</p>
         </div>
         <div class="kit-image parallax-element" onclick="showKitDetail(2)" style="background-image: url('images/kit3.png');">
         </div>
@@ -1166,7 +1184,7 @@
         </div>
         <div class="kit-text progressive-reveal">
           <h3>Gear-A: Exploring perpendicular power transmission</h3>
-          <p>Gear-A demonstrates how bevel gears transfer rotational motion between perpendicular shafts, turning horizontal circular motion into vertical. Bevel gears have cone-shaped teeth meeting at 90°, redirecting motion while maintaining power transmission. Widely used in automobiles, drills, and other machinery needing efficient angled power transfer.</p>
+          <p>Demonstrates how bevel gears with cone-shaped teeth transfer rotational motion between perpendicular shafts at 90-degree angles.</p>
         </div>
       </div>
     </div>
@@ -1176,7 +1194,7 @@
       <div class="kit-content scroll-content">
         <div class="kit-text progressive-reveal">
           <h3>Gear-B: Variable speed and torque systems</h3>
-          <p>Gear-B shows how gear alignment & shape affect torque/speed, even with a constant driver. This mechanism can cause continuous speed variation due to shifting alignment of the gears. The driver's turning changes load distribution, resulting in dynamic acceleration/deceleration. These "weird" gears are useful for specialized systems needing variable torque & non-uniform motion, e.g. adaptive transmissions.</p>
+          <p>Shows how gear alignment and shape create variable speed and torque output from constant input through dynamic load distribution.</p>
         </div>
         <div class="kit-image parallax-element" onclick="showKitDetail(4)" style="background-image: url('images/kit5.png');">
         </div>
@@ -1190,7 +1208,7 @@
         </div>
         <div class="kit-text progressive-reveal">
           <h3>Gear-C: Mastering worm gear systems</h3>
-          <p>Gear-C is a worm gear system that converts rotational motion while significantly reducing speed & increasing torque. A screw-like worm drives a worm wheel, transferring motion at 90°. This design offers high torque output & a self-locking feature, so it can't be back-driven. Used in elevators, conveyors, tuning mechanisms—anywhere controlled motion & torque multiplication are vital.</p>
+          <p>Features a worm gear system that significantly reduces speed while increasing torque with self-locking capability to prevent back-driving.</p>
         </div>
       </div>
     </div>

@@ -23,16 +23,168 @@
       box-sizing: border-box;
     }
 
+    html {
+      scroll-behavior: smooth;
+      scroll-snap-type: y mandatory;
+    }
+
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background-color: #1a237e;
+      background-color: #FF8C00;
       color: #ffffff;
       line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* Enhanced Apple-style Animation Keyframes */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(80px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeInLeft {
+      from {
+        opacity: 0;
+        transform: translateX(-80px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes fadeInRight {
+      from {
+        opacity: 0;
+        transform: translateX(80px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes scaleIn {
+      from {
+        opacity: 0;
+        transform: scale(0.8) translateY(40px);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    @keyframes slideInFromBottom {
+      from {
+        opacity: 0;
+        transform: translateY(100px) scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    /* Scroll-triggered animations */
+    .scroll-section {
+      scroll-snap-align: start;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .scroll-content.in-view {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .scroll-content {
+      transform: translateY(60px);
+      opacity: 0;
+      transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    /* Override for intro section - always visible */
+    .intro-section {
+      opacity: 1 !important;
+      transform: translateY(0) !important;
+    }
+
+    .intro-section * {
+      opacity: 1 !important;
+      color: #ffffff !important;
+      transform: translateY(0) !important;
+    }
+
+    .intro-section .scroll-content {
+      opacity: 1 !important;
+      transform: translateY(0) !important;
+    }
+
+    .parallax-element {
+      transition: transform 0.1s ease-out;
+    }
+
+    /* Progressive reveal animations */
+    .progressive-reveal {
+      overflow: hidden;
+    }
+
+    .progressive-reveal > * {
+      transform: translateY(40px);
+      opacity: 0;
+      transition: all 0.6s ease-out;
+    }
+
+    .progressive-reveal.revealed > * {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .progressive-reveal.revealed > *:nth-child(1) { transition-delay: 0.1s; }
+    .progressive-reveal.revealed > *:nth-child(2) { transition-delay: 0.2s; }
+    .progressive-reveal.revealed > *:nth-child(3) { transition-delay: 0.3s; }
+    .progressive-reveal.revealed > *:nth-child(4) { transition-delay: 0.4s; }
+
+    /* Animation classes */
+    .animate-on-scroll {
+      opacity: 0;
+      transition: all 0.6s ease-out;
+    }
+
+    .animate-on-scroll.animate {
+      animation-duration: 0.8s;
+      animation-fill-mode: both;
+    }
+
+    .fade-up.animate {
+      animation-name: fadeInUp;
+    }
+
+    .fade-left.animate {
+      animation-name: fadeInLeft;
+    }
+
+    .fade-right.animate {
+      animation-name: fadeInRight;
+    }
+
+    .scale-in.animate {
+      animation-name: scaleIn;
     }
 
     /* Header */
     .header-bar {
-      background-color: #1a237e;
+      background-color: #FF8C00;
       border-bottom: 1px solid #ffffff;
       padding: 1.5rem 0;
       position: sticky;
@@ -66,7 +218,7 @@
 
     .header-ar-button {
       background: #ffffff;
-      color: #1a237e;
+      color: #FF8C00;
       border: 2px solid #ffffff;
       padding: 0.8rem 1.5rem;
       font-size: 0.9rem;
@@ -83,7 +235,7 @@
     }
 
     .header-ar-button:hover {
-      background: #1a237e;
+      background: #FF8C00;
       color: #ffffff;
       transform: translateY(-1px);
       box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
@@ -99,92 +251,144 @@
     /* Home Screen */
     #homeScreen {
       display: none;
-      min-height: 100vh;
-      padding: 4rem 0;
-      background-color: #1a237e;
+      scroll-snap-type: y mandatory;
+      overflow-y: auto;
+      height: 100vh;
     }
 
     .intro-section {
+      scroll-snap-align: start;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
       text-align: center;
-      margin-bottom: 6rem;
-      padding: 2rem 0;
+      padding: 4rem 2rem;
+      position: relative;
     }
 
     .intro-section h2 {
-      font-size: 2.8rem;
+      font-size: clamp(2.5rem, 5vw, 4rem);
       font-weight: 700;
-      color: #ffffff;
-      margin-bottom: 1.5rem;
-      text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+      color: #ffffff !important;
+      margin-bottom: 2rem;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      letter-spacing: -2px;
+      opacity: 1 !important;
     }
 
     .intro-section p {
-      font-size: 1.2rem;
-      color: #ffffff;
-      max-width: 700px;
-      margin: 0 auto;
-      line-height: 1.7;
+      font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+      color: #ffffff !important;
+      max-width: 800px;
+      margin: 0 auto 3rem auto;
+      line-height: 1.8;
+      opacity: 1 !important;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
     }
 
     /* Kit sections */
     .kit-section {
-      margin-bottom: 6rem;
-      padding: 3rem 0;
-      background-color: #283593;
-      border-radius: 16px;
-      box-shadow: 0 4px 20px rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      scroll-snap-align: start;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding: 4rem 0;
+      margin: 0;
+      background-color: #FF7F00;
+      border-radius: 0;
+      box-shadow: none;
+      border: none;
+      transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      position: relative;
+    }
+
+    .kit-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, 
+        rgba(255, 140, 0, 0.95) 0%, 
+        rgba(255, 127, 0, 0.98) 50%, 
+        rgba(255, 102, 0, 0.95) 100%);
+      z-index: -1;
+    }
+
+    .kit-section:nth-child(odd) {
+      background-color: #FF8C00;
+    }
+
+    .kit-section:nth-child(odd)::before {
+      background: linear-gradient(135deg, 
+        rgba(255, 127, 0, 0.95) 0%, 
+        rgba(255, 140, 0, 0.98) 50%, 
+        rgba(255, 165, 0, 0.95) 100%);
     }
 
     .kit-content {
       display: grid;
-      grid-template-columns: 1fr 450px;
-      gap: 4rem;
+      grid-template-columns: 1fr 1fr;
+      gap: 6rem;
       align-items: center;
-      padding: 2rem;
+      padding: 0 4rem;
+      max-width: 1400px;
+      margin: 0 auto;
+      width: 100%;
     }
 
     .kit-content.reverse {
-      grid-template-columns: 450px 1fr;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .kit-text {
+      padding: 2rem 0;
     }
 
     .kit-text h3 {
-      font-size: 2rem;
+      font-size: clamp(1.8rem, 4vw, 2.5rem);
       font-weight: 600;
       color: #ffffff;
-      margin-bottom: 1.5rem;
-      line-height: 1.3;
-      text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+      margin-bottom: 2rem;
+      line-height: 1.2;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+      letter-spacing: -1px;
     }
 
     .kit-text p {
-      color: #ffffff;
-      font-size: 1.05rem;
+      color: rgba(255, 255, 255, 0.95);
+      font-size: clamp(1rem, 2vw, 1.15rem);
       line-height: 1.8;
-      text-align: justify;
+      text-align: left;
+      opacity: 0.9;
     }
 
     .kit-image {
       width: 100%;
-      height: 350px;
+      height: 500px;
       background: linear-gradient(135deg, #D4A574 0%, #E6C89C 100%);
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
-      border-radius: 16px;
+      border-radius: 20px;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
       position: relative;
       overflow: hidden;
-      border: 2px solid #ffffff;
+      border: 3px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
     }
 
     .kit-image:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 12px 32px rgba(255, 255, 255, 0.2), 0 0 20px rgba(255, 255, 255, 0.1);
+      transform: translateY(-10px) scale(1.02);
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.15);
+      border-color: rgba(255, 255, 255, 0.4);
     }
 
     .placeholder-img {
@@ -221,7 +425,7 @@
     .ar-initial-content {
       max-width: 600px;
       text-align: left;
-      background: rgba(26, 35, 126, 0.95);
+      background: rgba(255, 140, 0, 0.95);
       padding: 2.5rem;
       border-radius: 16px;
       border: 2px solid rgba(255, 255, 255, 0.3);
@@ -282,7 +486,7 @@
 
     .ar-start-button {
       background: #ffffff;
-      color: #1a237e;
+      color: #FF8C00;
       border: 2px solid #ffffff;
       padding: 1.2rem 2.5rem;
       font-size: 1rem;
@@ -299,7 +503,7 @@
     }
 
     .ar-start-button:hover {
-      background: #1a237e;
+      background: #FF8C00;
       color: #ffffff;
       transform: translateY(-2px);
       box-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
@@ -330,7 +534,7 @@
       max-width: 600px;
       margin: 2rem auto;
       text-align: left;
-      background: rgba(25, 25, 112, 0.95);
+      background: rgba(255, 140, 0, 0.95);
       padding: 2rem;
       border-radius: 12px;
       border: 1px solid rgba(255, 255, 255, 0.2);
@@ -406,7 +610,7 @@
       position: absolute;
       top: 1.5rem;
       right: 1.5rem;
-      background: rgba(25, 25, 112, 0.8);
+      background: rgba(255, 140, 0, 0.8);
       color: white;
       border: 1px solid rgba(255, 255, 255, 0.3);
       padding: 0.8rem 1.2rem;
@@ -420,7 +624,7 @@
     }
 
     .ar-help-button:hover {
-      background: rgba(25, 25, 112, 0.9);
+      background: rgba(255, 140, 0, 0.9);
       transform: translateY(-1px);
     }
 
@@ -429,7 +633,7 @@
       display: none;
       min-height: 100vh;
       padding: 4rem 0;
-      background-color: #1a237e;
+      background-color: #FF8C00;
     }
 
     .kit-detail {
@@ -437,7 +641,7 @@
       grid-template-columns: 500px 1fr;
       gap: 5rem;
       align-items: start;
-      background: #283593;
+      background: #FF7F00;
       padding: 3rem;
       border-radius: 16px;
       box-shadow: 0 4px 20px rgba(255, 255, 255, 0.1);
@@ -479,7 +683,7 @@
 
     .back-button {
       background: #ffffff;
-      color: #1a237e;
+      color: #FF8C00;
       border: 2px solid #ffffff;
       padding: 1rem 2rem;
       border-radius: 8px;
@@ -492,7 +696,7 @@
     }
 
     .back-button:hover {
-      background: #1a237e;
+      background: #FF8C00;
       color: #ffffff;
       box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
     }
@@ -514,7 +718,7 @@
       top: 0;
       left: 0;
       right: 0;
-      background: rgba(26, 35, 126, 0.9);
+      background: rgba(255, 140, 0, 0.9);
       color: #ffffff;
       padding: 1.5rem;
       text-align: center;
@@ -528,7 +732,7 @@
       top: 1.5rem;
       left: 1.5rem;
       background: #ffffff;
-      color: #1a237e;
+      color: #FF8C00;
       border: 2px solid #ffffff;
       padding: 0.8rem 1.5rem;
       border-radius: 8px;
@@ -541,7 +745,7 @@
     }
 
     .ar-back-button:hover {
-      background: #1a237e;
+      background: #FF8C00;
       color: #ffffff;
       transform: translateY(-1px);
       box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
@@ -573,7 +777,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
+      background: linear-gradient(135deg, #FF8C00 0%, #FF7F00 100%);
       z-index: 1;
     }
 
@@ -583,7 +787,7 @@
       right: 0;
       width: 450px;
       height: 100%;
-      background: rgba(40, 53, 147, 0.95);
+      background: rgba(255, 127, 0, 0.95);
       backdrop-filter: blur(10px);
       padding: 2rem;
       box-shadow: -4px 0 16px rgba(255, 255, 255, 0.1);
@@ -600,7 +804,7 @@
       left: 0;
       width: 150px;
       height: 100%;
-      background: rgba(26, 35, 126, 0.95);
+      background: rgba(255, 140, 0, 0.95);
       backdrop-filter: blur(10px);
       z-index: 14;
       border-right: 2px solid rgba(255, 255, 255, 0.3);
@@ -650,7 +854,7 @@
 
     .debug-button {
       background: #ffffff;
-      color: #1a237e;
+      color: #FF8C00;
       border: 2px solid #ffffff;
       padding: 0.8rem 1.5rem;
       border-radius: 8px;
@@ -663,7 +867,7 @@
     }
 
     .debug-button:hover {
-      background: #1a237e;
+      background: #FF8C00;
       color: #ffffff;
       box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
     }
@@ -740,7 +944,19 @@
       height: auto;
     }
 
-    /* Mobile Responsive */
+    /* Parallax Scrolling Effect */
+    .parallax-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 120%;
+      background: linear-gradient(135deg, #FF8C00 0%, #FF7F00 50%, #FF6600 100%);
+      z-index: -1;
+      transform: translateZ(0);
+    }
+
+    /* Mobile Responsive - Apple Style */
     @media (max-width: 768px) {
       .header-content {
         flex-direction: column;
@@ -760,22 +976,65 @@
         font-size: 0.8rem;
       }
 
+      .intro-section {
+        padding: 2rem 1rem;
+      }
+
+      .intro-section h2 {
+        font-size: clamp(2rem, 8vw, 3rem);
+        margin-bottom: 1.5rem;
+      }
+
+      .intro-section p {
+        font-size: clamp(1rem, 4vw, 1.2rem);
+        margin-bottom: 2rem;
+      }
+
+      .kit-content,
+      .kit-content.reverse {
+        grid-template-columns: 1fr;
+        gap: 3rem;
+        padding: 0 2rem;
+      }
+
+      .kit-section {
+        padding: 2rem 0;
+        min-height: 100vh;
+      }
+
+      .kit-text {
+        padding: 1rem 0;
+        order: 2;
+      }
+
+      .kit-text h3 {
+        font-size: clamp(1.5rem, 6vw, 2rem);
+        margin-bottom: 1.5rem;
+      }
+
+      .kit-text p {
+        font-size: clamp(0.9rem, 3.5vw, 1.1rem);
+        line-height: 1.7;
+      }
+
+      .kit-image {
+        height: 300px;
+        order: 1;
+        margin-bottom: 1rem;
+      }
+
+      .kit-detail {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+        padding: 2rem;
+      }
+
       .ar-initial-content {
         padding: 2rem 1rem;
       }
 
       .ar-initial-content h3 {
-        font-size: 2rem;
-      }
-
-      .ar-instructions-grid {
-        grid-template-columns: 1fr;
-        gap: 2rem;
-      }
-
-      .ar-start-button {
-        padding: 1rem 2rem;
-        font-size: 1rem;
+        font-size: 1.5rem;
       }
 
       .ar-instructions-content {
@@ -793,18 +1052,6 @@
         right: 1rem;
         padding: 0.6rem 1rem;
         font-size: 0.8rem;
-      }
-
-      .kit-content,
-      .kit-content.reverse {
-        grid-template-columns: 1fr;
-        gap: 2rem;
-      }
-
-      .kit-detail {
-        grid-template-columns: 1fr;
-        gap: 2rem;
-        padding: 2rem;
       }
 
       #threeContainer {
@@ -826,17 +1073,35 @@
         padding: 1rem;
       }
 
-      .intro-section h2 {
-        font-size: 2.2rem;
+      /* Disable complex animations on mobile for performance */
+      .kit-content {
+        transition: none !important;
       }
+      
+      .kit-image:hover {
+        transform: translateY(-5px) scale(1.01);
+      }
+    }
 
-      .kit-text h3 {
-        font-size: 1.6rem;
-      }
+    /* Apple-style enhancements */
+    .kit-content {
+      will-change: transform, opacity;
+    }
+
+    .parallax-element {
+      will-change: transform;
+    }
+
+    /* Smooth momentum scrolling for iOS */
+    #homeScreen {
+      -webkit-overflow-scrolling: touch;
     }
   </style>
 </head>
 <body>
+  <!-- Parallax Background -->
+  <div class="parallax-bg"></div>
+
   <!-- Header -->
   <div class="header-bar" id="mainHeader" style="display: flex;">
     <div class="header-content">
@@ -850,82 +1115,82 @@
 
   <!-- Home Screen -->
   <section id="homeScreen" style="display: block;">
-    <div class="container">
-      <!-- Intro -->
-      <div class="intro-section">
+    <!-- Intro -->
+    <div class="intro-section">
+      <div class="container">
         <h2>Welcome to Automata AR</h2>
         <p>Explore mechanical engineering concepts through augmented reality. Point your camera at kit markers to see interactive 3D demonstrations of gears, cams, cranks, and other mechanical systems.</p>
       </div>
+    </div>
 
-      <!-- Cam-A Kit -->
-      <div class="kit-section">
-        <div class="kit-content">
-          <div class="kit-text">
-            <h3>Cam-A: Learn the details of rotational motion</h3>
-            <p>Cam-A illustrates how cams convert rotational motion into linear oscillatory motion. The cam is a rotating or sliding piece in a mechanical linkage that drives the follower. The cam's surface can be contoured (circular, elliptical, etc.) to create different motion in the follower as the cam rotates. The cam mechanism's ability to produce precise, complex motion from simple rotational input makes it invaluable in mechanical design. It's used in internal engines, filling/packing machines, and more.</p>
-          </div>
-          <div class="kit-image" onclick="showKitDetail(0)" style="background-image: url('images/kit1.png');">
-          </div>
+    <!-- Cam-A Kit -->
+    <div class="kit-section animate-on-scroll fade-left">
+      <div class="kit-content scroll-content">
+        <div class="kit-text progressive-reveal">
+          <h3>Cam-A: Learn the details of rotational motion</h3>
+          <p>Cam-A illustrates how cams convert rotational motion into linear oscillatory motion. The cam is a rotating or sliding piece in a mechanical linkage that drives the follower. The cam's surface can be contoured (circular, elliptical, etc.) to create different motion in the follower as the cam rotates. The cam mechanism's ability to produce precise, complex motion from simple rotational input makes it invaluable in mechanical design. It's used in internal engines, filling/packing machines, and more.</p>
+        </div>
+        <div class="kit-image parallax-element" onclick="showKitDetail(0)" style="background-image: url('images/kit1.png');">
         </div>
       </div>
+    </div>
 
-      <!-- Cam-C Kit -->
-      <div class="kit-section">
-        <div class="kit-content reverse">
-          <div class="kit-image" onclick="showKitDetail(1)" style="background-image: url('images/kit2.png');">
-          </div>
-          <div class="kit-text">
-            <h3>Cam-C: Get to know more about intermittent motion</h3>
-            <p>Cam-C illustrates how cams convert rotational motion to arranged, paused (intermittent) motion. It's a rotating drive wheel (driver) with a pin engaging slots in a driven wheel (Geneva wheel). This engagement causes precise timing & indexing. Between steps, the Geneva wheel remains locked in place. Widely used in clockwork, film projectors, assembly lines, etc., for controlled, intermittent motion from continuous input.</p>
-          </div>
+    <!-- Cam-C Kit -->
+    <div class="kit-section animate-on-scroll fade-right">
+      <div class="kit-content reverse scroll-content">
+        <div class="kit-image parallax-element" onclick="showKitDetail(1)" style="background-image: url('images/kit2.png');">
+        </div>
+        <div class="kit-text progressive-reveal">
+          <h3>Cam-C: Get to know more about intermittent motion</h3>
+          <p>Cam-C illustrates how cams convert rotational motion to arranged, paused (intermittent) motion. It's a rotating drive wheel (driver) with a pin engaging slots in a driven wheel (Geneva wheel). This engagement causes precise timing & indexing. Between steps, the Geneva wheel remains locked in place. Widely used in clockwork, film projectors, assembly lines, etc., for controlled, intermittent motion from continuous input.</p>
         </div>
       </div>
+    </div>
 
-      <!-- Crank Kit -->
-      <div class="kit-section">
-        <div class="kit-content">
-          <div class="kit-text">
-            <h3>Crank: Understanding reciprocating motion</h3>
-            <p>Crank kit illustrates how a crank mechanism converts rotational motion into linear reciprocating motion. A rotating arm (the crank) pushes/pulls a connecting rod, creating back-and-forth movement. This simple but effective design ensures consistent rotation-to-reciprocation transfer. Used in engines, pumps, and presses, whenever converting rotary motion into linear is essential.</p>
-          </div>
-          <div class="kit-image" onclick="showKitDetail(2)" style="background-image: url('images/kit3.png');">
-          </div>
+    <!-- Crank Kit -->
+    <div class="kit-section animate-on-scroll fade-left">
+      <div class="kit-content scroll-content">
+        <div class="kit-text progressive-reveal">
+          <h3>Crank: Understanding reciprocating motion</h3>
+          <p>Crank kit illustrates how a crank mechanism converts rotational motion into linear reciprocating motion. A rotating arm (the crank) pushes/pulls a connecting rod, creating back-and-forth movement. This simple but effective design ensures consistent rotation-to-reciprocation transfer. Used in engines, pumps, and presses, whenever converting rotary motion into linear is essential.</p>
+        </div>
+        <div class="kit-image parallax-element" onclick="showKitDetail(2)" style="background-image: url('images/kit3.png');">
         </div>
       </div>
+    </div>
 
-      <!-- Gear-A Kit -->
-      <div class="kit-section">
-        <div class="kit-content reverse">
-          <div class="kit-image" onclick="showKitDetail(3)" style="background-image: url('images/kit4.png');">
-          </div>
-          <div class="kit-text">
-            <h3>Gear-A: Exploring perpendicular power transmission</h3>
-            <p>Gear-A demonstrates how bevel gears transfer rotational motion between perpendicular shafts, turning horizontal circular motion into vertical. Bevel gears have cone-shaped teeth meeting at 90°, redirecting motion while maintaining power transmission. Widely used in automobiles, drills, and other machinery needing efficient angled power transfer.</p>
-          </div>
+    <!-- Gear-A Kit -->
+    <div class="kit-section animate-on-scroll fade-right">
+      <div class="kit-content reverse scroll-content">
+        <div class="kit-image parallax-element" onclick="showKitDetail(3)" style="background-image: url('images/kit4.png');">
+        </div>
+        <div class="kit-text progressive-reveal">
+          <h3>Gear-A: Exploring perpendicular power transmission</h3>
+          <p>Gear-A demonstrates how bevel gears transfer rotational motion between perpendicular shafts, turning horizontal circular motion into vertical. Bevel gears have cone-shaped teeth meeting at 90°, redirecting motion while maintaining power transmission. Widely used in automobiles, drills, and other machinery needing efficient angled power transfer.</p>
         </div>
       </div>
+    </div>
 
-      <!-- Gear-B Kit -->
-      <div class="kit-section">
-        <div class="kit-content">
-          <div class="kit-text">
-            <h3>Gear-B: Variable speed and torque systems</h3>
-            <p>Gear-B shows how gear alignment & shape affect torque/speed, even with a constant driver. This mechanism can cause continuous speed variation due to shifting alignment of the gears. The driver's turning changes load distribution, resulting in dynamic acceleration/deceleration. These "weird" gears are useful for specialized systems needing variable torque & non-uniform motion, e.g. adaptive transmissions.</p>
-          </div>
-          <div class="kit-image" onclick="showKitDetail(4)" style="background-image: url('images/kit5.png');">
-          </div>
+    <!-- Gear-B Kit -->
+    <div class="kit-section animate-on-scroll fade-left">
+      <div class="kit-content scroll-content">
+        <div class="kit-text progressive-reveal">
+          <h3>Gear-B: Variable speed and torque systems</h3>
+          <p>Gear-B shows how gear alignment & shape affect torque/speed, even with a constant driver. This mechanism can cause continuous speed variation due to shifting alignment of the gears. The driver's turning changes load distribution, resulting in dynamic acceleration/deceleration. These "weird" gears are useful for specialized systems needing variable torque & non-uniform motion, e.g. adaptive transmissions.</p>
+        </div>
+        <div class="kit-image parallax-element" onclick="showKitDetail(4)" style="background-image: url('images/kit5.png');">
         </div>
       </div>
+    </div>
 
-      <!-- Gear-C Kit -->
-      <div class="kit-section">
-        <div class="kit-content reverse">
-          <div class="kit-image" onclick="showKitDetail(5)" style="background-image: url('images/kit6.png');">
-          </div>
-          <div class="kit-text">
-            <h3>Gear-C: Mastering worm gear systems</h3>
-            <p>Gear-C is a worm gear system that converts rotational motion while significantly reducing speed & increasing torque. A screw-like worm drives a worm wheel, transferring motion at 90°. This design offers high torque output & a self-locking feature, so it can't be back-driven. Used in elevators, conveyors, tuning mechanisms—anywhere controlled motion & torque multiplication are vital.</p>
-          </div>
+    <!-- Gear-C Kit -->
+    <div class="kit-section animate-on-scroll scale-in">
+      <div class="kit-content reverse scroll-content">
+        <div class="kit-image parallax-element" onclick="showKitDetail(5)" style="background-image: url('images/kit6.png');">
+        </div>
+        <div class="kit-text progressive-reveal">
+          <h3>Gear-C: Mastering worm gear systems</h3>
+          <p>Gear-C is a worm gear system that converts rotational motion while significantly reducing speed & increasing torque. A screw-like worm drives a worm wheel, transferring motion at 90°. This design offers high torque output & a self-locking feature, so it can't be back-driven. Used in elevators, conveyors, tuning mechanisms—anywhere controlled motion & torque multiplication are vital.</p>
         </div>
       </div>
     </div>
@@ -1062,6 +1327,200 @@
 
   <script>
     /********************************************
+     * APPLE-STYLE SCROLL ANIMATIONS
+     ********************************************/
+    
+    // Enhanced Intersection Observer for Apple-style animations
+    const observerOptions = {
+      threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1],
+      rootMargin: '0px 0px -10% 0px'
+    };
+
+    // Create multiple observers for different animation types
+    const fadeObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        const element = entry.target;
+        const ratio = entry.intersectionRatio;
+        
+        if (entry.isIntersecting && ratio > 0.1) {
+          element.classList.add('animate');
+          // Add staggered animation for child elements
+          const children = element.querySelectorAll('.kit-text, .kit-image');
+          children.forEach((child, index) => {
+            setTimeout(() => {
+              child.style.opacity = '1';
+              child.style.transform = 'translateY(0) scale(1)';
+            }, index * 200);
+          });
+        }
+      });
+    }, observerOptions);
+
+    // Progress-based scroll animations
+    const progressObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        const element = entry.target;
+        const ratio = entry.intersectionRatio;
+        
+        // Skip intro section - keep it fully visible
+        if (element.classList.contains('intro-section')) {
+          return;
+        }
+        
+        // Calculate progress-based transforms
+        const translateY = (1 - ratio) * 30;
+        const scale = 0.95 + (ratio * 0.05);
+        const opacity = Math.max(0.3, ratio);
+        
+        if (element.querySelector('.kit-content')) {
+          const content = element.querySelector('.kit-content');
+          content.style.transform = `translateY(${translateY}px) scale(${scale})`;
+          content.style.opacity = opacity;
+        }
+      });
+    }, {
+      threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1],
+      rootMargin: '0px'
+    });
+
+    // Parallax effect for background elements
+    function handleAdvancedParallax() {
+      const scrolled = window.pageYOffset;
+      const rate = scrolled * -0.3;
+      const parallaxBg = document.querySelector('.parallax-bg');
+      
+      if (parallaxBg) {
+        parallaxBg.style.transform = `translate3d(0, ${rate}px, 0)`;
+      }
+
+      // Individual section parallax
+      const sections = document.querySelectorAll('.kit-section');
+      sections.forEach((section, index) => {
+        const rect = section.getBoundingClientRect();
+        const speed = (index % 2 === 0) ? 0.5 : -0.3;
+        const yPos = rect.top * speed;
+        
+        const image = section.querySelector('.kit-image');
+        if (image && rect.top < window.innerHeight && rect.bottom > 0) {
+          image.style.transform = `translateY(${yPos}px)`;
+        }
+      });
+    }
+
+    // Smooth section scrolling with momentum
+    function initSmoothScrolling() {
+      const sections = document.querySelectorAll('.scroll-section, .kit-section, .intro-section');
+      let currentSection = 0;
+      let isScrolling = false;
+
+      function scrollToSection(index) {
+        if (index >= 0 && index < sections.length && !isScrolling) {
+          isScrolling = true;
+          sections[index].scrollIntoView({ 
+            behavior: 'smooth',
+            block: 'start'
+          });
+          
+          setTimeout(() => {
+            isScrolling = false;
+          }, 1000);
+        }
+      }
+
+      // Enhanced wheel event handling
+      window.addEventListener('wheel', (e) => {
+        if (isScrolling) return;
+        
+        const delta = e.deltaY;
+        if (Math.abs(delta) > 50) {
+          if (delta > 0 && currentSection < sections.length - 1) {
+            currentSection++;
+            scrollToSection(currentSection);
+          } else if (delta < 0 && currentSection > 0) {
+            currentSection--;
+            scrollToSection(currentSection);
+          }
+        }
+      }, { passive: false });
+
+      // Touch support for mobile
+      let touchStartY = 0;
+      window.addEventListener('touchstart', (e) => {
+        touchStartY = e.touches[0].clientY;
+      });
+
+      window.addEventListener('touchend', (e) => {
+        const touchEndY = e.changedTouches[0].clientY;
+        const diff = touchStartY - touchEndY;
+        
+        if (Math.abs(diff) > 50) {
+          if (diff > 0 && currentSection < sections.length - 1) {
+            currentSection++;
+            scrollToSection(currentSection);
+          } else if (diff < 0 && currentSection > 0) {
+            currentSection--;
+            scrollToSection(currentSection);
+          }
+        }
+      });
+    }
+
+    // Progressive content reveal
+    function initProgressiveReveal() {
+      const revealElements = document.querySelectorAll('.kit-text, .intro-section');
+      
+      revealElements.forEach(element => {
+        element.classList.add('progressive-reveal');
+        
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              setTimeout(() => {
+                entry.target.classList.add('revealed');
+              }, 100);
+            }
+          });
+        }, { threshold: 0.3 });
+        
+        observer.observe(element);
+      });
+    }
+
+    // Enhanced scroll animations initialization
+    function initScrollAnimations() {
+      // Observe all animated elements
+      const animatedElements = document.querySelectorAll('.animate-on-scroll, .kit-section');
+      animatedElements.forEach(el => {
+        fadeObserver.observe(el);
+        progressObserver.observe(el);
+      });
+
+      // Add advanced parallax scrolling
+      window.addEventListener('scroll', handleAdvancedParallax, { passive: true });
+      
+      // Initialize smooth section scrolling
+      initSmoothScrolling();
+      
+      // Initialize progressive reveal
+      initProgressiveReveal();
+      
+      // Initial setup for elements
+      animatedElements.forEach((el, index) => {
+        // Skip intro section - keep it fully visible
+        if (el.classList.contains('intro-section')) {
+          return;
+        }
+        
+        const content = el.querySelector('.kit-content');
+        if (content) {
+          content.style.opacity = '0.3';
+          content.style.transform = 'translateY(30px) scale(0.95)';
+          content.style.transition = 'all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+        }
+      });
+    }
+
+    /********************************************
      * GLOBAL STATE & CONSTANTS
      ********************************************/
     const PAGE_HOME = "HOME";
@@ -1071,6 +1530,7 @@
     window.onload = function() {
       setupUI();
       showHomeScreen();  // Always start with home screen
+      initScrollAnimations(); // Initialize scroll animations
     };
 
     function showHomeScreen(){
@@ -1081,6 +1541,41 @@
       
       // Reset AR overlay for next time
       document.getElementById("arInitialOverlay").classList.remove("hidden");
+      
+      // Reset Apple-style scroll animations
+      const scrollContents = document.querySelectorAll('.scroll-content');
+      scrollContents.forEach(content => {
+        // Don't reset intro section - keep it visible
+        if (!content.closest('.intro-section')) {
+          content.classList.remove('in-view');
+          content.style.opacity = '0.3';
+          content.style.transform = 'translateY(60px)';
+        }
+      });
+
+      const progressiveElements = document.querySelectorAll('.progressive-reveal');
+      progressiveElements.forEach(el => {
+        el.classList.remove('revealed');
+      });
+      
+      // Scroll to top smoothly
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      
+      // Re-initialize scroll animations after a brief delay
+      setTimeout(() => {
+        initScrollAnimations();
+        // Trigger intro animation immediately - no need to find scroll-content in intro
+        const introTitle = document.querySelector('.intro-section h2');
+        const introText = document.querySelector('.intro-section p');
+        if (introTitle) {
+          introTitle.style.color = '#ffffff';
+          introTitle.style.opacity = '1';
+        }
+        if (introText) {
+          introText.style.color = '#ffffff';
+          introText.style.opacity = '1';
+        }
+      }, 100);
     }
 
     function showKitDetailScreen(kitID){

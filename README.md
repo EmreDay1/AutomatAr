@@ -1,4 +1,4 @@
-# AutomatAr
+# AutomatAR
 
 Mechanical systems are fundamental to engineering and robotics, yet many K-12 students struggle to bridge the gap between theoretical
 knowledge and practical application. In order to bridge this gap and allow them to apply the necessary skill sets that are embedded within STEM

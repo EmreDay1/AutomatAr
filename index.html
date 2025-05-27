@@ -36,63 +36,155 @@
       overflow-x: hidden;
     }
 
-    /* Enhanced Apple-style Animation Keyframes */
-    @keyframes fadeInUp {
+    /* Apple-style Assembly/Disassembly Animation Keyframes */
+    @keyframes assembleFromLeft {
       from {
         opacity: 0;
-        transform: translateY(80px);
+        transform: translateX(-200px) translateY(50px) rotate(-15deg) scale(0.7);
+        filter: blur(8px);
       }
       to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateX(0) translateY(0) rotate(0deg) scale(1);
+        filter: blur(0px);
       }
     }
 
-    @keyframes fadeInLeft {
+    @keyframes assembleFromRight {
       from {
         opacity: 0;
-        transform: translateX(-80px);
+        transform: translateX(200px) translateY(-30px) rotate(12deg) scale(0.8);
+        filter: blur(6px);
       }
       to {
         opacity: 1;
-        transform: translateX(0);
+        transform: translateX(0) translateY(0) rotate(0deg) scale(1);
+        filter: blur(0px);
       }
     }
 
-    @keyframes fadeInRight {
+    @keyframes assembleFromTop {
       from {
         opacity: 0;
-        transform: translateX(80px);
+        transform: translateY(-150px) translateX(-20px) rotate(8deg) scale(0.6);
+        filter: blur(10px);
       }
       to {
         opacity: 1;
-        transform: translateX(0);
+        transform: translateY(0) translateX(0) rotate(0deg) scale(1);
+        filter: blur(0px);
       }
     }
 
-    @keyframes scaleIn {
+    @keyframes assembleFromBottom {
       from {
         opacity: 0;
-        transform: scale(0.8) translateY(40px);
+        transform: translateY(180px) translateX(30px) rotate(-10deg) scale(0.5);
+        filter: blur(12px);
       }
       to {
         opacity: 1;
-        transform: scale(1) translateY(0);
+        transform: translateY(0) translateX(0) rotate(0deg) scale(1);
+        filter: blur(0px);
       }
     }
 
-    @keyframes slideInFromBottom {
+    @keyframes videoAssemble {
       from {
         opacity: 0;
-        transform: translateY(100px) scale(0.95);
+        transform: translateX(300px) translateY(-100px) rotate(25deg) scale(0.3);
+        filter: blur(15px) brightness(0.3);
+        border-radius: 50%;
+      }
+      50% {
+        opacity: 0.7;
+        transform: translateX(100px) translateY(-20px) rotate(8deg) scale(0.7);
+        filter: blur(5px) brightness(0.7);
+        border-radius: 30px;
       }
       to {
         opacity: 1;
-        transform: translateY(0) scale(1);
+        transform: translateX(0) translateY(0) rotate(0deg) scale(1);
+        filter: blur(0px) brightness(1);
+        border-radius: 20px;
       }
     }
 
-    /* Scroll-triggered animations */
+    @keyframes textAssemble {
+      from {
+        opacity: 0;
+        transform: translateX(-250px) translateY(80px) rotate(-20deg) scale(0.4);
+        filter: blur(8px);
+        letter-spacing: 20px;
+      }
+      70% {
+        opacity: 0.8;
+        transform: translateX(-50px) translateY(20px) rotate(-3deg) scale(0.9);
+        filter: blur(2px);
+        letter-spacing: 5px;
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0) translateY(0) rotate(0deg) scale(1);
+        filter: blur(0px);
+        letter-spacing: normal;
+      }
+    }
+
+    /* Disassembly animations (reverse) */
+    @keyframes disassembleToLeft {
+      from {
+        opacity: 1;
+        transform: translateX(0) translateY(0) rotate(0deg) scale(1);
+        filter: blur(0px);
+      }
+      to {
+        opacity: 0;
+        transform: translateX(-300px) translateY(-80px) rotate(-25deg) scale(0.3);
+        filter: blur(15px);
+      }
+    }
+
+    @keyframes disassembleToRight {
+      from {
+        opacity: 1;
+        transform: translateX(0) translateY(0) rotate(0deg) scale(1);
+        filter: blur(0px);
+      }
+      to {
+        opacity: 0;
+        transform: translateX(350px) translateY(120px) rotate(30deg) scale(0.2);
+        filter: blur(20px);
+      }
+    }
+
+    @keyframes disassembleToTop {
+      from {
+        opacity: 1;
+        transform: translateX(0) translateY(0) rotate(0deg) scale(1);
+        filter: blur(0px);
+      }
+      to {
+        opacity: 0;
+        transform: translateX(50px) translateY(-400px) rotate(45deg) scale(0.1);
+        filter: blur(25px);
+      }
+    }
+
+    @keyframes disassembleToBottom {
+      from {
+        opacity: 1;
+        transform: translateX(0) translateY(0) rotate(0deg) scale(1);
+        filter: blur(0px);
+      }
+      to {
+        opacity: 0;
+        transform: translateX(-100px) translateY(500px) rotate(-60deg) scale(0.05);
+        filter: blur(30px);
+      }
+    }
+
+    /* Scroll-triggered assembly/disassembly animations */
     .scroll-section {
       scroll-snap-align: start;
       min-height: 100vh;
@@ -102,84 +194,161 @@
       overflow: hidden;
     }
 
-    .scroll-content.in-view {
-      transform: translateY(0);
+    /* Assembly animation states */
+    .kit-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6rem;
+      align-items: center;
+      padding: 0 4rem;
+      max-width: 1400px;
+      margin: 0 auto;
+      width: 100%;
+      transition: none; /* Remove default transition, we'll handle it with observers */
+    }
+
+    /* Individual element animation states */
+    .kit-text, .kit-image {
+      transition: all 1.2s cubic-bezier(0.23, 1, 0.32, 1);
+      will-change: transform, opacity, filter;
+    }
+
+    /* Initial hidden states */
+    .kit-text.pre-assembly {
+      opacity: 0;
+      transform: translateX(-250px) translateY(80px) rotate(-20deg) scale(0.4);
+      filter: blur(8px);
+    }
+
+    .kit-image.pre-assembly {
+      opacity: 0;
+      transform: translateX(300px) translateY(-100px) rotate(25deg) scale(0.3);
+      filter: blur(15px) brightness(0.3);
+    }
+
+    /* Assembled states */
+    .kit-text.assembled {
       opacity: 1;
+      transform: translateX(0) translateY(0) rotate(0deg) scale(1);
+      filter: blur(0px);
     }
 
-    .scroll-content {
-      transform: translateY(60px);
-      opacity: 0;
-      transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    }
-
-    /* Override for intro section - always visible */
-    .intro-section {
-      opacity: 1 !important;
-      transform: translateY(0) !important;
-    }
-
-    .intro-section * {
-      opacity: 1 !important;
-      color: #ffffff !important;
-      transform: translateY(0) !important;
-    }
-
-    .intro-section .scroll-content {
-      opacity: 1 !important;
-      transform: translateY(0) !important;
-    }
-
-    .parallax-element {
-      transition: transform 0.1s ease-out;
-    }
-
-    /* Progressive reveal animations */
-    .progressive-reveal {
-      overflow: hidden;
-    }
-
-    .progressive-reveal > * {
-      transform: translateY(40px);
-      opacity: 0;
-      transition: all 0.6s ease-out;
-    }
-
-    .progressive-reveal.revealed > * {
-      transform: translateY(0);
+    .kit-image.assembled {
       opacity: 1;
+      transform: translateX(0) translateY(0) rotate(0deg) scale(1);
+      filter: blur(0px) brightness(1);
     }
 
-    .progressive-reveal.revealed > *:nth-child(1) { transition-delay: 0.1s; }
-    .progressive-reveal.revealed > *:nth-child(2) { transition-delay: 0.2s; }
-    .progressive-reveal.revealed > *:nth-child(3) { transition-delay: 0.3s; }
-    .progressive-reveal.revealed > *:nth-child(4) { transition-delay: 0.4s; }
-
-    /* Animation classes */
-    .animate-on-scroll {
+    /* Disassembled states */
+    .kit-text.disassembled {
       opacity: 0;
-      transition: all 0.6s ease-out;
+      transform: translateX(-400px) translateY(-150px) rotate(-35deg) scale(0.2);
+      filter: blur(20px);
+      transition-duration: 0.8s;
     }
 
-    .animate-on-scroll.animate {
-      animation-duration: 0.8s;
-      animation-fill-mode: both;
+    .kit-image.disassembled {
+      opacity: 0;
+      transform: translateX(500px) translateY(200px) rotate(45deg) scale(0.1);
+      filter: blur(25px) brightness(0.1);
+      transition-duration: 0.8s;
     }
 
-    .fade-up.animate {
-      animation-name: fadeInUp;
+    /* Reverse layout for alternating sections */
+    .kit-content.reverse .kit-text.pre-assembly {
+      transform: translateX(250px) translateY(-60px) rotate(18deg) scale(0.5);
     }
 
-    .fade-left.animate {
-      animation-name: fadeInLeft;
+    .kit-content.reverse .kit-image.pre-assembly {
+      transform: translateX(-350px) translateY(120px) rotate(-22deg) scale(0.4);
     }
 
-    .fade-right.animate {
-      animation-name: fadeInRight;
+    .kit-content.reverse .kit-text.disassembled {
+      transform: translateX(450px) translateY(180px) rotate(40deg) scale(0.15);
     }
 
-    .scale-in.animate {
-      animation-name: scaleIn;
+    .kit-content.reverse .kit-image.disassembled {
+      transform: translateX(-500px) translateY(-250px) rotate(-50deg) scale(0.08);
+    }
+
+    /* Staggered animation delays */
+    .kit-text {
+      transition-delay: 0.1s;
+    }
+
+    .kit-image {
+      transition-delay: 0.3s;
+    }
+
+    .kit-content.reverse .kit-text {
+      transition-delay: 0.2s;
+    }
+
+    .kit-content.reverse .kit-image {
+      transition-delay: 0s;
+    }
+
+    /* Text-specific assembly effects */
+    .kit-text h3 {
+      transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1) 0.4s;
+      will-change: transform, opacity;
+    }
+
+    .kit-text p {
+      transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1) 0.6s;
+      will-change: transform, opacity;
+    }
+
+    .kit-text.pre-assembly h3 {
+      opacity: 0;
+      transform: translateY(50px) scale(0.8);
+      filter: blur(4px);
+    }
+
+    .kit-text.pre-assembly p {
+      opacity: 0;
+      transform: translateY(30px) scale(0.9);
+      filter: blur(2px);
+    }
+
+    .kit-text.assembled h3,
+    .kit-text.assembled p {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      filter: blur(0px);
+    }
+
+    .kit-text.disassembled h3 {
+      opacity: 0;
+      transform: translateY(-80px) scale(0.6);
+      filter: blur(8px);
+    }
+
+    .kit-text.disassembled p {
+      opacity: 0;
+      transform: translateY(-50px) scale(0.7);
+      filter: blur(6px);
+    }
+
+    /* Video-specific assembly effects */
+    .kit-video {
+      transition: all 1s cubic-bezier(0.23, 1, 0.32, 1);
+      will-change: transform, opacity, filter, border-radius;
+    }
+
+    .kit-image.pre-assembly .kit-video {
+      border-radius: 50%;
+      filter: blur(10px) brightness(0.2) saturate(0.3);
+    }
+
+    .kit-image.assembled .kit-video {
+      border-radius: 17px;
+      filter: blur(0px) brightness(1) saturate(1);
+    }
+
+    .kit-image.disassembled .kit-video {
+      border-radius: 80%;
+      filter: blur(20px) brightness(0.05) saturate(0.1);
     }
 
     /* Header */
@@ -370,9 +539,6 @@
       width: 100%;
       height: 500px;
       background: linear-gradient(135deg, #D4A574 0%, #E6C89C 100%);
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
       border-radius: 20px;
       display: flex;
       align-items: center;
@@ -389,6 +555,18 @@
       transform: translateY(-10px) scale(1.02);
       box-shadow: 0 30px 80px rgba(0, 0, 0, 0.15);
       border-color: rgba(255, 255, 255, 0.4);
+    }
+
+    .kit-video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 17px;
+      transition: transform 0.3s ease;
+    }
+
+    .kit-image:hover .kit-video {
+      transform: scale(1.05);
     }
 
     .placeholder-img {
@@ -652,9 +830,6 @@
       width: 100%;
       height: 400px;
       background: linear-gradient(135deg, #D4A574 0%, #E6C89C 100%);
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
       border-radius: 16px;
       display: flex;
       align-items: center;
@@ -662,6 +837,13 @@
       position: relative;
       overflow: hidden;
       border: 2px solid #ffffff;
+    }
+
+    .kit-detail-video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 14px;
     }
 
     .kit-detail-text h2 {
@@ -956,6 +1138,17 @@
       transform: translateZ(0);
     }
 
+    /* Video loading states */
+    .kit-video:not([src]),
+    .kit-detail-video:not([src]) {
+      background: linear-gradient(135deg, #D4A574 0%, #E6C89C 100%);
+    }
+
+    .kit-video[data-loading="true"],
+    .kit-detail-video[data-loading="true"] {
+      filter: brightness(0.7);
+    }
+
     /* Mobile Responsive - Apple Style */
     @media (max-width: 768px) {
       .header-content {
@@ -1081,11 +1274,21 @@
       .kit-image:hover {
         transform: translateY(-5px) scale(1.01);
       }
+
+      /* Mobile video optimizations */
+      .kit-video, .kit-detail-video {
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0);
+      }
     }
 
     /* Apple-style enhancements */
     .kit-content {
       will-change: transform, opacity;
+    }
+
+    .kit-text, .kit-image {
+      will-change: transform, opacity, filter;
     }
 
     .parallax-element {
@@ -1095,6 +1298,21 @@
     /* Smooth momentum scrolling for iOS */
     #homeScreen {
       -webkit-overflow-scrolling: touch;
+    }
+
+    /* Hardware acceleration for assembly animations */
+    .kit-text.pre-assembly,
+    .kit-text.assembled,
+    .kit-text.disassembled,
+    .kit-image.pre-assembly,
+    .kit-image.assembled,
+    .kit-image.disassembled {
+      -webkit-transform: translateZ(0);
+      transform: translateZ(0);
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+      -webkit-perspective: 1000px;
+      perspective: 1000px;
     }
   </style>
 </head>
@@ -1124,23 +1342,31 @@
     </div>
 
     <!-- Cam-A Kit -->
-    <div class="kit-section animate-on-scroll fade-left">
-      <div class="kit-content scroll-content">
-        <div class="kit-text progressive-reveal">
+    <div class="kit-section">
+      <div class="kit-content">
+        <div class="kit-text pre-assembly">
           <h3>Cam-A: Learn the details of rotational motion</h3>
           <p>Demonstrates how cams convert rotational motion into linear oscillatory motion using contoured surfaces to drive followers in precise, complex patterns.</p>
         </div>
-        <div class="kit-image parallax-element" onclick="showKitDetail(0)" style="background-image: url('images/kit1.png');">
+        <div class="kit-image pre-assembly parallax-element" onclick="showKitDetail(0)">
+          <video class="kit-video" autoplay muted loop playsinline>
+            <source src="images/camani.mp4" type="video/mp4">
+            <div class="placeholder-img">Cam-A Kit Video</div>
+          </video>
         </div>
       </div>
     </div>
 
     <!-- Cam-C Kit -->
-    <div class="kit-section animate-on-scroll fade-right">
-      <div class="kit-content reverse scroll-content">
-        <div class="kit-image parallax-element" onclick="showKitDetail(1)" style="background-image: url('images/kit2.png');">
+    <div class="kit-section">
+      <div class="kit-content reverse">
+        <div class="kit-image pre-assembly parallax-element" onclick="showKitDetail(1)">
+          <video class="kit-video" autoplay muted loop playsinline>
+            <source src="images/genevaani.mp4" type="video/mp4">
+            <div class="placeholder-img">Cam-C Kit Video</div>
+          </video>
         </div>
-        <div class="kit-text progressive-reveal">
+        <div class="kit-text pre-assembly">
           <h3>Cam-C: Get to know more about intermittent motion</h3>
           <p>Shows how a Geneva wheel mechanism creates precise, timed intermittent motion from continuous rotational input using pins and slots.</p>
         </div>
@@ -1148,23 +1374,31 @@
     </div>
 
     <!-- Crank Kit -->
-    <div class="kit-section animate-on-scroll fade-left">
-      <div class="kit-content scroll-content">
-        <div class="kit-text progressive-reveal">
+    <div class="kit-section">
+      <div class="kit-content">
+        <div class="kit-text pre-assembly">
           <h3>Crank: Understanding reciprocating motion</h3>
           <p>Illustrates how a rotating crank arm converts rotational motion into linear back-and-forth movement through connecting rods.</p>
         </div>
-        <div class="kit-image parallax-element" onclick="showKitDetail(2)" style="background-image: url('images/kit3.png');">
+        <div class="kit-image pre-assembly parallax-element" onclick="showKitDetail(2)">
+          <video class="kit-video" autoplay muted loop playsinline>
+            <source src="images/crankani.mp4" type="video/mp4">
+            <div class="placeholder-img">Crank Kit Video</div>
+          </video>
         </div>
       </div>
     </div>
 
     <!-- Gear-A Kit -->
-    <div class="kit-section animate-on-scroll fade-right">
-      <div class="kit-content reverse scroll-content">
-        <div class="kit-image parallax-element" onclick="showKitDetail(3)" style="background-image: url('images/kit4.png');">
+    <div class="kit-section">
+      <div class="kit-content reverse">
+        <div class="kit-image pre-assembly parallax-element" onclick="showKitDetail(3)">
+          <video class="kit-video" autoplay muted loop playsinline>
+            <source src="images/gearaani.mp4" type="video/mp4">
+            <div class="placeholder-img">Gear-A Kit Video</div>
+          </video>
         </div>
-        <div class="kit-text progressive-reveal">
+        <div class="kit-text pre-assembly">
           <h3>Gear-A: Exploring perpendicular power transmission</h3>
           <p>Demonstrates how bevel gears with cone-shaped teeth transfer rotational motion between perpendicular shafts at 90-degree angles.</p>
         </div>
@@ -1172,23 +1406,31 @@
     </div>
 
     <!-- Gear-B Kit -->
-    <div class="kit-section animate-on-scroll fade-left">
-      <div class="kit-content scroll-content">
-        <div class="kit-text progressive-reveal">
+    <div class="kit-section">
+      <div class="kit-content">
+        <div class="kit-text pre-assembly">
           <h3>Gear-B: Variable speed and torque systems</h3>
           <p>Shows how gear alignment and shape create variable speed and torque output from constant input through dynamic load distribution.</p>
         </div>
-        <div class="kit-image parallax-element" onclick="showKitDetail(4)" style="background-image: url('images/kit5.png');">
+        <div class="kit-image pre-assembly parallax-element" onclick="showKitDetail(4)">
+          <video class="kit-video" autoplay muted loop playsinline>
+            <source src="images/gearbani.mp4" type="video/mp4">
+            <div class="placeholder-img">Gear-B Kit Video</div>
+          </video>
         </div>
       </div>
     </div>
 
     <!-- Gear-C Kit -->
-    <div class="kit-section animate-on-scroll scale-in">
-      <div class="kit-content reverse scroll-content">
-        <div class="kit-image parallax-element" onclick="showKitDetail(5)" style="background-image: url('images/kit6.png');">
+    <div class="kit-section">
+      <div class="kit-content reverse">
+        <div class="kit-image pre-assembly parallax-element" onclick="showKitDetail(5)">
+          <video class="kit-video" autoplay muted loop playsinline>
+            <source src="videos/kit6.mp4" type="video/mp4">
+            <div class="placeholder-img">Gear-C Kit Video</div>
+          </video>
         </div>
-        <div class="kit-text progressive-reveal">
+        <div class="kit-text pre-assembly">
           <h3>Gear-C: Mastering worm gear systems</h3>
           <p>Gear-C is a worm gear system that converts rotational motion while significantly reducing speed & increasing torque. A screw-like worm drives a worm wheel, transferring motion at 90°. This design offers high torque output & a self-locking feature, so it can't be back-driven. Used in elevators, conveyors, tuning mechanisms—anywhere controlled motion & torque multiplication are vital.</p>
         </div>
@@ -1200,8 +1442,11 @@
   <section id="kitDetailScreen">
     <div class="container">
       <div class="kit-detail">
-        <div class="kit-detail-image kit-detail-img">
-          <div class="placeholder-img" id="kitDetailImg">Kit Image</div>
+        <div class="kit-detail-image">
+          <video class="kit-detail-video" autoplay muted loop playsinline id="kitDetailVideo">
+            <source src="videos/kit1.mp4" type="video/mp4">
+            <div class="placeholder-img" id="kitDetailImg">Kit Video</div>
+          </video>
         </div>
         <div class="kit-detail-text">
           <h2 id="kitDetailTitle">Kit Name</h2>
@@ -1327,195 +1572,376 @@
 
   <script>
     /********************************************
-     * APPLE-STYLE SCROLL ANIMATIONS
+     * APPLE-STYLE ASSEMBLY/DISASSEMBLY ANIMATIONS
      ********************************************/
     
-    // Enhanced Intersection Observer for Apple-style animations
-    const observerOptions = {
-      threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1],
-      rootMargin: '0px 0px -10% 0px'
-    };
+    // Assembly animation system
+    let assemblyObserver;
+    let assemblyElements = [];
+    let currentAssembledSection = -1;
 
-    // Create multiple observers for different animation types
-    const fadeObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        const element = entry.target;
-        const ratio = entry.intersectionRatio;
+    // Initialize Apple-style assembly animations
+    function initAssemblyAnimations() {
+      // Get all kit sections for assembly animation
+      assemblyElements = Array.from(document.querySelectorAll('.kit-section')).map((section, index) => {
+        const kitText = section.querySelector('.kit-text');
+        const kitImage = section.querySelector('.kit-image');
         
-        if (entry.isIntersecting && ratio > 0.1) {
-          element.classList.add('animate');
-          // Add staggered animation for child elements
-          const children = element.querySelectorAll('.kit-text, .kit-image');
-          children.forEach((child, index) => {
-            setTimeout(() => {
-              child.style.opacity = '1';
-              child.style.transform = 'translateY(0) scale(1)';
-            }, index * 200);
-          });
-        }
+        return {
+          section,
+          kitText,
+          kitImage,
+          index,
+          isAssembled: false,
+          lastRatio: 0
+        };
       });
-    }, observerOptions);
 
-    // Progress-based scroll animations
-    const progressObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        const element = entry.target;
-        const ratio = entry.intersectionRatio;
-        
-        // Skip intro section - keep it fully visible
-        if (element.classList.contains('intro-section')) {
-          return;
-        }
-        
-        // Calculate progress-based transforms
-        const translateY = (1 - ratio) * 30;
-        const scale = 0.95 + (ratio * 0.05);
-        const opacity = Math.max(0.3, ratio);
-        
-        if (element.querySelector('.kit-content')) {
-          const content = element.querySelector('.kit-content');
-          content.style.transform = `translateY(${translateY}px) scale(${scale})`;
-          content.style.opacity = opacity;
-        }
+      // Create intersection observer for assembly detection
+      assemblyObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          const sectionIndex = assemblyElements.findIndex(el => el.section === entry.target);
+          if (sectionIndex === -1) return;
+
+          const element = assemblyElements[sectionIndex];
+          const ratio = entry.intersectionRatio;
+          element.lastRatio = ratio;
+
+          // Determine assembly state based on scroll position
+          if (ratio > 0.3 && ratio < 0.7) {
+            // Sweet spot - fully assemble
+            assembleSection(element, sectionIndex);
+          } else if (ratio >= 0.1 && ratio <= 0.3) {
+            // Entering viewport - start assembly
+            if (!element.isAssembled) {
+              assembleSection(element, sectionIndex);
+            }
+          } else if (ratio < 0.1 || ratio > 0.9) {
+            // Leaving viewport - disassemble
+            disassembleSection(element, sectionIndex);
+          }
+        });
+
+        // Handle section transitions
+        updateSectionTransitions();
+      }, {
+        threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1],
+        rootMargin: '0px'
       });
-    }, {
-      threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1],
-      rootMargin: '0px'
-    });
 
-    // Parallax effect for background elements
-    function handleAdvancedParallax() {
-      const scrolled = window.pageYOffset;
-      const rate = scrolled * -0.3;
-      const parallaxBg = document.querySelector('.parallax-bg');
+      // Observe all kit sections
+      assemblyElements.forEach(element => {
+        assemblyObserver.observe(element.section);
+      });
+
+      // Add parallax scrolling for assembled elements
+      window.addEventListener('scroll', handleAssemblyParallax, { passive: true });
+    }
+
+    function assembleSection(element, index) {
+      if (element.isAssembled) return;
       
+      element.isAssembled = true;
+      currentAssembledSection = index;
+
+      // Remove pre-assembly and disassembled classes
+      element.kitText.classList.remove('pre-assembly', 'disassembled');
+      element.kitImage.classList.remove('pre-assembly', 'disassembled');
+
+      // Add assembled class with staggered timing
+      setTimeout(() => {
+        element.kitText.classList.add('assembled');
+      }, 100);
+
+      setTimeout(() => {
+        element.kitImage.classList.add('assembled');
+      }, 300);
+
+      // Trigger video play if not playing
+      const video = element.kitImage.querySelector('.kit-video');
+      if (video && video.paused && video.readyState >= 2) {
+        video.play().catch(e => console.warn('Video play failed:', e));
+      }
+    }
+
+    function disassembleSection(element, index) {
+      if (!element.isAssembled) return;
+      
+      element.isAssembled = false;
+      
+      // Remove assembled class
+      element.kitText.classList.remove('assembled');
+      element.kitImage.classList.remove('assembled');
+
+      // Add disassembled class with staggered timing
+      setTimeout(() => {
+        element.kitText.classList.add('disassembled');
+      }, 50);
+
+      setTimeout(() => {
+        element.kitImage.classList.add('disassembled');
+      }, 150);
+
+      // After disassembly animation, reset to pre-assembly
+      setTimeout(() => {
+        element.kitText.classList.remove('disassembled');
+        element.kitImage.classList.remove('disassembled');
+        element.kitText.classList.add('pre-assembly');
+        element.kitImage.classList.add('pre-assembly');
+      }, 800);
+
+      // Pause video to save resources
+      const video = element.kitImage.querySelector('.kit-video');
+      if (video && !video.paused) {
+        video.pause();
+      }
+    }
+
+    function updateSectionTransitions() {
+      // Find the most visible section
+      let mostVisibleSection = -1;
+      let highestRatio = 0;
+
+      assemblyElements.forEach((element, index) => {
+        if (element.lastRatio > highestRatio && element.lastRatio > 0.2) {
+          highestRatio = element.lastRatio;
+          mostVisibleSection = index;
+        }
+      });
+
+      // Update current assembled section
+      if (mostVisibleSection !== -1 && mostVisibleSection !== currentAssembledSection) {
+        // Disassemble previous section
+        if (currentAssembledSection >= 0 && currentAssembledSection < assemblyElements.length) {
+          const prevElement = assemblyElements[currentAssembledSection];
+          if (Math.abs(currentAssembledSection - mostVisibleSection) > 1) {
+            disassembleSection(prevElement, currentAssembledSection);
+          }
+        }
+      }
+    }
+
+    // Enhanced parallax for assembled elements
+    function handleAssemblyParallax() {
+      const scrolled = window.pageYOffset;
+      
+      // Background parallax
+      const parallaxBg = document.querySelector('.parallax-bg');
       if (parallaxBg) {
+        const rate = scrolled * -0.2;
         parallaxBg.style.transform = `translate3d(0, ${rate}px, 0)`;
       }
 
-      // Individual section parallax
-      const sections = document.querySelectorAll('.kit-section');
-      sections.forEach((section, index) => {
-        const rect = section.getBoundingClientRect();
-        const speed = (index % 2 === 0) ? 0.5 : -0.3;
-        const yPos = rect.top * speed;
-        
-        const image = section.querySelector('.kit-image');
-        if (image && rect.top < window.innerHeight && rect.bottom > 0) {
-          image.style.transform = `translateY(${yPos}px)`;
+      // Individual element parallax for assembled sections
+      assemblyElements.forEach((element, index) => {
+        if (element.isAssembled && element.lastRatio > 0.3) {
+          const rect = element.section.getBoundingClientRect();
+          const speed = (index % 2 === 0) ? 0.1 : -0.1;
+          const yPos = rect.top * speed;
+          
+          // Apply subtle parallax to assembled elements
+          if (element.kitImage && rect.top < window.innerHeight && rect.bottom > 0) {
+            const currentTransform = element.kitImage.style.transform || '';
+            if (!currentTransform.includes('translateX') || element.kitImage.classList.contains('assembled')) {
+              element.kitImage.style.transform = `translateZ(0) translateY(${yPos}px)`;
+            }
+          }
         }
       });
     }
 
-    // Smooth section scrolling with momentum
-    function initSmoothScrolling() {
-      const sections = document.querySelectorAll('.scroll-section, .kit-section, .intro-section');
-      let currentSection = 0;
+    // Smooth section-by-section scrolling
+    function initSectionScrolling() {
+      const sections = document.querySelectorAll('.kit-section, .intro-section');
       let isScrolling = false;
+      let currentSectionIndex = 0;
 
       function scrollToSection(index) {
         if (index >= 0 && index < sections.length && !isScrolling) {
           isScrolling = true;
           sections[index].scrollIntoView({ 
             behavior: 'smooth',
-            block: 'start'
+            block: 'center'
           });
           
           setTimeout(() => {
             isScrolling = false;
-          }, 1000);
+          }, 1200);
         }
       }
 
-      // Enhanced wheel event handling
+      // Enhanced wheel event for section navigation
+      let wheelTimeout;
       window.addEventListener('wheel', (e) => {
         if (isScrolling) return;
         
-        const delta = e.deltaY;
-        if (Math.abs(delta) > 50) {
-          if (delta > 0 && currentSection < sections.length - 1) {
-            currentSection++;
-            scrollToSection(currentSection);
-          } else if (delta < 0 && currentSection > 0) {
-            currentSection--;
-            scrollToSection(currentSection);
+        clearTimeout(wheelTimeout);
+        wheelTimeout = setTimeout(() => {
+          const delta = e.deltaY;
+          if (Math.abs(delta) > 100) {
+            if (delta > 0 && currentSectionIndex < sections.length - 1) {
+              currentSectionIndex++;
+              scrollToSection(currentSectionIndex);
+            } else if (delta < 0 && currentSectionIndex > 0) {
+              currentSectionIndex--;
+              scrollToSection(currentSectionIndex);
+            }
           }
-        }
-      }, { passive: false });
+        }, 50);
+      }, { passive: true });
 
-      // Touch support for mobile
+      // Touch support for mobile section navigation
       let touchStartY = 0;
+      let touchEndY = 0;
+
       window.addEventListener('touchstart', (e) => {
         touchStartY = e.touches[0].clientY;
-      });
+      }, { passive: true });
 
       window.addEventListener('touchend', (e) => {
-        const touchEndY = e.changedTouches[0].clientY;
+        touchEndY = e.changedTouches[0].clientY;
         const diff = touchStartY - touchEndY;
         
-        if (Math.abs(diff) > 50) {
-          if (diff > 0 && currentSection < sections.length - 1) {
-            currentSection++;
-            scrollToSection(currentSection);
-          } else if (diff < 0 && currentSection > 0) {
-            currentSection--;
-            scrollToSection(currentSection);
+        if (Math.abs(diff) > 100 && !isScrolling) {
+          if (diff > 0 && currentSectionIndex < sections.length - 1) {
+            currentSectionIndex++;
+            scrollToSection(currentSectionIndex);
+          } else if (diff < 0 && currentSectionIndex > 0) {
+            currentSectionIndex--;
+            scrollToSection(currentSectionIndex);
           }
         }
-      });
+      }, { passive: true });
+
+      // Update current section based on scroll position
+      window.addEventListener('scroll', () => {
+        if (isScrolling) return;
+        
+        const scrollTop = window.pageYOffset;
+        const windowHeight = window.innerHeight;
+        
+        sections.forEach((section, index) => {
+          const rect = section.getBoundingClientRect();
+          const sectionTop = scrollTop + rect.top;
+          const sectionBottom = sectionTop + rect.height;
+          
+          if (scrollTop >= sectionTop - windowHeight / 2 && scrollTop < sectionBottom - windowHeight / 2) {
+            currentSectionIndex = index;
+          }
+        });
+      }, { passive: true });
     }
 
-    // Progressive content reveal
-    function initProgressiveReveal() {
-      const revealElements = document.querySelectorAll('.kit-text, .intro-section');
-      
-      revealElements.forEach(element => {
-        element.classList.add('progressive-reveal');
-        
-        const observer = new IntersectionObserver((entries) => {
-          entries.forEach(entry => {
-            if (entry.isIntersecting) {
-              setTimeout(() => {
-                entry.target.classList.add('revealed');
-              }, 100);
-            }
-          });
-        }, { threshold: 0.3 });
-        
-        observer.observe(element);
-      });
-    }
-
-    // Enhanced scroll animations initialization
+    // Initialize all assembly animations
     function initScrollAnimations() {
-      // Observe all animated elements
-      const animatedElements = document.querySelectorAll('.animate-on-scroll, .kit-section');
-      animatedElements.forEach(el => {
-        fadeObserver.observe(el);
-        progressObserver.observe(el);
-      });
-
-      // Add advanced parallax scrolling
-      window.addEventListener('scroll', handleAdvancedParallax, { passive: true });
+      initAssemblyAnimations();
+      initSectionScrolling();
       
-      // Initialize smooth section scrolling
-      initSmoothScrolling();
+      // Add subtle initial animations to intro section
+      const introTitle = document.querySelector('.intro-section h2');
+      const introText = document.querySelector('.intro-section p');
       
-      // Initialize progressive reveal
-      initProgressiveReveal();
-      
-      // Initial setup for elements
-      animatedElements.forEach((el, index) => {
-        // Skip intro section - keep it fully visible
-        if (el.classList.contains('intro-section')) {
-          return;
-        }
+      if (introTitle && introText) {
+        introTitle.style.opacity = '0';
+        introText.style.opacity = '0';
+        introTitle.style.transform = 'translateY(50px)';
+        introText.style.transform = 'translateY(30px)';
         
-        const content = el.querySelector('.kit-content');
-        if (content) {
-          content.style.opacity = '0.3';
-          content.style.transform = 'translateY(30px) scale(0.95)';
-          content.style.transition = 'all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+        setTimeout(() => {
+          introTitle.style.transition = 'all 1s cubic-bezier(0.23, 1, 0.32, 1)';
+          introText.style.transition = 'all 1s cubic-bezier(0.23, 1, 0.32, 1) 0.3s';
+          introTitle.style.opacity = '1';
+          introTitle.style.transform = 'translateY(0)';
+        }, 500);
+        
+        setTimeout(() => {
+          introText.style.opacity = '1';
+          introText.style.transform = 'translateY(0)';
+        }, 800);
+      }
+    }
+
+    /********************************************
+     * VIDEO OPTIMIZATION FUNCTIONS
+     ********************************************/
+    
+    function initVideoOptimization() {
+      // Optimize video playback for performance
+      const videos = document.querySelectorAll('.kit-video, .kit-detail-video');
+      
+      videos.forEach(video => {
+        // Set loading attribute for better performance
+        video.setAttribute('loading', 'lazy');
+        
+        // Handle video loading states
+        video.addEventListener('loadstart', function() {
+          this.setAttribute('data-loading', 'true');
+        });
+        
+        video.addEventListener('canplay', function() {
+          this.removeAttribute('data-loading');
+        });
+        
+        // Handle video errors gracefully
+        video.addEventListener('error', function() {
+          console.warn('Video failed to load:', this.src);
+          this.style.display = 'none';
+          const placeholder = this.nextElementSibling;
+          if (placeholder && placeholder.classList.contains('placeholder-img')) {
+            placeholder.style.display = 'block';
+          }
+        });
+      });
+      
+      // Intersection Observer for video playback optimization
+      const videoObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          const video = entry.target;
+          if (entry.isIntersecting) {
+            // Video is visible, ensure it's playing
+            if (video.paused && video.readyState >= 2) {
+              video.play().catch(e => {
+                console.warn('Video autoplay failed:', e);
+              });
+            }
+          } else {
+            // Video is not visible, pause to save resources
+            if (!video.paused) {
+              video.pause();
+            }
+          }
+        });
+      }, {
+        threshold: 0.1,
+        rootMargin: '50px'
+      });
+      
+      // Observe all kit videos
+      const kitVideos = document.querySelectorAll('.kit-video');
+      kitVideos.forEach(video => {
+        videoObserver.observe(video);
+      });
+    }
+    
+    function pauseAllVideos() {
+      const videos = document.querySelectorAll('.kit-video, .kit-detail-video');
+      videos.forEach(video => {
+        if (!video.paused) {
+          video.pause();
+        }
+      });
+    }
+    
+    function resumeVisibleVideos() {
+      const videos = document.querySelectorAll('.kit-video');
+      videos.forEach(video => {
+        const rect = video.getBoundingClientRect();
+        const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
+        
+        if (isVisible && video.paused && video.readyState >= 2) {
+          video.play().catch(e => {
+            console.warn('Video resume failed:', e);
+          });
         }
       });
     }
@@ -1531,6 +1957,7 @@
       setupUI();
       showHomeScreen();  // Always start with home screen
       initScrollAnimations(); // Initialize scroll animations
+      initVideoOptimization(); // Initialize video performance optimizations
     };
 
     function showHomeScreen(){
@@ -1542,52 +1969,59 @@
       // Reset AR overlay for next time
       document.getElementById("arInitialOverlay").classList.remove("hidden");
       
-      // Reset Apple-style scroll animations
-      const scrollContents = document.querySelectorAll('.scroll-content');
-      scrollContents.forEach(content => {
-        // Don't reset intro section - keep it visible
-        if (!content.closest('.intro-section')) {
-          content.classList.remove('in-view');
-          content.style.opacity = '0.3';
-          content.style.transform = 'translateY(60px)';
-        }
-      });
-
-      const progressiveElements = document.querySelectorAll('.progressive-reveal');
-      progressiveElements.forEach(el => {
-        el.classList.remove('revealed');
-      });
+      // Resume video playback for visible videos
+      setTimeout(() => {
+        resumeVisibleVideos();
+      }, 500);
+      
+      // Reset assembly animation system
+      if (assemblyElements && assemblyElements.length > 0) {
+        assemblyElements.forEach(element => {
+          element.isAssembled = false;
+          element.lastRatio = 0;
+          
+          // Reset all elements to pre-assembly state
+          element.kitText.classList.remove('assembled', 'disassembled');
+          element.kitImage.classList.remove('assembled', 'disassembled');
+          element.kitText.classList.add('pre-assembly');
+          element.kitImage.classList.add('pre-assembly');
+        });
+      }
+      
+      currentAssembledSection = -1;
       
       // Scroll to top smoothly
       window.scrollTo({ top: 0, behavior: 'smooth' });
       
-      // Re-initialize scroll animations after a brief delay
+      // Re-initialize animations after a brief delay
       setTimeout(() => {
+        if (assemblyObserver) {
+          assemblyObserver.disconnect();
+        }
         initScrollAnimations();
-        // Trigger intro animation immediately - no need to find scroll-content in intro
-        const introTitle = document.querySelector('.intro-section h2');
-        const introText = document.querySelector('.intro-section p');
-        if (introTitle) {
-          introTitle.style.color = '#ffffff';
-          introTitle.style.opacity = '1';
-        }
-        if (introText) {
-          introText.style.color = '#ffffff';
-          introText.style.opacity = '1';
-        }
-      }, 100);
+      }, 300);
     }
 
     function showKitDetailScreen(kitID){
+      // Pause home screen videos
+      pauseAllVideos();
+      
       document.getElementById("mainHeader").style.display = "none";
       // Fill placeholders
       const kit = scenarios[kitID];
       document.getElementById("kitDetailTitle").textContent = kit ? kit.name : "Unknown Kit";
       document.getElementById("kitDetailDesc").textContent = kit ? kit.desc : "No description found.";
 
-      document.querySelector(".kit-detail-img").style.backgroundImage = `url("images/kit${kitID+1}.png")`;
-      // Hide placeholder text when image is loaded
-      document.getElementById("kitDetailImg").style.display = "none";
+      // Update video source
+      const video = document.getElementById("kitDetailVideo");
+      const source = video.querySelector("source");
+      source.src = `videos/kit${kitID+1}.mp4`;
+      video.load(); // Reload the video with new source
+      
+      // Hide placeholder text when video is loaded
+      video.addEventListener('loadeddata', function() {
+        document.getElementById("kitDetailImg").style.display = "none";
+      });
 
       document.getElementById("homeScreen").style.display = "none";
       document.getElementById("kitDetailScreen").style.display = "block";
@@ -1599,6 +2033,9 @@
     }
 
     function showARScreen(){
+      // Pause all videos to save resources
+      pauseAllVideos();
+      
       document.getElementById("mainHeader").style.display = "none";
       document.getElementById("homeScreen").style.display = "none";
       document.getElementById("kitDetailScreen").style.display = "none";
@@ -2119,7 +2556,7 @@ conveyors, tuning mechanisms—anywhere controlled motion & torque multiplicatio
       if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
         navigator.mediaDevices.getUserMedia({ 
           video: { 
-            facingMode: "environment"  // This specifies the back camera
+            facingMode: "user"  // This specifies the back camera
           } 
         })
         .then(function(stream){

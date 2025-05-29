@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Automata AR</title>
+  <title>AutomatAR</title>
 
-  <!-- Same library references as your working index.html -->
+  <!-- External Libraries -->
   <script src="libs/Three.js"></script>
   <script src="libs/STLLoader.js"></script>
   <script src="src/svd.js"></script>
@@ -204,7 +204,7 @@
       max-width: 1400px;
       margin: 0 auto;
       width: 100%;
-      transition: none; /* Remove default transition, we'll handle it with observers */
+      transition: none;
     }
 
     /* Individual element animation states */
@@ -383,6 +383,34 @@
 
     .header-buttons {
       position: static;
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .header-button {
+      background: #ffffff;
+      color: #FF8C00;
+      border: 2px solid #ffffff;
+      padding: 0.8rem 1.5rem;
+      font-size: 0.9rem;
+      font-weight: 700;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .header-button:hover {
+      background: #FF8C00;
+      color: #ffffff;
+      transform: translateY(-1px);
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
     }
 
     .header-ar-button {
@@ -496,17 +524,6 @@
         rgba(255, 127, 0, 0.95) 0%, 
         rgba(255, 140, 0, 0.98) 50%, 
         rgba(255, 165, 0, 0.95) 100%);
-    }
-
-    .kit-content {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 6rem;
-      align-items: center;
-      padding: 0 4rem;
-      max-width: 1400px;
-      margin: 0 auto;
-      width: 100%;
     }
 
     .kit-content.reverse {
@@ -686,6 +703,7 @@
       transform: translateY(-2px);
       box-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
     }
+
     .ar-instructions-overlay {
       position: absolute;
       top: 0;
@@ -916,7 +934,8 @@
       background: #ffffff;
       color: #FF8C00;
       border: 2px solid #ffffff;
-      padding: 0.8rem 1.5rem;
+      padding: 0.4rem 0.8rem;  
+      font-size: 700;        
       border-radius: 8px;
       cursor: pointer;
       font-weight: 700;
@@ -996,7 +1015,7 @@
     }
 
     .ar-left-panel::before {
-      content: 'AUTOMATA\AAAAR';
+      content: 'AUTOMATAR';
       writing-mode: vertical-lr;
       text-orientation: mixed;
       color: rgba(255, 255, 255, 0.6);
@@ -1099,6 +1118,7 @@
       align-items: center; 
       justify-content: space-between;
     }
+
     .debug-overlay-header h3 {
       margin: 0;
     }
@@ -1158,12 +1178,23 @@
 
       .header-buttons {
         order: -1;
+        flex-direction: column;
+        gap: 0.5rem;
+        width: 100%;
+      }
+
+      .header-button,
+      .header-ar-button {
+        width: 100%;
+        max-width: 200px;
+        margin: 0 auto;
       }
 
       .header-bar h1 {
         font-size: 1.5rem;
       }
 
+      .header-button,
       .header-ar-button {
         padding: 0.6rem 1rem;
         font-size: 0.8rem;
@@ -1314,6 +1345,268 @@
       -webkit-perspective: 1000px;
       perspective: 1000px;
     }
+
+    /* Modal Screen Styles */
+    .modal-screen {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100vh;
+      background: linear-gradient(135deg, #FF8C00 0%, #FF7F00 100%);
+      z-index: 1000;
+      overflow-y: auto;
+    }
+
+    .modal-screen.active {
+      display: block;
+    }
+
+    .modal-header {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 2rem;
+      text-align: center;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(10px);
+    }
+
+    .modal-close-button {
+      position: absolute;
+      top: 2rem;
+      left: 2rem;
+      background: #ffffff;
+      color: #FF8C00;
+      border: 2px solid #ffffff;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 700;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    }
+
+    .modal-close-button:hover {
+      background: #FF8C00;
+      color: #ffffff;
+      transform: translateY(-1px);
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+    }
+
+    .modal-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 3rem 2rem;
+    }
+
+    .modal-title {
+      font-size: 3rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 1rem;
+      text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+    }
+
+    .modal-subtitle {
+      font-size: 1.2rem;
+      color: rgba(255, 255, 255, 0.9);
+      margin-bottom: 3rem;
+    }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin-bottom: 3rem;
+    }
+
+    .content-card {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 2rem;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .content-card:hover {
+      transform: translateY(-5px);
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.4);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .content-card h3 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #ffffff;
+      margin-bottom: 1rem;
+      text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+    }
+
+    .content-card p {
+      color: rgba(255, 255, 255, 0.9);
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+    }
+
+    .download-button {
+      background: #ffffff;
+      color: #FF8C00;
+      border: 2px solid #ffffff;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-size: 0.9rem;
+      width: 100%;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+    }
+
+    .download-button:hover {
+      background: #FF8C00;
+      color: #ffffff;
+      transform: translateY(-1px);
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+    }
+
+    @media (max-width: 768px) {
+      .modal-title {
+        font-size: 2rem;
+      }
+      
+      .modal-content {
+        padding: 2rem 1rem;
+      }
+      
+      .content-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+      }
+      
+      .content-card {
+        padding: 1.5rem;
+      }
+      
+      .pdf-viewer {
+        height: 60vh;
+      }
+      
+      .pdf-viewer iframe {
+        height: 50vh;
+      }
+    }
+
+    /* PDF Viewer Modal */
+    .pdf-viewer-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.95);
+      z-index: 2000;
+      padding: 2rem;
+    }
+
+    .pdf-viewer-modal.active {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .pdf-viewer-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      color: white;
+    }
+
+    .pdf-viewer-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #ffffff;
+    }
+
+    .pdf-viewer-close {
+      background: #FF8C00;
+      color: #ffffff;
+      border: 2px solid #FF8C00;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 700;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      box-shadow: 0 0 10px rgba(255, 140, 0, 0.3);
+    }
+
+    .pdf-viewer-close:hover {
+      background: #ffffff;
+      color: #FF8C00;
+      transform: translateY(-1px);
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+    }
+
+    .pdf-viewer {
+      flex: 1;
+      background: #ffffff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .pdf-viewer iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    .pdf-fallback {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      text-align: center;
+      color: #666666;
+      background: #f5f5f5;
+    }
+
+    .pdf-fallback h3 {
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+      color: #333333;
+    }
+
+    .pdf-fallback p {
+      margin-bottom: 1.5rem;
+      color: #666666;
+    }
+
+    .pdf-download-link {
+      background: #FF8C00;
+      color: #ffffff;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .pdf-download-link:hover {
+      background: #FF7F00;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 10px rgba(255, 140, 0, 0.3);
+    }
   </style>
 </head>
 <body>
@@ -1324,9 +1617,11 @@
   <div class="header-bar" id="mainHeader" style="display: flex;">
     <div class="header-content">
       <div></div> <!-- Empty div for spacing -->
-      <h1>AUTOMATA AR</h1>
+      <h1>AutomatAR</h1>
       <div class="header-buttons">
+        <button class="header-button" id="manualsBtn">Manuals</button>
         <button class="header-ar-button" id="openARBtn">Open AR</button>
+        <button class="header-button" id="modelsBtn">Models</button>
       </div>
     </div>
   </div>
@@ -1336,7 +1631,7 @@
     <!-- Intro -->
     <div class="intro-section">
       <div class="container">
-        <h2>Welcome to Automata AR</h2>
+        <h2>Welcome to AutomatAR</h2>
         <p>Explore mechanical engineering concepts through augmented reality. Point your camera at kit markers to see interactive 3D demonstrations of gears, cams, cranks, and other mechanical systems.</p>
       </div>
     </div>
@@ -1350,7 +1645,7 @@
         </div>
         <div class="kit-image pre-assembly parallax-element" onclick="showKitDetail(0)">
           <video class="kit-video" autoplay muted loop playsinline>
-            <source src="images/camani.mp4" type="video/mp4">
+            <source src="images/kit1.mp4" type="video/mp4">
             <div class="placeholder-img">Cam-A Kit Video</div>
           </video>
         </div>
@@ -1362,7 +1657,7 @@
       <div class="kit-content reverse">
         <div class="kit-image pre-assembly parallax-element" onclick="showKitDetail(1)">
           <video class="kit-video" autoplay muted loop playsinline>
-            <source src="images/genevaani.mp4" type="video/mp4">
+            <source src="images/kit2.mp4" type="video/mp4">
             <div class="placeholder-img">Cam-C Kit Video</div>
           </video>
         </div>
@@ -1382,7 +1677,7 @@
         </div>
         <div class="kit-image pre-assembly parallax-element" onclick="showKitDetail(2)">
           <video class="kit-video" autoplay muted loop playsinline>
-            <source src="images/crankani.mp4" type="video/mp4">
+            <source src="images/kit3.mp4" type="video/mp4">
             <div class="placeholder-img">Crank Kit Video</div>
           </video>
         </div>
@@ -1394,7 +1689,7 @@
       <div class="kit-content reverse">
         <div class="kit-image pre-assembly parallax-element" onclick="showKitDetail(3)">
           <video class="kit-video" autoplay muted loop playsinline>
-            <source src="images/gearaani.mp4" type="video/mp4">
+            <source src="images/kit4.mp4" type="video/mp4">
             <div class="placeholder-img">Gear-A Kit Video</div>
           </video>
         </div>
@@ -1414,7 +1709,7 @@
         </div>
         <div class="kit-image pre-assembly parallax-element" onclick="showKitDetail(4)">
           <video class="kit-video" autoplay muted loop playsinline>
-            <source src="images/gearbani.mp4" type="video/mp4">
+            <source src="images/kit5.mp4" type="video/mp4">
             <div class="placeholder-img">Gear-B Kit Video</div>
           </video>
         </div>
@@ -1426,7 +1721,7 @@
       <div class="kit-content reverse">
         <div class="kit-image pre-assembly parallax-element" onclick="showKitDetail(5)">
           <video class="kit-video" autoplay muted loop playsinline>
-            <source src="videos/kit6.mp4" type="video/mp4">
+            <source src="images/kit6.mp4" type="video/mp4">
             <div class="placeholder-img">Gear-C Kit Video</div>
           </video>
         </div>
@@ -1444,7 +1739,7 @@
       <div class="kit-detail">
         <div class="kit-detail-image">
           <video class="kit-detail-video" autoplay muted loop playsinline id="kitDetailVideo">
-            <source src="videos/kit1.mp4" type="video/mp4">
+            <source src="images/camani.mp4" type="video/mp4">
             <div class="placeholder-img" id="kitDetailImg">Kit Video</div>
           </video>
         </div>
@@ -1456,6 +1751,113 @@
       </div>
     </div>
   </section>
+
+  <!-- Manuals Screen -->
+  <section id="manualsScreen" class="modal-screen">
+    <div class="modal-header">
+      <button class="modal-close-button" id="closeManualsBtn">← Back</button>
+      <div class="modal-title">Instruction Manuals</div>
+      <div class="modal-subtitle">Download comprehensive guides for each mechanical kit</div>
+    </div>
+    <div class="modal-content">
+      <div class="content-grid">
+        <div class="content-card">
+          <h3>Cam-A Manual</h3>
+          <p>Complete assembly instructions and theory guide for the Cam-A rotational motion kit. Includes part diagrams, assembly steps, and engineering principles.</p>
+          <button class="download-button" onclick="openManual('1')">View Manual</button>
+        </div>
+        <div class="content-card">
+          <h3>Cam-C Manual</h3>
+          <p>Geneva wheel mechanism guide covering intermittent motion principles, assembly procedures, and practical applications in machinery.</p>
+          <button class="download-button" onclick="openManual('2')">View Manual</button>
+        </div>
+        <div class="content-card">
+          <h3>Crank Manual</h3>
+          <p>Reciprocating motion system manual with detailed explanations of crank mechanisms, connecting rods, and motion conversion principles.</p>
+          <button class="download-button" onclick="openManual('3')">View Manual</button>
+        </div>
+        <div class="content-card">
+          <h3>Gear-A Manual</h3>
+          <p>Bevel gear system guide explaining perpendicular power transmission, gear ratios, and 90-degree motion transfer applications.</p>
+          <button class="download-button" onclick="openManual('4')">View Manual</button>
+        </div>
+        <div class="content-card">
+          <h3>Gear-B Manual</h3>
+          <p>Variable speed gear system manual covering dynamic load distribution, torque variation, and adaptive transmission concepts.</p>
+          <button class="download-button" onclick="openManual('5')">View Manual</button>
+        </div>
+        <div class="content-card">
+          <h3>Gear-C Manual</h3>
+          <p>Worm gear system comprehensive guide including self-locking mechanisms, torque multiplication, and precision control applications.</p>
+          <button class="download-button" onclick="openManual('6')">View Manual</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Models Screen -->
+  <section id="modelsScreen" class="modal-screen">
+    <div class="modal-header">
+      <button class="modal-close-button" id="closeModelsBtn">← Back</button>
+      <div class="modal-title">3D Models</div>
+      <div class="modal-subtitle">Download and explore the 3D models used in AR experiences</div>
+    </div>
+    <div class="modal-content">
+      <div class="content-grid">
+        <div class="content-card">
+          <h3>Cam-A 3D Model</h3>
+          <p>High-resolution STL model of the cam mechanism. Compatible with 3D printers and CAD software for further analysis and modification.</p>
+          <button class="download-button" onclick="downloadModel('1')">Download STL</button>
+        </div>
+        <div class="content-card">
+          <h3>Cam-C 3D Model</h3>
+          <p>Geneva wheel mechanism 3D model including drive wheel and indexed output wheel. Perfect for educational demonstrations and prototyping.</p>
+          <button class="download-button" onclick="downloadModel('2')">Download STL</button>
+        </div>
+        <div class="content-card">
+          <h3>Crank 3D Model</h3>
+          <p>Complete crank mechanism model with connecting rod and slider components. Ideal for studying reciprocating motion systems.</p>
+          <button class="download-button" onclick="downloadModel('3')">Download STL</button>
+        </div>
+        <div class="content-card">
+          <h3>Gear-A 3D Model</h3>
+          <p>Precision bevel gear set model demonstrating 90-degree power transmission. Suitable for mechanical engineering education and analysis.</p>
+          <button class="download-button" onclick="downloadModel('4')">Download STL</button>
+        </div>
+        <div class="content-card">
+          <h3>Gear-B 3D Model</h3>
+          <p>Variable speed gear system model showcasing dynamic torque distribution and non-uniform motion characteristics.</p>
+          <button class="download-button" onclick="downloadModel('5')">Download STL</button>
+        </div>
+        <div class="content-card">
+          <h3>Gear-C 3D Model</h3>
+          <p>Worm gear assembly model featuring self-locking mechanism and high torque multiplication ratio components.</p>
+          <button class="download-button" onclick="downloadModel('6')">Download STL</button>
+        </div>
+        <div class="content-card">
+          <h3>Base Platform Model</h3>
+          <p>Universal base platform for mounting and testing all mechanical kits. Includes standardized mounting points and measurement references for educational experiments.</p>
+          <button class="download-button" onclick="downloadModel('7')">Download STL</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PDF Viewer Modal -->
+  <div id="pdfViewerModal" class="pdf-viewer-modal">
+    <div class="pdf-viewer-header">
+      <div class="pdf-viewer-title" id="pdfViewerTitle">Manual Viewer</div>
+      <button class="pdf-viewer-close" id="closePdfViewer">← Close</button>
+    </div>
+    <div class="pdf-viewer">
+      <iframe id="pdfFrame" src="" title="PDF Viewer"></iframe>
+      <div class="pdf-fallback" id="pdfFallback" style="display: none;">
+        <h3>PDF Viewer Not Available</h3>
+        <p>Your browser doesn't support embedded PDF viewing.</p>
+        <a href="" id="pdfDownloadLink" class="pdf-download-link" target="_blank">Open PDF in New Tab</a>
+      </div>
+    </div>
+  </div>
 
   <!-- AR Screen -->
   <section id="arScreen">
@@ -1496,7 +1898,7 @@
     <div class="ar-header">
       <p><strong>Instructions:</strong> Point your camera at a kit marker to see the 3D demonstration</p>
     </div>
-    <button class="ar-back-button" id="backHomeBtn">← Back to Home</button>
+    <button class="ar-back-button" id="backHomeBtn">← Home</button>
     <button class="ar-help-button" id="arHelpBtn">Help</button>
 
     <!-- Left panel for additional coverage -->
@@ -1952,6 +2354,8 @@
     const PAGE_HOME = "HOME";
     const PAGE_KIT_DETAIL = "KITDETAIL";
     const PAGE_AR = "AR";
+    const PAGE_MANUALS = "MANUALS";
+    const PAGE_MODELS = "MODELS";
 
     window.onload = function() {
       setupUI();
@@ -1961,18 +2365,27 @@
     };
 
     function showHomeScreen(){
+      // Hide all screens first
       document.getElementById("mainHeader").style.display = "flex";
       document.getElementById("homeScreen").style.display = "block";
       document.getElementById("kitDetailScreen").style.display = "none";
       document.getElementById("arScreen").style.display = "none";
+      document.getElementById("manualsScreen").classList.remove("active");
+      document.getElementById("modelsScreen").classList.remove("active");
       
       // Reset AR overlay for next time
       document.getElementById("arInitialOverlay").classList.remove("hidden");
       
-      // Resume video playback for visible videos
-      setTimeout(() => {
-        resumeVisibleVideos();
-      }, 500);
+      // Force scroll to absolute top - multiple methods to ensure it works
+      document.body.scrollTop = 0; // For Safari
+      document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
+      window.scrollTo(0, 0);
+      
+      // Also reset homeScreen scroll position
+      const homeScreen = document.getElementById("homeScreen");
+      if (homeScreen) {
+        homeScreen.scrollTop = 0;
+      }
       
       // Reset assembly animation system
       if (assemblyElements && assemblyElements.length > 0) {
@@ -1990,16 +2403,24 @@
       
       currentAssembledSection = -1;
       
-      // Scroll to top smoothly
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      
-      // Re-initialize animations after a brief delay
-      setTimeout(() => {
+      // Use requestAnimationFrame to ensure DOM is updated before scrolling again
+      requestAnimationFrame(() => {
+        // Double-check scroll position after DOM updates
+        document.body.scrollTop = 0;
+        document.documentElement.scrollTop = 0;
+        window.scrollTo(0, 0);
+        
+        // Re-initialize animations
         if (assemblyObserver) {
           assemblyObserver.disconnect();
         }
         initScrollAnimations();
-      }, 300);
+        
+        // Resume video playback for visible videos
+        setTimeout(() => {
+          resumeVisibleVideos();
+        }, 200);
+      });
     }
 
     function showKitDetailScreen(kitID){
@@ -2026,6 +2447,8 @@
       document.getElementById("homeScreen").style.display = "none";
       document.getElementById("kitDetailScreen").style.display = "block";
       document.getElementById("arScreen").style.display = "none";
+      document.getElementById("manualsScreen").classList.remove("active");
+      document.getElementById("modelsScreen").classList.remove("active");
     }
 
     function showKitDetail(kitID) {
@@ -2040,9 +2463,31 @@
       document.getElementById("homeScreen").style.display = "none";
       document.getElementById("kitDetailScreen").style.display = "none";
       document.getElementById("arScreen").style.display = "block";
+      document.getElementById("manualsScreen").classList.remove("active");
+      document.getElementById("modelsScreen").classList.remove("active");
       
       // Show the initial overlay - don't start AR yet
       document.getElementById("arInitialOverlay").classList.remove("hidden");
+    }
+
+    function showManualsScreen(){
+      pauseAllVideos();
+      document.getElementById("mainHeader").style.display = "none";
+      document.getElementById("homeScreen").style.display = "none";
+      document.getElementById("kitDetailScreen").style.display = "none";
+      document.getElementById("arScreen").style.display = "none";
+      document.getElementById("manualsScreen").classList.add("active");
+      document.getElementById("modelsScreen").classList.remove("active");
+    }
+
+    function showModelsScreen(){
+      pauseAllVideos();
+      document.getElementById("mainHeader").style.display = "none";
+      document.getElementById("homeScreen").style.display = "none";
+      document.getElementById("kitDetailScreen").style.display = "none";
+      document.getElementById("arScreen").style.display = "none";
+      document.getElementById("manualsScreen").classList.remove("active");
+      document.getElementById("modelsScreen").classList.add("active");
     }
 
     function startARExperience(){
@@ -2055,10 +2500,213 @@
       }
     }
 
+    function openManual(manualNumber) {
+      // Map manual numbers to kit names for title
+      const kitNames = {
+        '1': 'Cam-A Rotational Motion Manual',
+        '2': 'Cam-C Intermittent Motion Manual', 
+        '3': 'Crank Reciprocating Motion Manual',
+        '4': 'Gear-A Bevel Gears Manual',
+        '5': 'Gear-B Variable Speed Manual',
+        '6': 'Gear-C Worm Gears Manual'
+      };
+      
+      const pdfPath = `manuals/${manualNumber}.pdf`;
+      const pdfFrame = document.getElementById('pdfFrame');
+      const pdfFallback = document.getElementById('pdfFallback');
+      const pdfDownloadLink = document.getElementById('pdfDownloadLink');
+      const pdfViewerTitle = document.getElementById('pdfViewerTitle');
+      const pdfViewerModal = document.getElementById('pdfViewerModal');
+      
+      // Set title
+      pdfViewerTitle.textContent = kitNames[manualNumber] || 'Manual Viewer';
+      
+      // Try to load PDF in iframe
+      pdfFrame.src = pdfPath;
+      pdfDownloadLink.href = pdfPath;
+      
+      // Show modal
+      pdfViewerModal.classList.add('active');
+      
+      // Handle iframe load error (fallback for browsers that don't support PDF embedding)
+      pdfFrame.onload = function() {
+        // Check if the iframe loaded successfully
+        try {
+          if (pdfFrame.contentDocument === null) {
+            // PDF didn't load properly, show fallback
+            pdfFrame.style.display = 'none';
+            pdfFallback.style.display = 'flex';
+          } else {
+            pdfFrame.style.display = 'block';
+            pdfFallback.style.display = 'none';
+          }
+        } catch (e) {
+          // Cross-origin issue or PDF not supported
+          pdfFrame.style.display = 'none';
+          pdfFallback.style.display = 'flex';
+        }
+      };
+      
+      pdfFrame.onerror = function() {
+        // PDF failed to load, show fallback
+        pdfFrame.style.display = 'none';
+        pdfFallback.style.display = 'flex';
+      };
+    }
+
+    function closePdfViewer() {
+      const pdfViewerModal = document.getElementById('pdfViewerModal');
+      const pdfFrame = document.getElementById('pdfFrame');
+      
+      // Hide modal
+      pdfViewerModal.classList.remove('active');
+      
+      // Clear iframe source to stop loading
+      pdfFrame.src = '';
+    }
+
+    function downloadManual(kitType) {
+      // Legacy function - redirect to openManual
+      const manualMap = {
+        'cam-a': '1',
+        'cam-c': '2', 
+        'crank': '3',
+        'gear-a': '4',
+        'gear-b': '5',
+        'gear-c': '6'
+      };
+      
+      if (manualMap[kitType]) {
+        openManual(manualMap[kitType]);
+      }
+    }
+
+    function downloadModel(modelNumber) {
+      // Map model numbers to kit names for user feedback
+      const kitNames = {
+        '1': 'Cam-A 3D Model',
+        '2': 'Cam-C 3D Model',
+        '3': 'Crank 3D Model', 
+        '4': 'Gear-A 3D Model',
+        '5': 'Gear-B 3D Model',
+        '6': 'Gear-C 3D Model'
+      };
+      
+      const modelPath = `kits-stl/${modelNumber}.stl`;
+      const kitName = kitNames[modelNumber] || '3D Model';
+      
+      // Create a temporary link element for download
+      const downloadLink = document.createElement('a');
+      downloadLink.href = modelPath;
+      downloadLink.download = `AutomatAR_${kitName.replace(/\s+/g, '_')}.stl`;
+      
+      // Check if file exists before attempting download
+      fetch(modelPath, { method: 'HEAD' })
+        .then(response => {
+          if (response.ok) {
+            // File exists, proceed with download
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+            
+            // Show success message
+            showDownloadNotification(`${kitName} downloaded successfully!`, 'success');
+          } else {
+            // File doesn't exist, show error
+            showDownloadNotification(`${kitName} file not found. Please contact support.`, 'error');
+          }
+        })
+        .catch(error => {
+          // Network error or file not accessible
+          console.warn('Download attempt failed:', error);
+          showDownloadNotification(`Download failed. Please check your connection and try again.`, 'error');
+        });
+    }
+
+    // Function to show download notifications
+    function showDownloadNotification(message, type) {
+      // Create notification element
+      const notification = document.createElement('div');
+      notification.className = `download-notification ${type}`;
+      notification.textContent = message;
+      
+      // Style the notification
+      notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: ${type === 'success' ? '#4CAF50' : '#f44336'};
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        z-index: 10000;
+        font-weight: 600;
+        max-width: 300px;
+        word-wrap: break-word;
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+      `;
+      
+      // Add to page
+      document.body.appendChild(notification);
+      
+      // Animate in
+      setTimeout(() => {
+        notification.style.transform = 'translateX(0)';
+      }, 100);
+      
+      // Auto remove after 4 seconds
+      setTimeout(() => {
+        notification.style.transform = 'translateX(100%)';
+        setTimeout(() => {
+          if (notification.parentNode) {
+            document.body.removeChild(notification);
+          }
+        }, 300);
+      }, 4000);
+    }
+
+    // Legacy function for backward compatibility
+    function downloadModelLegacy(kitType) {
+      const modelMap = {
+        'cam-a': '1',
+        'cam-c': '2',
+        'crank': '3', 
+        'gear-a': '4',
+        'gear-b': '5',
+        'gear-c': '6'
+      };
+      
+      if (modelMap[kitType]) {
+        downloadModel(modelMap[kitType]);
+      } else {
+        // Fallback to old alert system
+        const kitNames = {
+          'cam-a': 'Cam-A 3D Model',
+          'cam-c': 'Cam-C 3D Model',
+          'crank': 'Crank 3D Model',
+          'gear-a': 'Gear-A 3D Model',
+          'gear-b': 'Gear-B 3D Model',
+          'gear-c': 'Gear-C 3D Model'
+        };
+        
+        alert(`Downloading ${kitNames[kitType]}...\n\nThis would normally download an STL file that can be:\n• 3D printed for physical study\n• Imported into CAD software\n• Used for engineering analysis\n• Modified for custom applications`);
+      }
+    }
+
     function setupUI(){
       // Home -> AR
       document.getElementById("openARBtn").onclick = function(){
         showARScreen();
+      };
+      // Manuals button
+      document.getElementById("manualsBtn").onclick = function(){
+        showManualsScreen();
+      };
+      // Models button
+      document.getElementById("modelsBtn").onclick = function(){
+        showModelsScreen();
       };
       // Kit detail -> Home
       document.getElementById("kitBackHomeBtn").onclick = function(){
@@ -2067,6 +2715,18 @@
       // AR -> Home
       document.getElementById("backHomeBtn").onclick = function(){
         showHomeScreen();
+      };
+      // Manuals -> Home
+      document.getElementById("closeManualsBtn").onclick = function(){
+        showHomeScreen();
+      };
+      // Models -> Home
+      document.getElementById("closeModelsBtn").onclick = function(){
+        showHomeScreen();
+      };
+      // PDF Viewer -> Close
+      document.getElementById("closePdfViewer").onclick = function(){
+        closePdfViewer();
       };
       // Debug overlay
       document.getElementById("debugSideBtn").onclick = toggleDebugOverlay;
@@ -2078,6 +2738,13 @@
       // AR start button
       document.getElementById("arStartButton").onclick = function(){
         startARExperience();
+      };
+      
+      // Close PDF viewer when clicking outside
+      document.getElementById("pdfViewerModal").onclick = function(e) {
+        if (e.target === this) {
+          closePdfViewer();
+        }
       };
     }
 
@@ -2882,6 +3549,10 @@ conveyors, tuning mechanisms—anywhere controlled motion & torque multiplicatio
       });
       document.getElementById("markerInfo").textContent=txt;
     }
+  </script>
+</body>
+</html>
+    
   </script>
 </body>
 </html>

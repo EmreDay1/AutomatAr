@@ -536,7 +536,7 @@ function openManual(manualNumber) {
     '6': 'Gear-C Worm Gears Manual'
   };
   
-  const pdfPath = `manuals/${manualNumber}.pdf`;
+  const pdfPath = `manuels/${manualNumber}.pdf`;
   const pdfFrame = document.getElementById('pdfFrame');
   const pdfFallback = document.getElementById('pdfFallback');
   const pdfDownloadLink = document.getElementById('pdfDownloadLink');

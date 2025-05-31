@@ -7,6 +7,7 @@
 html {
   scroll-behavior: smooth;
   scroll-snap-type: y mandatory;
+  font-size: clamp(14px, 1.5vw, 18px); /* Base font size scales with screen */
 }
 
 body {
@@ -17,12 +18,12 @@ body {
   overflow-x: hidden;
 }
 
-/* Apple-style Assembly/Disassembly Animation Keyframes */
+/* Responsive Animation Keyframes - Scale with viewport */
 @keyframes assembleFromLeft {
   from {
     opacity: 0;
-    transform: translateX(-200px) translateY(50px) rotate(-15deg) scale(0.7);
-    filter: blur(8px);
+    transform: translateX(clamp(-100px, -20vw, -200px)) translateY(clamp(25px, 5vw, 50px)) rotate(-15deg) scale(0.7);
+    filter: blur(clamp(4px, 1vw, 8px));
   }
   to {
     opacity: 1;
@@ -34,8 +35,8 @@ body {
 @keyframes assembleFromRight {
   from {
     opacity: 0;
-    transform: translateX(200px) translateY(-30px) rotate(12deg) scale(0.8);
-    filter: blur(6px);
+    transform: translateX(clamp(100px, 20vw, 200px)) translateY(clamp(-15px, -3vw, -30px)) rotate(12deg) scale(0.8);
+    filter: blur(clamp(3px, 0.8vw, 6px));
   }
   to {
     opacity: 1;
@@ -47,8 +48,8 @@ body {
 @keyframes assembleFromTop {
   from {
     opacity: 0;
-    transform: translateY(-150px) translateX(-20px) rotate(8deg) scale(0.6);
-    filter: blur(10px);
+    transform: translateY(clamp(-75px, -15vw, -150px)) translateX(clamp(-10px, -2vw, -20px)) rotate(8deg) scale(0.6);
+    filter: blur(clamp(5px, 1.2vw, 10px));
   }
   to {
     opacity: 1;
@@ -60,8 +61,8 @@ body {
 @keyframes assembleFromBottom {
   from {
     opacity: 0;
-    transform: translateY(180px) translateX(30px) rotate(-10deg) scale(0.5);
-    filter: blur(12px);
+    transform: translateY(clamp(90px, 18vw, 180px)) translateX(clamp(15px, 3vw, 30px)) rotate(-10deg) scale(0.5);
+    filter: blur(clamp(6px, 1.5vw, 12px));
   }
   to {
     opacity: 1;
@@ -73,36 +74,36 @@ body {
 @keyframes videoAssemble {
   from {
     opacity: 0;
-    transform: translateX(300px) translateY(-100px) rotate(25deg) scale(0.3);
-    filter: blur(15px) brightness(0.3);
+    transform: translateX(clamp(150px, 30vw, 300px)) translateY(clamp(-50px, -10vw, -100px)) rotate(25deg) scale(0.3);
+    filter: blur(clamp(7px, 1.8vw, 15px)) brightness(0.3);
     border-radius: 50%;
   }
   50% {
     opacity: 0.7;
-    transform: translateX(100px) translateY(-20px) rotate(8deg) scale(0.7);
-    filter: blur(5px) brightness(0.7);
-    border-radius: 30px;
+    transform: translateX(clamp(50px, 10vw, 100px)) translateY(clamp(-10px, -2vw, -20px)) rotate(8deg) scale(0.7);
+    filter: blur(clamp(2px, 0.6vw, 5px)) brightness(0.7);
+    border-radius: clamp(15px, 3vw, 30px);
   }
   to {
     opacity: 1;
     transform: translateX(0) translateY(0) rotate(0deg) scale(1);
     filter: blur(0px) brightness(1);
-    border-radius: 20px;
+    border-radius: clamp(10px, 2vw, 20px);
   }
 }
 
 @keyframes textAssemble {
   from {
     opacity: 0;
-    transform: translateX(-250px) translateY(80px) rotate(-20deg) scale(0.4);
-    filter: blur(8px);
-    letter-spacing: 20px;
+    transform: translateX(clamp(-125px, -25vw, -250px)) translateY(clamp(40px, 8vw, 80px)) rotate(-20deg) scale(0.4);
+    filter: blur(clamp(4px, 1vw, 8px));
+    letter-spacing: clamp(10px, 2vw, 20px);
   }
   70% {
     opacity: 0.8;
-    transform: translateX(-50px) translateY(20px) rotate(-3deg) scale(0.9);
-    filter: blur(2px);
-    letter-spacing: 5px;
+    transform: translateX(clamp(-25px, -5vw, -50px)) translateY(clamp(10px, 2vw, 20px)) rotate(-3deg) scale(0.9);
+    filter: blur(clamp(1px, 0.3vw, 2px));
+    letter-spacing: clamp(2px, 0.5vw, 5px);
   }
   to {
     opacity: 1;
@@ -112,7 +113,7 @@ body {
   }
 }
 
-/* Disassembly animations (reverse) */
+/* Disassembly animations - Responsive */
 @keyframes disassembleToLeft {
   from {
     opacity: 1;
@@ -121,8 +122,8 @@ body {
   }
   to {
     opacity: 0;
-    transform: translateX(-300px) translateY(-80px) rotate(-25deg) scale(0.3);
-    filter: blur(15px);
+    transform: translateX(clamp(-150px, -30vw, -300px)) translateY(clamp(-40px, -8vw, -80px)) rotate(-25deg) scale(0.3);
+    filter: blur(clamp(7px, 1.8vw, 15px));
   }
 }
 
@@ -134,8 +135,8 @@ body {
   }
   to {
     opacity: 0;
-    transform: translateX(350px) translateY(120px) rotate(30deg) scale(0.2);
-    filter: blur(20px);
+    transform: translateX(clamp(175px, 35vw, 350px)) translateY(clamp(60px, 12vw, 120px)) rotate(30deg) scale(0.2);
+    filter: blur(clamp(10px, 2.5vw, 20px));
   }
 }
 
@@ -147,8 +148,8 @@ body {
   }
   to {
     opacity: 0;
-    transform: translateX(50px) translateY(-400px) rotate(45deg) scale(0.1);
-    filter: blur(25px);
+    transform: translateX(clamp(25px, 5vw, 50px)) translateY(clamp(-200px, -40vw, -400px)) rotate(45deg) scale(0.1);
+    filter: blur(clamp(12px, 3vw, 25px));
   }
 }
 
@@ -160,12 +161,12 @@ body {
   }
   to {
     opacity: 0;
-    transform: translateX(-100px) translateY(500px) rotate(-60deg) scale(0.05);
-    filter: blur(30px);
+    transform: translateX(clamp(-50px, -10vw, -100px)) translateY(clamp(250px, 50vw, 500px)) rotate(-60deg) scale(0.05);
+    filter: blur(clamp(15px, 3.8vw, 30px));
   }
 }
 
-/* Scroll-triggered assembly/disassembly animations */
+/* Scroll-triggered sections */
 .scroll-section {
   scroll-snap-align: start;
   min-height: 100vh;
@@ -175,36 +176,54 @@ body {
   overflow: hidden;
 }
 
-/* Assembly animation states */
+/* Flexbox-based responsive content */
 .kit-content {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6rem;
+  display: flex;
+  flex-wrap: nowrap; /* Prevent wrapping to maintain horizontal layout */
+  gap: clamp(2rem, 6vw, 4rem);
   align-items: center;
-  padding: 0 4rem;
+  justify-content: space-between;
+  padding: clamp(2rem, 6vw, 4rem);
   max-width: 1400px;
   margin: 0 auto;
   width: 100%;
-  transition: none;
+  min-height: 70vh; /* Ensure adequate height */
 }
 
-/* Individual element animation states */
+.kit-content > * {
+  flex: 1 1 45%; /* Force 45% width for each item */
+  min-width: 300px; /* Minimum width to prevent too much shrinking */
+  max-width: 600px; /* Maximum width to keep proportions */
+}
+
+/* Ensure consistent spacing and alignment */
+.kit-content .kit-text {
+  flex: 1 1 45%;
+  max-width: 500px;
+}
+
+.kit-content .kit-image {
+  flex: 1 1 45%;
+  max-width: 600px;
+}
+
+/* Animation states for flex items */
 .kit-text, .kit-image {
   transition: all 1.2s cubic-bezier(0.23, 1, 0.32, 1);
   will-change: transform, opacity, filter;
 }
 
-/* Initial hidden states */
+/* Initial hidden states - Responsive transforms */
 .kit-text.pre-assembly {
   opacity: 0;
-  transform: translateX(-250px) translateY(80px) rotate(-20deg) scale(0.4);
-  filter: blur(8px);
+  transform: translateX(clamp(-125px, -25vw, -250px)) translateY(clamp(40px, 8vw, 80px)) rotate(-20deg) scale(0.4);
+  filter: blur(clamp(4px, 1vw, 8px));
 }
 
 .kit-image.pre-assembly {
   opacity: 0;
-  transform: translateX(300px) translateY(-100px) rotate(25deg) scale(0.3);
-  filter: blur(15px) brightness(0.3);
+  transform: translateX(clamp(150px, 30vw, 300px)) translateY(clamp(-50px, -10vw, -100px)) rotate(25deg) scale(0.3);
+  filter: blur(clamp(7px, 1.8vw, 15px)) brightness(0.3);
 }
 
 /* Assembled states */
@@ -220,39 +239,43 @@ body {
   filter: blur(0px) brightness(1);
 }
 
-/* Disassembled states */
+/* Disassembled states - Responsive */
 .kit-text.disassembled {
   opacity: 0;
-  transform: translateX(-400px) translateY(-150px) rotate(-35deg) scale(0.2);
-  filter: blur(20px);
+  transform: translateX(clamp(-200px, -40vw, -400px)) translateY(clamp(-75px, -15vw, -150px)) rotate(-35deg) scale(0.2);
+  filter: blur(clamp(10px, 2.5vw, 20px));
   transition-duration: 0.8s;
 }
 
 .kit-image.disassembled {
   opacity: 0;
-  transform: translateX(500px) translateY(200px) rotate(45deg) scale(0.1);
-  filter: blur(25px) brightness(0.1);
+  transform: translateX(clamp(250px, 50vw, 500px)) translateY(clamp(100px, 20vw, 200px)) rotate(45deg) scale(0.1);
+  filter: blur(clamp(12px, 3vw, 25px)) brightness(0.1);
   transition-duration: 0.8s;
 }
 
-/* Reverse layout for alternating sections */
+/* Reverse layout handling */
+.kit-content.reverse {
+  flex-direction: row-reverse;
+}
+
 .kit-content.reverse .kit-text.pre-assembly {
-  transform: translateX(250px) translateY(-60px) rotate(18deg) scale(0.5);
+  transform: translateX(clamp(125px, 25vw, 250px)) translateY(clamp(-30px, -6vw, -60px)) rotate(18deg) scale(0.5);
 }
 
 .kit-content.reverse .kit-image.pre-assembly {
-  transform: translateX(-350px) translateY(120px) rotate(-22deg) scale(0.4);
+  transform: translateX(clamp(-175px, -35vw, -350px)) translateY(clamp(60px, 12vw, 120px)) rotate(-22deg) scale(0.4);
 }
 
 .kit-content.reverse .kit-text.disassembled {
-  transform: translateX(450px) translateY(180px) rotate(40deg) scale(0.15);
+  transform: translateX(clamp(225px, 45vw, 450px)) translateY(clamp(90px, 18vw, 180px)) rotate(40deg) scale(0.15);
 }
 
 .kit-content.reverse .kit-image.disassembled {
-  transform: translateX(-500px) translateY(-250px) rotate(-50deg) scale(0.08);
+  transform: translateX(clamp(-250px, -50vw, -500px)) translateY(clamp(-125px, -25vw, -250px)) rotate(-50deg) scale(0.08);
 }
 
-/* Staggered animation delays */
+/* Responsive animation delays */
 .kit-text {
   transition-delay: 0.1s;
 }
@@ -269,7 +292,7 @@ body {
   transition-delay: 0s;
 }
 
-/* Text-specific assembly effects */
+/* Text-specific responsive assembly effects */
 .kit-text h3 {
   transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1) 0.4s;
   will-change: transform, opacity;
@@ -282,14 +305,14 @@ body {
 
 .kit-text.pre-assembly h3 {
   opacity: 0;
-  transform: translateY(50px) scale(0.8);
-  filter: blur(4px);
+  transform: translateY(clamp(25px, 5vw, 50px)) scale(0.8);
+  filter: blur(clamp(2px, 0.5vw, 4px));
 }
 
 .kit-text.pre-assembly p {
   opacity: 0;
-  transform: translateY(30px) scale(0.9);
-  filter: blur(2px);
+  transform: translateY(clamp(15px, 3vw, 30px)) scale(0.9);
+  filter: blur(clamp(1px, 0.3vw, 2px));
 }
 
 .kit-text.assembled h3,
@@ -301,17 +324,17 @@ body {
 
 .kit-text.disassembled h3 {
   opacity: 0;
-  transform: translateY(-80px) scale(0.6);
-  filter: blur(8px);
+  transform: translateY(clamp(-40px, -8vw, -80px)) scale(0.6);
+  filter: blur(clamp(4px, 1vw, 8px));
 }
 
 .kit-text.disassembled p {
   opacity: 0;
-  transform: translateY(-50px) scale(0.7);
-  filter: blur(6px);
+  transform: translateY(clamp(-25px, -5vw, -50px)) scale(0.7);
+  filter: blur(clamp(3px, 0.8vw, 6px));
 }
 
-/* Video-specific assembly effects */
+/* Video-specific responsive assembly effects */
 .kit-video {
   transition: all 1s cubic-bezier(0.23, 1, 0.32, 1);
   will-change: transform, opacity, filter, border-radius;
@@ -319,24 +342,24 @@ body {
 
 .kit-image.pre-assembly .kit-video {
   border-radius: 50%;
-  filter: blur(10px) brightness(0.2) saturate(0.3);
+  filter: blur(clamp(5px, 1.2vw, 10px)) brightness(0.2) saturate(0.3);
 }
 
 .kit-image.assembled .kit-video {
-  border-radius: 17px;
+  border-radius: clamp(8px, 1.7vw, 17px);
   filter: blur(0px) brightness(1) saturate(1);
 }
 
 .kit-image.disassembled .kit-video {
   border-radius: 80%;
-  filter: blur(20px) brightness(0.05) saturate(0.1);
+  filter: blur(clamp(10px, 2.5vw, 20px)) brightness(0.05) saturate(0.1);
 }
 
-/* Header */
+/* Flexbox Header */
 .header-bar {
   background-color: #FF8C00;
   border-bottom: 1px solid #ffffff;
-  padding: 1.5rem 0;
+  padding: clamp(1rem, 2.5vw, 1.5rem) 0;
   position: sticky;
   top: 0;
   z-index: 100;
@@ -346,72 +369,54 @@ body {
 .header-content {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 2rem;
+  padding: 0 clamp(1rem, 3vw, 2rem);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1rem;
+  gap: clamp(1rem, 2.5vw, 1.5rem);
 }
 
 .header-bar h1 {
-  font-size: 2rem;
+  font-size: clamp(2rem, 5vw, 2.5rem);
   font-weight: 700;
   color: #ffffff;
-  letter-spacing: 2px;
+  letter-spacing: clamp(1px, 0.3vw, 2px);
   text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+  text-align: center;
+  margin: 0;
 }
 
 .header-buttons {
-  position: static;
   display: flex;
-  gap: 1rem;
-  align-items: center;
-}
-
-.header-button {
-  background: #ffffff;
-  color: #FF8C00;
-  border: 2px solid #ffffff;
-  padding: 0.8rem 1.5rem;
-  font-size: 0.9rem;
-  font-weight: 700;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
-  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(0.8rem, 2vw, 1.2rem);
   align-items: center;
   justify-content: center;
 }
 
-.header-button:hover {
-  background: #FF8C00;
-  color: #ffffff;
-  transform: translateY(-1px);
-  box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
-}
-
+.header-button,
 .header-ar-button {
   background: #ffffff;
   color: #FF8C00;
   border: 2px solid #ffffff;
-  padding: 0.8rem 1.5rem;
-  font-size: 0.9rem;
+  padding: clamp(0.6rem, 1.5vw, 0.8rem) clamp(1rem, 2.5vw, 1.5rem);
+  font-size: clamp(0.8rem, 1.8vw, 0.9rem);
   font-weight: 700;
-  border-radius: 8px;
+  border-radius: clamp(6px, 1.2vw, 8px);
   cursor: pointer;
   transition: all 0.3s ease;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: clamp(0.5px, 0.15vw, 1px);
   box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
+  flex: 0 1 auto;
+  white-space: nowrap;
 }
 
+.header-button:hover,
 .header-ar-button:hover {
   background: #FF8C00;
   color: #ffffff;
@@ -419,14 +424,14 @@ body {
   box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
 }
 
-/* Container */
+/* Container - Flexbox responsive */
 .container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 2rem;
+  padding: 0 clamp(1rem, 3vw, 2rem);
 }
 
-/* Home Screen */
+/* Home Screen - Flexbox */
 #homeScreen {
   display: none;
   scroll-snap-type: y mandatory;
@@ -442,37 +447,37 @@ body {
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 4rem 2rem;
+  padding: clamp(2rem, 8vw, 4rem) clamp(1rem, 4vw, 2rem);
   position: relative;
 }
 
 .intro-section h2 {
-  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-size: clamp(2rem, 8vw, 4rem);
   font-weight: 700;
   color: #ffffff !important;
-  margin-bottom: 2rem;
+  margin-bottom: clamp(1.5rem, 4vw, 2rem);
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  letter-spacing: -2px;
+  letter-spacing: clamp(-1px, -0.3vw, -2px);
   opacity: 1 !important;
 }
 
 .intro-section p {
-  font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+  font-size: clamp(1rem, 3vw, 1.4rem);
   color: #ffffff !important;
   max-width: 800px;
-  margin: 0 auto 3rem auto;
+  margin: 0 auto clamp(2rem, 5vw, 3rem) auto;
   line-height: 1.8;
   opacity: 1 !important;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
-/* Kit sections */
+/* Kit sections - Flexbox responsive */
 .kit-section {
   scroll-snap-align: start;
   min-height: 100vh;
   display: flex;
   align-items: center;
-  padding: 4rem 0;
+  padding: clamp(2rem, 8vw, 4rem) 0;
   margin: 0;
   background-color: #FF7F00;
   border-radius: 0;
@@ -507,37 +512,36 @@ body {
     rgba(255, 165, 0, 0.95) 100%);
 }
 
-.kit-content.reverse {
-  grid-template-columns: 1fr 1fr;
-}
-
+/* Flexible text content */
 .kit-text {
-  padding: 2rem 0;
+  padding: clamp(1rem, 3vw, 2rem) 0;
 }
 
 .kit-text h3 {
-  font-size: clamp(1.8rem, 4vw, 2.5rem);
-  font-weight: 600;
+  font-size: clamp(2rem, 6vw, 3rem);
+  font-weight: 700;
   color: #ffffff;
-  margin-bottom: 2rem;
-  line-height: 1.2;
-  text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
-  letter-spacing: -1px;
+  margin-bottom: clamp(1.5rem, 4vw, 2rem);
+  line-height: 1.1;
+  text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+  letter-spacing: clamp(-0.5px, -0.15vw, -1px);
 }
 
 .kit-text p {
   color: rgba(255, 255, 255, 0.95);
-  font-size: clamp(1rem, 2vw, 1.15rem);
-  line-height: 1.8;
+  font-size: clamp(1.1rem, 2.8vw, 1.3rem);
+  line-height: 1.6;
   text-align: left;
-  opacity: 0.9;
+  opacity: 0.95;
+  font-weight: 400;
 }
 
+/* Flexible image container */
 .kit-image {
   width: 100%;
-  height: 500px;
-  background: linear-gradient(135deg, #D4A574 0%, #E6C89C 100%);
-  border-radius: 20px;
+  height: clamp(350px, 55vw, 500px);
+  background: linear-gradient(135deg, #333333 0%, #444444 100%);
+  border-radius: clamp(15px, 3vw, 25px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -545,39 +549,39 @@ body {
   transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   position: relative;
   overflow: hidden;
-  border: 3px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+  border: clamp(2px, 0.4vw, 3px) solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 clamp(15px, 4vw, 25px) clamp(40px, 10vw, 60px) rgba(0, 0, 0, 0.2);
 }
 
 .kit-image:hover {
-  transform: translateY(-10px) scale(1.02);
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.15);
-  border-color: rgba(255, 255, 255, 0.4);
+  transform: translateY(clamp(-8px, -1.5vw, -12px)) scale(1.02);
+  box-shadow: 0 clamp(20px, 5vw, 35px) clamp(50px, 12vw, 80px) rgba(0, 0, 0, 0.25);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 .kit-video {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 17px;
+  border-radius: clamp(12px, 2.5vw, 22px);
   transition: transform 0.3s ease;
 }
 
 .kit-image:hover .kit-video {
-  transform: scale(1.05);
+  transform: scale(1.03);
 }
 
 .placeholder-img {
   color: #ffffff;
-  font-size: 1.1rem;
+  font-size: clamp(1.1rem, 2.5vw, 1.3rem);
   font-weight: 600;
   text-align: center;
   z-index: 1;
   position: relative;
-  text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
 }
 
-/* AR Initial Overlay */
+/* AR Overlay - Responsive Flexbox */
 .ar-initial-overlay {
   position: absolute;
   top: 0;
@@ -585,13 +589,13 @@ body {
   width: 100%;
   height: 100%;
   background: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(clamp(5px, 1.2vw, 10px));
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 50;
-  padding: 2rem;
+  padding: clamp(1rem, 4vw, 2rem);
 }
 
 .ar-initial-overlay.hidden {
@@ -599,59 +603,59 @@ body {
 }
 
 .ar-initial-content {
-  max-width: 600px;
+  max-width: clamp(300px, 80vw, 600px);
   text-align: left;
   background: rgba(255, 140, 0, 0.95);
-  padding: 2.5rem;
-  border-radius: 16px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  padding: clamp(1.5rem, 5vw, 2.5rem);
+  border-radius: clamp(12px, 2.5vw, 16px);
+  border: clamp(1px, 0.3vw, 2px) solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 clamp(4px, 1.2vw, 8px) clamp(16px, 4vw, 32px) rgba(0, 0, 0, 0.3);
 }
 
 .ar-initial-content h3 {
-  font-size: 1.8rem;
+  font-size: clamp(1.4rem, 4vw, 1.8rem);
   font-weight: 700;
-  margin-bottom: 1.5rem;
+  margin-bottom: clamp(1rem, 3vw, 1.5rem);
   color: #ffffff;
   text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
   text-align: center;
 }
 
 .ar-initial-instructions {
-  margin-bottom: 2rem;
+  margin-bottom: clamp(1.5rem, 4vw, 2rem);
 }
 
 .ar-initial-instructions h4 {
-  font-size: 1.2rem;
+  font-size: clamp(1rem, 2.5vw, 1.2rem);
   font-weight: 600;
   color: #ffffff;
-  margin: 1.5rem 0 1rem 0;
-  border-left: 3px solid rgba(255, 255, 255, 0.6);
-  padding-left: 1rem;
+  margin: clamp(1rem, 3vw, 1.5rem) 0 clamp(0.8rem, 2vw, 1rem) 0;
+  border-left: clamp(2px, 0.4vw, 3px) solid rgba(255, 255, 255, 0.6);
+  padding-left: clamp(0.8rem, 2vw, 1rem);
   background: rgba(255, 255, 255, 0.05);
-  padding: 0.5rem 0 0.5rem 1rem;
-  border-radius: 4px;
+  padding: clamp(0.4rem, 1vw, 0.5rem) 0 clamp(0.4rem, 1vw, 0.5rem) clamp(0.8rem, 2vw, 1rem);
+  border-radius: clamp(3px, 0.6vw, 4px);
 }
 
 .ar-initial-instructions p {
-  font-size: 1rem;
+  font-size: clamp(0.9rem, 2.2vw, 1rem);
   line-height: 1.6;
-  margin-bottom: 1rem;
+  margin-bottom: clamp(0.8rem, 2vw, 1rem);
   color: rgba(255, 255, 255, 0.9);
 }
 
 .ar-initial-instructions ul {
-  margin-left: 1.5rem;
-  margin-bottom: 1.5rem;
+  margin-left: clamp(1rem, 2.5vw, 1.5rem);
+  margin-bottom: clamp(1rem, 3vw, 1.5rem);
   background: rgba(255, 255, 255, 0.03);
-  padding: 1rem;
-  border-radius: 6px;
+  padding: clamp(0.8rem, 2vw, 1rem);
+  border-radius: clamp(4px, 0.8vw, 6px);
 }
 
 .ar-initial-instructions li {
-  font-size: 0.95rem;
+  font-size: clamp(0.85rem, 2vw, 0.95rem);
   line-height: 1.5;
-  margin-bottom: 0.6rem;
+  margin-bottom: clamp(0.5rem, 1.2vw, 0.6rem);
   color: rgba(255, 255, 255, 0.9);
 }
 
@@ -663,226 +667,111 @@ body {
 .ar-start-button {
   background: #ffffff;
   color: #FF8C00;
-  border: 2px solid #ffffff;
-  padding: 1.2rem 2.5rem;
-  font-size: 1rem;
+  border: clamp(1px, 0.3vw, 2px) solid #ffffff;
+  padding: clamp(1rem, 2.5vw, 1.2rem) clamp(2rem, 5vw, 2.5rem);
+  font-size: clamp(0.9rem, 2.2vw, 1rem);
   font-weight: 700;
-  border-radius: 10px;
+  border-radius: clamp(8px, 1.5vw, 10px);
   cursor: pointer;
   transition: all 0.3s ease;
   text-transform: uppercase;
-  letter-spacing: 1px;
-  box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+  letter-spacing: clamp(0.5px, 0.15vw, 1px);
+  box-shadow: 0 0 clamp(10px, 3vw, 20px) rgba(255, 255, 255, 0.3);
   display: block;
-  margin: 2rem auto 0 auto;
+  margin: clamp(1.5rem, 4vw, 2rem) auto 0 auto;
   width: fit-content;
 }
 
 .ar-start-button:hover {
   background: #FF8C00;
   color: #ffffff;
-  transform: translateY(-2px);
-  box-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+  transform: translateY(clamp(-1px, -0.3vw, -2px));
+  box-shadow: 0 0 clamp(15px, 4vw, 30px) rgba(255, 255, 255, 0.5);
 }
 
-.ar-instructions-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.8);
-  color: white;
-  display: none;
-  z-index: 25;
-  padding: 2rem;
-  overflow-y: auto;
-  backdrop-filter: blur(5px);
-}
-
-.ar-instructions-overlay.visible {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-}
-
-.ar-instructions-content {
-  max-width: 600px;
-  margin: 2rem auto;
-  text-align: left;
-  background: rgba(255, 140, 0, 0.95);
-  padding: 2rem;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.ar-instructions-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
-  border-bottom: 2px solid rgba(255, 255, 255, 0.3);
-  padding-bottom: 1rem;
-}
-
-.ar-instructions-header h3 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: white;
-  margin: 0;
-}
-
-.ar-instructions-close {
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  padding: 0.6rem 1rem;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 600;
-  text-transform: uppercase;
-  transition: all 0.3s ease;
-  font-size: 0.9rem;
-}
-
-.ar-instructions-close:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: translateY(-1px);
-}
-
-.ar-instructions-section {
-  margin-bottom: 1.5rem;
-}
-
-.ar-instructions-section h4 {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: white;
-  margin-bottom: 0.8rem;
-  border-left: 3px solid rgba(255, 255, 255, 0.5);
-  padding-left: 0.8rem;
-}
-
-.ar-instructions-section p {
-  font-size: 0.95rem;
-  line-height: 1.6;
-  margin-bottom: 0.8rem;
-  color: rgba(255, 255, 255, 0.9);
-}
-
-.ar-instructions-section ul {
-  margin-left: 1rem;
-  margin-bottom: 0.8rem;
-}
-
-.ar-instructions-section li {
-  font-size: 0.9rem;
-  line-height: 1.5;
-  margin-bottom: 0.4rem;
-  color: rgba(255, 255, 255, 0.9);
-}
-
-.ar-help-button {
-  position: absolute;
-  top: 1.5rem;
-  right: 1.5rem;
-  background: rgba(255, 140, 0, 0.8);
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  padding: 0.8rem 1.2rem;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-  z-index: 15;
-  transition: all 0.3s ease;
-  text-transform: uppercase;
-  font-size: 0.9rem;
-}
-
-.ar-help-button:hover {
-  background: rgba(255, 140, 0, 0.9);
-  transform: translateY(-1px);
-}
-
-/* Kit Detail Screen */
+/* Kit Detail Screen - Flexbox */
 #kitDetailScreen {
   display: none;
   min-height: 100vh;
-  padding: 4rem 0;
+  padding: clamp(2rem, 8vw, 4rem) 0;
   background-color: #FF8C00;
 }
 
 .kit-detail {
-  display: grid;
-  grid-template-columns: 500px 1fr;
-  gap: 5rem;
-  align-items: start;
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(2rem, 8vw, 5rem);
+  align-items: flex-start;
   background: #FF7F00;
-  padding: 3rem;
-  border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: clamp(2rem, 5vw, 3rem);
+  border-radius: clamp(12px, 2.5vw, 16px);
+  box-shadow: 0 clamp(2px, 0.8vw, 4px) clamp(10px, 3vw, 20px) rgba(255, 255, 255, 0.1);
+  border: clamp(1px, 0.2vw, 1px) solid rgba(255, 255, 255, 0.2);
+}
+
+.kit-detail > * {
+  flex: 1 1 clamp(280px, 45vw, 500px);
 }
 
 .kit-detail-image {
   width: 100%;
-  height: 400px;
+  height: clamp(300px, 50vw, 400px);
   background: linear-gradient(135deg, #D4A574 0%, #E6C89C 100%);
-  border-radius: 16px;
+  border-radius: clamp(12px, 2.5vw, 16px);
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   overflow: hidden;
-  border: 2px solid #ffffff;
+  border: clamp(1px, 0.3vw, 2px) solid #ffffff;
 }
 
 .kit-detail-video {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 14px;
+  border-radius: clamp(10px, 2vw, 14px);
 }
 
 .kit-detail-text h2 {
-  font-size: 2.5rem;
+  font-size: clamp(2rem, 6vw, 2.5rem);
   font-weight: 700;
   color: #ffffff;
-  margin-bottom: 2rem;
+  margin-bottom: clamp(1.5rem, 4vw, 2rem);
   line-height: 1.2;
   text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
 }
 
 .kit-detail-text p {
-  font-size: 1.1rem;
+  font-size: clamp(1rem, 2.5vw, 1.1rem);
   color: #ffffff;
   line-height: 1.8;
-  margin-bottom: 2.5rem;
+  margin-bottom: clamp(2rem, 5vw, 2.5rem);
   text-align: justify;
 }
 
 .back-button {
   background: #ffffff;
   color: #FF8C00;
-  border: 2px solid #ffffff;
-  padding: 1rem 2rem;
-  border-radius: 8px;
+  border: clamp(1px, 0.3vw, 2px) solid #ffffff;
+  padding: clamp(0.8rem, 2vw, 1rem) clamp(1.5rem, 4vw, 2rem);
+  border-radius: clamp(6px, 1.2vw, 8px);
   cursor: pointer;
   font-weight: 700;
   transition: all 0.3s ease;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+  letter-spacing: clamp(0.3px, 0.1vw, 0.5px);
+  box-shadow: 0 0 clamp(5px, 1.5vw, 10px) rgba(255, 255, 255, 0.2);
+  font-size: clamp(0.9rem, 2vw, 1rem);
 }
 
 .back-button:hover {
   background: #FF8C00;
   color: #ffffff;
-  box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 clamp(10px, 3vw, 20px) rgba(255, 255, 255, 0.3);
 }
 
-/* AR Screen */
+/* AR Screen - Responsive Flexbox */
 #arScreen {
   display: none;
   position: fixed;
@@ -901,36 +790,36 @@ body {
   right: 0;
   background: rgba(255, 140, 0, 0.9);
   color: #ffffff;
-  padding: 1.5rem;
+  padding: clamp(1rem, 3vw, 1.5rem);
   text-align: center;
   z-index: 10;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(clamp(5px, 1.5vw, 10px));
   border-bottom: 1px solid #ffffff;
 }
 
 .ar-back-button {
   position: absolute;
-  top: 1.5rem;
-  left: 1.5rem;
+  top: clamp(1rem, 3vw, 1.5rem);
+  left: clamp(1rem, 3vw, 1.5rem);
   background: #ffffff;
   color: #FF8C00;
-  border: 2px solid #ffffff;
-  padding: 0.4rem 0.8rem;  
-  font-size: 700;        
-  border-radius: 8px;
+  border: clamp(1px, 0.3vw, 2px) solid #ffffff;
+  padding: clamp(0.3rem, 1vw, 0.4rem) clamp(0.6rem, 1.5vw, 0.8rem);
+  font-size: clamp(0.8rem, 1.8vw, 1rem);
+  border-radius: clamp(6px, 1.2vw, 8px);
   cursor: pointer;
   font-weight: 700;
   z-index: 20;
   transition: all 0.3s ease;
   text-transform: uppercase;
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 clamp(5px, 1.5vw, 10px) rgba(255, 255, 255, 0.3);
 }
 
 .ar-back-button:hover {
   background: #FF8C00;
   color: #ffffff;
-  transform: translateY(-1px);
-  box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+  transform: translateY(clamp(-0.5px, -0.2vw, -1px));
+  box-shadow: 0 0 clamp(10px, 3vw, 20px) rgba(255, 255, 255, 0.5);
 }
 
 .ar-container {
@@ -952,7 +841,7 @@ body {
   z-index: 5;
 }
 
-/* AR Background to cover black void */
+/* AR Background */
 .ar-background {
   position: absolute;
   top: 0;
@@ -963,33 +852,34 @@ body {
   z-index: 1;
 }
 
+/* Responsive AR Sidebar */
 .ar-sidebar {
   position: absolute;
   top: 0;
   right: 0;
-  width: 450px;
+  width: clamp(250px, 35vw, 450px);
   height: 100%;
   background: rgba(255, 127, 0, 0.95);
-  backdrop-filter: blur(10px);
-  padding: 2rem;
-  box-shadow: -4px 0 16px rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(clamp(5px, 1.5vw, 10px));
+  padding: clamp(1.5rem, 4vw, 2rem);
+  box-shadow: clamp(-2px, -0.5vw, -4px) 0 clamp(8px, 2vw, 16px) rgba(255, 255, 255, 0.1);
   display: flex;
   flex-direction: column;
   z-index: 15;
-  border-left: 2px solid #ffffff;
+  border-left: clamp(1px, 0.3vw, 2px) solid #ffffff;
 }
 
-/* Left sidebar for additional coverage */
+/* Left panel for coverage */
 .ar-left-panel {
   position: absolute;
   top: 0;
   left: 0;
-  width: 150px;
+  width: clamp(80px, 12vw, 150px);
   height: 100%;
   background: rgba(255, 140, 0, 0.95);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(clamp(5px, 1.5vw, 10px));
   z-index: 14;
-  border-right: 2px solid rgba(255, 255, 255, 0.3);
+  border-right: clamp(1px, 0.3vw, 2px) solid rgba(255, 255, 255, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1000,17 +890,17 @@ body {
   writing-mode: vertical-lr;
   text-orientation: mixed;
   color: rgba(255, 255, 255, 0.6);
-  font-size: 1.2rem;
+  font-size: clamp(0.8rem, 2vw, 1.2rem);
   font-weight: 700;
-  letter-spacing: 3px;
-  text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+  letter-spacing: clamp(2px, 0.5vw, 3px);
+  text-shadow: 0 0 clamp(5px, 1.5vw, 10px) rgba(255, 255, 255, 0.3);
 }
 
 .ar-sidebar h3 {
-  font-size: 1.3rem;
+  font-size: clamp(1.1rem, 2.5vw, 1.3rem);
   font-weight: 600;
   color: #ffffff;
-  margin-bottom: 1.5rem;
+  margin-bottom: clamp(1rem, 3vw, 1.5rem);
   text-align: center;
   text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
 }
@@ -1021,15 +911,15 @@ body {
 }
 
 .ar-kit-name {
-  font-size: 1.1rem;
+  font-size: clamp(1rem, 2.2vw, 1.1rem);
   font-weight: 600;
   color: #ffffff;
-  margin-bottom: 1rem;
+  margin-bottom: clamp(0.8rem, 2vw, 1rem);
   text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
 }
 
 .ar-kit-desc {
-  font-size: 0.95rem;
+  font-size: clamp(0.85rem, 2vw, 0.95rem);
   color: #ffffff;
   line-height: 1.6;
 }
@@ -1037,24 +927,25 @@ body {
 .debug-button {
   background: #ffffff;
   color: #FF8C00;
-  border: 2px solid #ffffff;
-  padding: 0.8rem 1.5rem;
-  border-radius: 8px;
+  border: clamp(1px, 0.3vw, 2px) solid #ffffff;
+  padding: clamp(0.6rem, 1.5vw, 0.8rem) clamp(1rem, 2.5vw, 1.5rem);
+  border-radius: clamp(6px, 1.2vw, 8px);
   cursor: pointer;
   font-weight: 700;
-  margin-top: 2rem;
+  margin-top: clamp(1.5rem, 4vw, 2rem);
   transition: all 0.3s ease;
   text-transform: uppercase;
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 clamp(5px, 1.5vw, 10px) rgba(255, 255, 255, 0.2);
+  font-size: clamp(0.8rem, 1.8vw, 0.9rem);
 }
 
 .debug-button:hover {
   background: #FF8C00;
   color: #ffffff;
-  box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 clamp(10px, 3vw, 20px) rgba(255, 255, 255, 0.3);
 }
 
-/* Debug overlay */
+/* Debug overlay - Responsive */
 .debug-overlay {
   position: fixed;
   top: 0;
@@ -1065,7 +956,7 @@ body {
   color: white;
   display: none;
   z-index: 1001;
-  padding: 2rem;
+  padding: clamp(1rem, 4vw, 2rem);
   overflow-y: auto;
 }
 
@@ -1075,13 +966,15 @@ body {
 
 .debug-header {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  margin-bottom: clamp(1.5rem, 4vw, 2rem);
+  gap: clamp(0.5rem, 2vw, 1rem);
 }
 
 .debug-header h3 {
-  font-size: 1.5rem;
+  font-size: clamp(1.2rem, 3vw, 1.5rem);
   font-weight: 600;
 }
 
@@ -1089,15 +982,18 @@ body {
   background: #666666;
   color: white;
   border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
+  padding: clamp(0.4rem, 1vw, 0.5rem) clamp(0.8rem, 2vw, 1rem);
+  border-radius: clamp(4px, 0.8vw, 6px);
   cursor: pointer;
+  font-size: clamp(0.8rem, 1.8vw, 0.9rem);
 }
 
 .debug-overlay-header {
   display: flex; 
+  flex-wrap: wrap;
   align-items: center; 
   justify-content: space-between;
+  gap: clamp(0.5rem, 2vw, 1rem);
 }
 
 .debug-overlay-header h3 {
@@ -1106,19 +1002,19 @@ body {
 
 .marker-info {
   font-family: 'Courier New', monospace;
-  font-size: 0.9rem;
+  font-size: clamp(0.8rem, 1.8vw, 0.9rem);
   white-space: pre-wrap;
-  margin-bottom: 2rem;
+  margin-bottom: clamp(1.5rem, 4vw, 2rem);
   background: rgba(255,255,255,0.1);
-  padding: 1rem;
-  border-radius: 8px;
+  padding: clamp(0.8rem, 2vw, 1rem);
+  border-radius: clamp(6px, 1.2vw, 8px);
 }
 
 .debug-canvas-container {
   text-align: center;
   background: rgba(255,255,255,0.1);
-  padding: 1rem;
-  border-radius: 8px;
+  padding: clamp(0.8rem, 2vw, 1rem);
+  border-radius: clamp(6px, 1.2vw, 8px);
 }
 
 #debugCanvas {
@@ -1127,7 +1023,7 @@ body {
   height: auto;
 }
 
-/* Parallax Scrolling Effect */
+/* Parallax Background - Fixed */
 .parallax-bg {
   position: fixed;
   top: 0;
@@ -1150,184 +1046,7 @@ body {
   filter: brightness(0.7);
 }
 
-/* Mobile Responsive - Apple Style */
-@media (max-width: 768px) {
-  .header-content {
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .header-buttons {
-    order: -1;
-    flex-direction: column;
-    gap: 0.5rem;
-    width: 100%;
-  }
-
-  .header-button,
-  .header-ar-button {
-    width: 100%;
-    max-width: 200px;
-    margin: 0 auto;
-  }
-
-  .header-bar h1 {
-    font-size: 1.5rem;
-  }
-
-  .header-button,
-  .header-ar-button {
-    padding: 0.6rem 1rem;
-    font-size: 0.8rem;
-  }
-
-  .intro-section {
-    padding: 2rem 1rem;
-  }
-
-  .intro-section h2 {
-    font-size: clamp(2rem, 8vw, 3rem);
-    margin-bottom: 1.5rem;
-  }
-
-  .intro-section p {
-    font-size: clamp(1rem, 4vw, 1.2rem);
-    margin-bottom: 2rem;
-  }
-
-  .kit-content,
-  .kit-content.reverse {
-    grid-template-columns: 1fr;
-    gap: 3rem;
-    padding: 0 2rem;
-  }
-
-  .kit-section {
-    padding: 2rem 0;
-    min-height: 100vh;
-  }
-
-  .kit-text {
-    padding: 1rem 0;
-    order: 2;
-  }
-
-  .kit-text h3 {
-    font-size: clamp(1.5rem, 6vw, 2rem);
-    margin-bottom: 1.5rem;
-  }
-
-  .kit-text p {
-    font-size: clamp(0.9rem, 3.5vw, 1.1rem);
-    line-height: 1.7;
-  }
-
-  .kit-image {
-    height: 300px;
-    order: 1;
-    margin-bottom: 1rem;
-  }
-
-  .kit-detail {
-    grid-template-columns: 1fr;
-    gap: 2rem;
-    padding: 2rem;
-  }
-
-  .ar-initial-content {
-    padding: 2rem 1rem;
-  }
-
-  .ar-initial-content h3 {
-    font-size: 1.5rem;
-  }
-
-  .ar-instructions-content {
-    margin: 1rem;
-    padding: 1.5rem;
-  }
-
-  .ar-instructions-header {
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .ar-help-button {
-    top: 1rem;
-    right: 1rem;
-    padding: 0.6rem 1rem;
-    font-size: 0.8rem;
-  }
-
-  #threeContainer {
-    left: 50%;
-    transform: translateX(-50%);
-    width: auto;
-  }
-
-  .ar-left-panel {
-    display: none;
-  }
-
-  .ar-sidebar {
-    position: fixed;
-    bottom: 0;
-    right: 0;
-    width: 100%;
-    height: 200px;
-    padding: 1rem;
-  }
-
-  /* Disable complex animations on mobile for performance */
-  .kit-content {
-    transition: none !important;
-  }
-  
-  .kit-image:hover {
-    transform: translateY(-5px) scale(1.01);
-  }
-
-  /* Mobile video optimizations */
-  .kit-video, .kit-detail-video {
-    -webkit-transform: translateZ(0);
-    transform: translateZ(0);
-  }
-}
-
-/* Apple-style enhancements */
-.kit-content {
-  will-change: transform, opacity;
-}
-
-.kit-text, .kit-image {
-  will-change: transform, opacity, filter;
-}
-
-.parallax-element {
-  will-change: transform;
-}
-
-/* Smooth momentum scrolling for iOS */
-#homeScreen {
-  -webkit-overflow-scrolling: touch;
-}
-
-/* Hardware acceleration for assembly animations */
-.kit-text.pre-assembly,
-.kit-text.assembled,
-.kit-text.disassembled,
-.kit-image.pre-assembly,
-.kit-image.assembled,
-.kit-image.disassembled {
-  -webkit-transform: translateZ(0);
-  transform: translateZ(0);
-  -webkit-backface-visibility: hidden;
-  backface-visibility: hidden;
-  -webkit-perspective: 1000px;
-  perspective: 1000px;
-}
-
-/* Modal Screen Styles */
+/* Modal Screen Styles - Responsive Flexbox */
 .modal-screen {
   display: none;
   position: fixed;
@@ -1346,146 +1065,126 @@ body {
 
 .modal-header {
   background: rgba(255, 255, 255, 0.1);
-  padding: 2rem;
+  padding: clamp(1.5rem, 4vw, 2rem);
   text-align: center;
-  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+  border-bottom: clamp(1px, 0.3vw, 2px) solid rgba(255, 255, 255, 0.2);
   position: sticky;
   top: 0;
   z-index: 10;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(clamp(5px, 1.5vw, 10px));
 }
 
 .modal-close-button {
   position: absolute;
-  top: 2rem;
-  left: 2rem;
+  top: clamp(1.5rem, 4vw, 2rem);
+  left: clamp(1.5rem, 4vw, 2rem);
   background: #ffffff;
   color: #FF8C00;
-  border: 2px solid #ffffff;
-  padding: 0.8rem 1.5rem;
-  border-radius: 8px;
+  border: clamp(1px, 0.3vw, 2px) solid #ffffff;
+  padding: clamp(0.6rem, 1.5vw, 0.8rem) clamp(1rem, 2.5vw, 1.5rem);
+  border-radius: clamp(6px, 1.2vw, 8px);
   cursor: pointer;
   font-weight: 700;
   transition: all 0.3s ease;
   text-transform: uppercase;
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 clamp(5px, 1.5vw, 10px) rgba(255, 255, 255, 0.3);
+  font-size: clamp(0.8rem, 1.8vw, 0.9rem);
 }
 
 .modal-close-button:hover {
   background: #FF8C00;
   color: #ffffff;
-  transform: translateY(-1px);
-  box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+  transform: translateY(clamp(-0.5px, -0.2vw, -1px));
+  box-shadow: 0 0 clamp(10px, 3vw, 20px) rgba(255, 255, 255, 0.5);
 }
 
 .modal-content {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 3rem 2rem;
+  padding: clamp(2rem, 6vw, 3rem) clamp(1rem, 4vw, 2rem);
 }
 
 .modal-title {
-  font-size: 3rem;
+  font-size: clamp(2rem, 6vw, 3rem);
   font-weight: 700;
   color: #ffffff;
-  margin-bottom: 1rem;
-  text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+  margin-bottom: clamp(0.8rem, 2vw, 1rem);
+  text-shadow: 0 0 clamp(7px, 2vw, 15px) rgba(255, 255, 255, 0.3);
 }
 
 .modal-subtitle {
-  font-size: 1.2rem;
+  font-size: clamp(1rem, 2.5vw, 1.2rem);
   color: rgba(255, 255, 255, 0.9);
-  margin-bottom: 3rem;
+  margin-bottom: clamp(2rem, 6vw, 3rem);
 }
 
 .content-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
-  margin-bottom: 3rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(1.5rem, 4vw, 2rem);
+  margin-bottom: clamp(2rem, 6vw, 3rem);
+}
+
+.content-grid > * {
+  flex: 1 1 clamp(250px, 30vw, 300px);
+  min-width: 0;
 }
 
 .content-card {
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
-  padding: 2rem;
-  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: clamp(12px, 2.5vw, 16px);
+  padding: clamp(1.5rem, 4vw, 2rem);
+  border: clamp(1px, 0.3vw, 2px) solid rgba(255, 255, 255, 0.2);
   transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(clamp(5px, 1.5vw, 10px));
 }
 
 .content-card:hover {
-  transform: translateY(-5px);
+  transform: translateY(clamp(-3px, -0.8vw, -5px));
   background: rgba(255, 255, 255, 0.15);
   border-color: rgba(255, 255, 255, 0.4);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 clamp(5px, 1.5vw, 10px) clamp(15px, 4vw, 30px) rgba(0, 0, 0, 0.2);
 }
 
 .content-card h3 {
-  font-size: 1.5rem;
+  font-size: clamp(1.2rem, 3vw, 1.5rem);
   font-weight: 600;
   color: #ffffff;
-  margin-bottom: 1rem;
+  margin-bottom: clamp(0.8rem, 2vw, 1rem);
   text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
 }
 
 .content-card p {
   color: rgba(255, 255, 255, 0.9);
   line-height: 1.6;
-  margin-bottom: 1.5rem;
+  margin-bottom: clamp(1rem, 3vw, 1.5rem);
+  font-size: clamp(0.9rem, 2vw, 1rem);
 }
 
 .download-button {
   background: #ffffff;
   color: #FF8C00;
-  border: 2px solid #ffffff;
-  padding: 0.8rem 1.5rem;
-  border-radius: 8px;
+  border: clamp(1px, 0.3vw, 2px) solid #ffffff;
+  padding: clamp(0.6rem, 1.5vw, 0.8rem) clamp(1rem, 2.5vw, 1.5rem);
+  border-radius: clamp(6px, 1.2vw, 8px);
   cursor: pointer;
   font-weight: 600;
   transition: all 0.3s ease;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-size: 0.9rem;
+  letter-spacing: clamp(0.3px, 0.1vw, 0.5px);
+  font-size: clamp(0.8rem, 1.8vw, 0.9rem);
   width: 100%;
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 clamp(5px, 1.5vw, 10px) rgba(255, 255, 255, 0.2);
 }
 
 .download-button:hover {
   background: #FF8C00;
   color: #ffffff;
-  transform: translateY(-1px);
-  box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+  transform: translateY(clamp(-0.5px, -0.2vw, -1px));
+  box-shadow: 0 0 clamp(10px, 3vw, 20px) rgba(255, 255, 255, 0.3);
 }
 
-@media (max-width: 768px) {
-  .modal-title {
-    font-size: 2rem;
-  }
-  
-  .modal-content {
-    padding: 2rem 1rem;
-  }
-  
-  .content-grid {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-  }
-  
-  .content-card {
-    padding: 1.5rem;
-  }
-  
-  .pdf-viewer {
-    height: 60vh;
-  }
-  
-  .pdf-viewer iframe {
-    height: 50vh;
-  }
-}
-
-/* PDF Viewer Modal */
+/* PDF Viewer Modal - Responsive */
 .pdf-viewer-modal {
   display: none;
   position: fixed;
@@ -1495,7 +1194,7 @@ body {
   height: 100vh;
   background: rgba(0, 0, 0, 0.95);
   z-index: 2000;
-  padding: 2rem;
+  padding: clamp(1rem, 4vw, 2rem);
 }
 
 .pdf-viewer-modal.active {
@@ -1505,44 +1204,49 @@ body {
 
 .pdf-viewer-header {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-bottom: clamp(0.8rem, 2vw, 1rem);
   color: white;
+  gap: clamp(0.5rem, 2vw, 1rem);
 }
 
 .pdf-viewer-title {
-  font-size: 1.5rem;
+  font-size: clamp(1.2rem, 3vw, 1.5rem);
   font-weight: 600;
   color: #ffffff;
+  flex: 1 1 auto;
 }
 
 .pdf-viewer-close {
   background: #FF8C00;
   color: #ffffff;
-  border: 2px solid #FF8C00;
-  padding: 0.8rem 1.5rem;
-  border-radius: 8px;
+  border: clamp(1px, 0.3vw, 2px) solid #FF8C00;
+  padding: clamp(0.6rem, 1.5vw, 0.8rem) clamp(1rem, 2.5vw, 1.5rem);
+  border-radius: clamp(6px, 1.2vw, 8px);
   cursor: pointer;
   font-weight: 700;
   transition: all 0.3s ease;
   text-transform: uppercase;
-  box-shadow: 0 0 10px rgba(255, 140, 0, 0.3);
+  box-shadow: 0 0 clamp(5px, 1.5vw, 10px) rgba(255, 140, 0, 0.3);
+  font-size: clamp(0.8rem, 1.8vw, 0.9rem);
+  flex: 0 0 auto;
 }
 
 .pdf-viewer-close:hover {
   background: #ffffff;
   color: #FF8C00;
-  transform: translateY(-1px);
-  box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+  transform: translateY(clamp(-0.5px, -0.2vw, -1px));
+  box-shadow: 0 0 clamp(10px, 3vw, 20px) rgba(255, 255, 255, 0.3);
 }
 
 .pdf-viewer {
   flex: 1;
   background: #ffffff;
-  border-radius: 8px;
+  border-radius: clamp(6px, 1.2vw, 8px);
   overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 clamp(2px, 0.8vw, 4px) clamp(10px, 3vw, 20px) rgba(0, 0, 0, 0.3);
 }
 
 .pdf-viewer iframe {
@@ -1560,33 +1264,142 @@ body {
   text-align: center;
   color: #666666;
   background: #f5f5f5;
+  padding: clamp(1rem, 4vw, 2rem);
 }
 
 .pdf-fallback h3 {
-  font-size: 1.2rem;
-  margin-bottom: 1rem;
+  font-size: clamp(1rem, 2.5vw, 1.2rem);
+  margin-bottom: clamp(0.8rem, 2vw, 1rem);
   color: #333333;
 }
 
 .pdf-fallback p {
-  margin-bottom: 1.5rem;
+  margin-bottom: clamp(1rem, 3vw, 1.5rem);
   color: #666666;
+  font-size: clamp(0.9rem, 2vw, 1rem);
 }
 
 .pdf-download-link {
   background: #FF8C00;
   color: #ffffff;
-  padding: 0.8rem 1.5rem;
-  border-radius: 8px;
+  padding: clamp(0.6rem, 1.5vw, 0.8rem) clamp(1rem, 2.5vw, 1.5rem);
+  border-radius: clamp(6px, 1.2vw, 8px);
   text-decoration: none;
   font-weight: 600;
   transition: all 0.3s ease;
+  font-size: clamp(0.9rem, 2vw, 1rem);
 }
 
 .pdf-download-link:hover {
   background: #FF7F00;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 10px rgba(255, 140, 0, 0.3);
+  transform: translateY(clamp(-0.5px, -0.2vw, -1px));
+  box-shadow: 0 clamp(2px, 0.8vw, 4px) clamp(5px, 1.5vw, 10px) rgba(255, 140, 0, 0.3);
 }
 
+/* Responsive breakpoints for layout adjustments */
+@media (max-width: 768px) {
+  /* Header adjustments for mobile */
+  .header-content {
+    gap: clamp(0.8rem, 2vw, 1.2rem);
+  }
+  
+  .header-buttons {
+    gap: clamp(0.6rem, 1.5vw, 0.8rem);
+  }
+  
+  /* Maintain horizontal layout but adjust sizing */
+  .kit-content {
+    gap: clamp(1.5rem, 4vw, 2.5rem);
+    padding: clamp(1.5rem, 4vw, 2rem);
+    min-height: 60vh;
+  }
+  
+  .kit-content > * {
+    flex: 1 1 42%; /* Slightly smaller on mobile but still horizontal */
+    min-width: 250px;
+  }
+  
+  /* Adjust text sizing for smaller screens */
+  .kit-text h3 {
+    font-size: clamp(1.6rem, 4.5vw, 2.2rem);
+  }
+  
+  .kit-text p {
+    font-size: clamp(0.95rem, 2.3vw, 1.1rem);
+  }
+  
+  /* Adjust image sizing for mobile */
+  .kit-image {
+    height: clamp(250px, 40vw, 350px);
+  }
+}
 
+@media (max-width: 480px) {
+  /* Very small screens - switch to vertical only when absolutely necessary */
+  .kit-content {
+    flex-direction: column;
+    flex-wrap: wrap;
+    gap: clamp(1.5rem, 4vw, 2rem);
+    padding: clamp(1rem, 3vw, 1.5rem);
+    min-height: auto;
+  }
+  
+  .kit-content > * {
+    flex: 1 1 100%;
+    min-width: unset;
+    max-width: 100%;
+  }
+  
+  .kit-text {
+    order: 2; /* Text below image on very small screens */
+  }
+  
+  .kit-image {
+    order: 1; /* Image above text on very small screens */
+    height: clamp(200px, 35vw, 280px);
+  }
+  
+  .kit-content.reverse .kit-text {
+    order: 2; /* Keep consistent order on small screens */
+  }
+  
+  .kit-content.reverse .kit-image {
+    order: 1;
+  }
+}
+
+/* Hardware acceleration for smooth animations */
+.kit-content,
+.kit-text,
+.kit-image,
+.kit-video {
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-perspective: 1000px;
+  perspective: 1000px;
+}
+
+/* Smooth momentum scrolling for iOS */
+#homeScreen,
+.debug-overlay,
+.modal-screen,
+.pdf-viewer-modal {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Ensure text remains readable at all sizes */
+* {
+  min-height: 0;
+  min-width: 0;
+}
+
+/* Prevent text from becoming too small */
+h1, h2, h3, h4, h5, h6 {
+  min-font-size: 14px;
+}
+
+p, li, span {
+  min-font-size: 12px;
+}

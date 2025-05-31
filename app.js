@@ -1240,6 +1240,10 @@ function initAR(){
 
   initCamera();
   initRenderer();
+
+  canvas.width  = window.CV_RENDER_WIDTH;
+  canvas.height = window.CV_RENDER_HEIGHT;
+
   stlLoader = new THREE.STLLoader();
   requestAnimationFrame(tick);
 }
@@ -1348,6 +1352,11 @@ function handleResize() {
     
     window.CV_RENDER_WIDTH = renderWidth;
     window.CV_RENDER_HEIGHT = renderHeight;
+
+    if (canvas) {
+      canvas.width  = renderWidth;
+      canvas.height = renderHeight;
+    }
 }
 
 window.addEventListener('resize', handleResize);
@@ -1552,6 +1561,10 @@ function toggleDebugOverlay(){
 function drawDebugCanvas(){
   let dbgCanvas=document.getElementById("debugCanvas");
   let dbgCtx=dbgCanvas.getContext("2d");
+
+  dbgCanvas.width  = window.CV_RENDER_WIDTH;
+  dbgCanvas.height = window.CV_RENDER_HEIGHT;
+
   dbgCtx.clearRect(0,0,dbgCanvas.width,dbgCanvas.height);
   dbgCtx.drawImage(canvas,0,0);
 
@@ -1574,5 +1587,6 @@ function drawDebugCanvas(){
   });
   document.getElementById("markerInfo").textContent=txt;
 }
+
 
 

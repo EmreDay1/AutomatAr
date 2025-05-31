@@ -773,14 +773,14 @@ body {
 
 /* AR Screen - Responsive Flexbox */
 #arScreen {
-  display: none;
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
+  width: 100vw;
   height: 100vh;
   background: #000000;
   z-index: 1000;
+  display: none;
 }
 
 .ar-header {
@@ -823,23 +823,34 @@ body {
 }
 
 .ar-container {
+  display: flex;
+  flex-direction: column; 
+  align-items: stretch;
+  justify-content: stretch;
   width: 100%;
   height: 100%;
-  position: relative;
+  position: relative; 
 }
 
-#video { display: none; }
-#canvas { display: none; }
+.ar-container video,
+.ar-container canvas {
+  flex: 1 1 auto;           
+  width: 100% !important;      
+  height: 100% !important;
+  object-fit: cover;           
+  background: black;          
+  display: block;              
+}
 
 #threeContainer {
   position: absolute;
   top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: auto;
+  left: 0;
+  width: 100%;
   height: 100%;
   z-index: 5;
 }
+
 
 /* AR Background */
 .ar-background {
@@ -1018,9 +1029,9 @@ body {
 }
 
 #debugCanvas {
-  border: 1px solid #666666;
-  max-width: 100%;
-  height: auto;
+  width: 100% !important;
+  height: 100% !important;
+  display: block; 
 }
 
 /* Parallax Background - Fixed */

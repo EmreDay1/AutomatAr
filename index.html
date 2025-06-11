@@ -3,9 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AutomatAR - Interactive Mechanical Engineering Learning</title>
-  <meta name="description" content="Explore mechanical engineering concepts through augmented reality with AutomatAR's interactive learning platform.">
-  
+  <title>AutomatAR</title>
+
   <!-- External Libraries -->
   <script src="libs/Three.js"></script>
   <script src="libs/STLLoader.js"></script>
@@ -17,787 +16,136 @@
   <script src="src/multiS.js"></script>
   <script src="src/optic.js"></script>
 
-  <!-- Stylesheets -->
+  <!-- External CSS and JS -->
   <link rel="stylesheet" href="styles.css">
-  
-  <!-- Favicon -->
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
-
- <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: linear-gradient(135deg, #FF8C00 0%, #FF7F00 100%);
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-
-    /* Header */
-    .ai-header {
-      background: rgba(255, 255, 255, 0.1);
-      padding: 1.5rem 2rem;
-      text-align: center;
-      border-bottom: 2px solid rgba(255, 255, 255, 0.2);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      backdrop-filter: blur(10px);
-    }
-
-    .ai-close-button {
-      position: absolute;
-      top: 1.5rem;
-      left: 2rem;
-      background: #ffffff;
-      color: #FF8C00;
-      border: 2px solid #ffffff;
-      padding: 0.8rem 1.5rem;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 700;
-      transition: all 0.3s ease;
-      text-transform: uppercase;
-      box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
-      font-size: 0.9rem;
-    }
-
-    .ai-close-button:hover {
-      background: #FF8C00;
-      color: #ffffff;
-      transform: translateY(-1px);
-      box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
-    }
-
-    .ai-header-title {
-      font-size: 2.5rem;
-      font-weight: 700;
-      color: #ffffff;
-      margin-bottom: 0.5rem;
-      text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
-    }
-
-    .ai-header-subtitle {
-      font-size: 1.1rem;
-      color: rgba(255, 255, 255, 0.9);
-      font-weight: 500;
-    }
-
-    /* Main Container */
-    .ai-main-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 2rem;
-      scroll-snap-type: y mandatory;
-      height: calc(100vh - 140px);
-      overflow-y: auto;
-    }
-
-    /* Card Container */
-    .ai-card-container {
-      margin-bottom: 2rem;
-      scroll-snap-align: start;
-      opacity: 0;
-      transform: translateY(60px) scale(0.95);
-      transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
-    }
-
-    .ai-card-container.animate-in {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-    }
-
-    .ai-card-container:nth-child(2) {
-      transition-delay: 0.2s;
-    }
-
-    .ai-card-container:nth-child(3) {
-      transition-delay: 0.4s;
-    }
-
-    /* Horizontal Card Design */
-
-/* Horizontal Card Design */
-.ai-horizontal-card {
-  background: linear-gradient(145deg, 
-    rgba(230, 245, 255, 0.95) 0%, 
-    rgba(210, 235, 255, 0.9) 100%);
-  border-radius: 20px;
-  box-shadow: 
-    0 20px 60px rgba(0, 0, 0, 0.05),
-    0 8px 24px rgba(180, 220, 255, 0.15),
-    inset 0 2px 0 rgba(255, 255, 255, 0.8);
-  display: flex;
-  min-height: 200px;
-  position: relative;
-  overflow: hidden;
-  border: 3px solid rgba(255, 255, 255, 0.5);
-  backdrop-filter: blur(10px);
-  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-}
-
-.ai-horizontal-card:hover {
-  transform: translateY(-8px) scale(1.02);
-  box-shadow: 
-    0 30px 80px rgba(0, 0, 0, 0.1),
-    0 12px 36px rgba(180, 220, 255, 0.25),
-    inset 0 2px 0 rgba(255, 255, 255, 0.9);
-  border-color: rgba(255, 255, 255, 0.7);
-}
-
-/* Left Side - Dropdown Area */
-.card-left-side {
-  flex: 1;
-  padding: 2rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  position: relative;
-  background: linear-gradient(135deg, 
-    rgba(210, 235, 255, 0.2) 0%, 
-    rgba(190, 225, 250, 0.3) 100%);
-}
-
-.card-title {
-  font-size: 2rem;
-  font-weight: 700;
-  color: #4BA3C7;
-  margin-bottom: 0.5rem;
-  text-shadow: 0 2px 4px rgba(75, 163, 199, 0.3);
-}
-
-/* Right Side - Image Area */
-.card-right-side {
-  flex: 1.5;
-  background: linear-gradient(135deg, #e6f5ff 0%, #d0ebff 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  overflow: hidden;
-}
-    .card-subtitle {
-      font-size: 1.1rem;
-      color: #666;
-      margin-bottom: 2rem;
-      font-weight: 500;
-    }
-
-    /* Custom Dropdown */
-    .custom-dropdown {
-      position: relative;
-      width: 100%;
-      max-width: 300px;
-    }
-
-    .dropdown-trigger {
-      width: 100%;
-      background: linear-gradient(145deg, #ffffff, #f8f9fa);
-      border: 2px solid #FF8C00;
-      border-radius: 12px;
-      padding: 1rem 1.5rem;
-      font-size: 1rem;
-      font-weight: 600;
-      color: #FF8C00;
-      cursor: pointer;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 
-        0 4px 12px rgba(255, 140, 0, 0.2),
-        inset 0 1px 0 rgba(255, 255, 255, 0.8);
-      transition: all 0.3s ease;
-    }
-
-    .dropdown-trigger:hover {
-      background: linear-gradient(145deg, #f8f9fa, #e9ecef);
-      border-color: #FF7F00;
-      box-shadow: 
-        0 6px 18px rgba(255, 140, 0, 0.3),
-        inset 0 1px 0 rgba(255, 255, 255, 0.9);
-    }
-
-    .dropdown-trigger.active {
-      border-color: #FF6600;
-      background: linear-gradient(145deg, #fff3e0, #ffe0b2);
-    }
-
-    .dropdown-arrow {
-      font-size: 0.8rem;
-      transition: transform 0.3s ease;
-    }
-
-    .dropdown-trigger.active .dropdown-arrow {
-      transform: rotate(180deg);
-    }
-
-    .dropdown-menu {
-      position: absolute;
-      top: 100%;
-      left: 0;
-      right: 0;
-      background: #ffffff;
-      border: 2px solid #FF8C00;
-      border-radius: 12px;
-      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.15);
-      max-height: 200px;
-      overflow-y: auto;
-      z-index: 1000;
-      margin-top:8px;
-      opacity: 0;
-      visibility: hidden;
-      transform: translateY(-20px);
-      transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
-    }
-
-    .dropdown-menu.open {
-      opacity: 1;
-      visibility: visible;
-      transform: translateY(8px);    /* small gap under the trigger */
-    }
-
-    .dropdown-option {
-      padding: 1rem 1.5rem;
-      font-size: 0.95rem;
-      color: #333;
-      cursor: pointer;
-      border-bottom: 1px solid rgba(255, 140, 0, 0.1);
-      font-weight: 500;
-      transition: all 0.2s ease;
-    }
-
-    .dropdown-option:last-child {
-      border-bottom: none;
-    }
-
-    .dropdown-option:hover {
-      background: linear-gradient(135deg, 
-        rgba(255, 140, 0, 0.1) 0%, 
-        rgba(255, 165, 0, 0.05) 100%);
-      color: #FF8C00;
-      font-weight: 600;
-    }
-
-    .dropdown-option.selected {
-      background: linear-gradient(135deg, 
-        rgba(255, 140, 0, 0.2) 0%, 
-        rgba(255, 165, 0, 0.1) 100%);
-      color: #FF6600;
-      font-weight: 600;
-    }
-
-    /* Right Side - Image Area */
-    .card-right-side {
-      flex: 1.5;
-      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .card-image-container {
-      width: 100%;
-      height: 100%;
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-    }
-
-    .card-image {
-      max-width: 90%;
-      max-height: 90%;
-      object-fit: contain;
-      border-radius: 12px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-      transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-      opacity: 0;
-      transform: scale(0.8);
-    }
-
-    .card-image.loaded {
-      opacity: 1;
-      transform: scale(1);
-    }
-
-    .card-image:hover {
-      transform: scale(1.05);
-      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.15);
-    }
-
-    .image-placeholder {
-      width: 150px;
-      height: 150px;
-      background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 3rem;
-      color: #adb5bd;
-      border: 3px dashed #ced4da;
-      transition: all 0.3s ease;
-    }
-
-    .image-placeholder:hover {
-      background: linear-gradient(135deg, #dee2e6 0%, #ced4da 100%);
-      color: #868e96;
-    }
-
-    /* Help Button */
-    .help-button {
-      position: absolute;
-      bottom: 1rem;
-      left: 1rem;
-      background: #FF8C00;
-      color: #ffffff;
-      border: none;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      font-size: 1.2rem;
-      font-weight: 700;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 4px 12px rgba(255, 140, 0, 0.3);
-      transition: all 0.3s ease;
-      z-index: 10;
-    }
-
-    .help-button:hover {
-      background: #FF7F00;
-      transform: scale(1.1);
-      box-shadow: 0 6px 18px rgba(255, 140, 0, 0.4);
-    }
-
-    /* Scenario Button */
-    .scenario-button-container {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      z-index: 200;
-    }
-
-    .scenario-button {
-      width: 100%;
-      height: 60px;
-      background: linear-gradient(135deg, #FF8C00 0%, #FF7F00 100%);
-      border: none;
-      color: #ffffff;
-      font-size: 1.2rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    .scenario-button:hover {
-      background: linear-gradient(135deg, #FF7F00 0%, #FF6600 100%);
-      box-shadow: 0 -6px 30px rgba(0, 0, 0, 0.15);
-      transform: translateY(-2px);
-    }
-
-    /* Scenario Popup */
-    .scenario-popup {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.8);
-      backdrop-filter: blur(10px);
-      z-index: 300;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0;
-      visibility: hidden;
-      transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-    }
-
-    .scenario-popup.open {
-      opacity: 1;
-      visibility: visible;
-    }
-
-    .scenario-content {
-      background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
-      border-radius: 20px;
-      padding: 3rem;
-      max-width: 800px;
-      max-height: 80vh;
-      overflow-y: auto;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-      position: relative;
-      transform: scale(0.8) translateY(40px);
-      transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-    }
-
-    .scenario-popup.open .scenario-content {
-      transform: scale(1) translateY(0);
-    }
-
-    .scenario-close {
-      position: absolute;
-      top: 1rem;
-      right: 1rem;
-      background: #FF8C00;
-      color: #ffffff;
-      border: none;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      font-size: 1.2rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .scenario-close:hover {
-      background: #FF7F00;
-      transform: scale(1.1);
-    }
-
-    .scenario-title {
-      font-size: 2rem;
-      font-weight: 700;
-      color: #FF8C00;
-      margin-bottom: 1.5rem;
-      text-align: center;
-    }
-
-    .scenario-text {
-      font-size: 1.1rem;
-      line-height: 1.6;
-      color: #333;
-      margin-bottom: 1.5rem;
-    }
-
-    /* Responsive Design */
-    @media (max-width: 768px) {
-      .ai-horizontal-card {
-        flex-direction: column;
-        min-height: auto;
-      }
-
-      .card-left-side,
-      .card-right-side {
-        flex: none;
-      }
-
-      .card-left-side {
-        padding: 1.5rem;
-      }
-
-      .card-right-side {
-        min-height: 200px;
-      }
-
-      .ai-main-container {
-        padding: 1rem;
-        height: calc(100vh - 180px);
-        margin-bottom: 60px;
-      }
-
-      .scenario-content {
-        margin: 1rem;
-        padding: 2rem;
-      }
-    }
-
-    /* Scrollbar Styling */
-    .ai-main-container::-webkit-scrollbar {
-      width: 8px;
-    }
-
-    .ai-main-container::-webkit-scrollbar-track {
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 4px;
-    }
-
-    .ai-main-container::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.3);
-      border-radius: 4px;
-    }
-
-    .ai-main-container::-webkit-scrollbar-thumb:hover {
-      background: rgba(255, 255, 255, 0.5);
-    }
-
-    /* Animation Classes */
-    .fade-in {
-      animation: fadeIn 0.6s cubic-bezier(0.23, 1, 0.32, 1);
-    }
-
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .scale-in {
-      animation: scaleIn 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-    }
-
-    @keyframes scaleIn {
-      from {
-        opacity: 0;
-        transform: scale(0.8);
-      }
-      to {
-        opacity: 1;
-        transform: scale(1);
-      }
-    }
-
-    /* Loading States */
-    .loading {
-      opacity: 0.6;
-      pointer-events: none;
-    }
-
-    .loading::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 20px;
-      height: 20px;
-      margin: -10px 0 0 -10px;
-      border: 2px solid #FF8C00;
-      border-radius: 50%;
-      border-top-color: transparent;
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-
-        /* 1. Let dropdowns escape their card/container */
-    .ai-card-container,
-    .ai-horizontal-card {
-      overflow: visible;
-    }
-
-    /* 2. Make sure the dropdown itself floats on top */
-    .custom-dropdown {
-      position: relative;  /* ensure child z-index is relative to this */
-      z-index: 1000;       /* a base stacking context */
-    }
-
-    .dropdown-menu {
-      z-index: 1001;       /* just above its parent; adjust upward if needed */
-    }
-
-    /* If there are any other higher-z elements (like modals),
-      you can go even higher: */
-    .scenario-popup,
-    #aiScreen .dropdown-menu {
-      z-index: 9999 !important;
-    }
-    /* 1) bump the open card above its siblings */
-    .ai-card-container.dropdown-open {
-      position: relative;
-      z-index: 1002;
-    }
-
-    /* 2) equalize heights across all horizontal cards */
-    .ai-horizontal-card {
-      min-height: 260px;    /* whatever matches your Kit cards’ height */
-      /* if you need more fine-tuning, adjust this value */
-    }
-
-    /* 3) (optional) ensure the left and right sides stretch */
-    .ai-horizontal-card {
-      display: flex;
-      align-items: stretch;
-    }
-    .card-left-side,
-    .card-right-side {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
-
-    /* 1) let dropdowns escape their card */
-    .ai-card-container,
-    .ai-horizontal-card {
-      overflow: visible;
-    }
-
-    /* 2) the menu itself */
-    .dropdown-menu {
-      position: absolute;
-      top: 100%;
-      left: 0; right: 0;
-      background: #fff;
-      border: 2px solid #FF8C00;
-      border-radius: 12px;
-      box-shadow: 0 12px 36px rgba(0,0,0,0.15);
-      max-height: 240px;        /* tweak as you like */
-      overflow-y: auto;
-      margin-top: 8px;
-      opacity: 0;
-      visibility: hidden;
-      transform: translateY(-20px);
-      transition: all 0.3s cubic-bezier(0.23,1,0.32,1);
-      z-index: 1001;
-    }
-
-    .dropdown-menu.open {
-      opacity: 1;
-      visibility: visible;
-      transform: translateY(8px);  /* sits 8px below the trigger */
-    }
-  </style>
+  <script src="app.js"></script>
 </head>
 <body>
   <!-- Parallax Background -->
   <div class="parallax-bg"></div>
 
   <!-- Header -->
-  <header class="header-bar" id="mainHeader">
+  <div class="header-bar" id="mainHeader" style="display: flex;">
     <div class="header-content">
-      <div></div>
+      <div></div> <!-- Empty div for spacing -->
       <h1>AutomatAR</h1>
-      <nav class="header-buttons" role="navigation" aria-label="Main navigation">
-        <button class="header-button" id="manualsBtn" aria-label="View instruction manuals">Manuals</button>
-        <button class="header-ar-button" id="openARBtn" aria-label="Open augmented reality experience">Open AR</button>
-        <button class="header-button" id="modelsBtn" aria-label="Download 3D models">Models</button>
-        <button class="header-button" id="aiBtn" aria-label="AI learning assistant">AI</button>
-      </nav>
+      <div class="header-buttons">
+        <button class="header-button" id="manualsBtn">Manuals</button>
+        <button class="header-ar-button" id="openARBtn">Open AR</button>
+        <button class="header-button" id="modelsBtn">Models</button>
+      </div>
     </div>
-  </header>
+  </div>
 
   <!-- Home Screen -->
-  <main id="homeScreen">
-    <!-- Intro Section -->
-    <section class="intro-section" role="banner">
+  <section id="homeScreen" style="display: block;">
+    <!-- Intro -->
+    <div class="intro-section">
       <div class="container">
         <h2>Welcome to AutomatAR</h2>
         <p>Explore mechanical engineering concepts through augmented reality. Point your camera at kit markers to see interactive 3D demonstrations of gears, cams, cranks, and other mechanical systems.</p>
       </div>
-    </section>
+    </div>
 
-    <!-- Cam-A Kit Section -->
-    <section class="kit-section" aria-labelledby="cam-a-title">
+    <!-- Cam-A Kit -->
+    <div class="kit-section">
       <div class="kit-content">
         <div class="kit-text pre-assembly">
-          <h3 id="cam-a-title">Cam-A: Learn the details of rotational motion</h3>
+          <h3>Cam-A: Learn the details of rotational motion</h3>
           <p>Demonstrates how cams convert rotational motion into linear oscillatory motion using contoured surfaces to drive followers in precise, complex patterns.</p>
         </div>
-        <div class="kit-image pre-assembly parallax-element" onclick="showKitDetail(0)" role="button" tabindex="0" aria-label="View Cam-A kit details">
+        <div class="kit-image pre-assembly parallax-element" onclick="showKitDetail(0)">
           <video class="kit-video" autoplay muted loop playsinline>
             <source src="images/kit1.mp4" type="video/mp4">
             <div class="placeholder-img">Cam-A Kit Video</div>
           </video>
         </div>
       </div>
-    </section>
+    </div>
 
-    <!-- Cam-C Kit Section -->
-    <section class="kit-section" aria-labelledby="cam-c-title">
+    <!-- Cam-C Kit -->
+    <div class="kit-section">
       <div class="kit-content reverse">
-        <div class="kit-image pre-assembly parallax-element" onclick="showKitDetail(1)" role="button" tabindex="0" aria-label="View Cam-C kit details">
+        <div class="kit-image pre-assembly parallax-element" onclick="showKitDetail(1)">
           <video class="kit-video" autoplay muted loop playsinline>
             <source src="images/kit2.mp4" type="video/mp4">
             <div class="placeholder-img">Cam-C Kit Video</div>
           </video>
         </div>
         <div class="kit-text pre-assembly">
-          <h3 id="cam-c-title">Cam-C: Get to know more about intermittent motion</h3>
+          <h3>Cam-C: Get to know more about intermittent motion</h3>
           <p>Shows how a Geneva wheel mechanism creates precise, timed intermittent motion from continuous rotational input using pins and slots.</p>
         </div>
       </div>
-    </section>
+    </div>
 
-    <!-- Crank Kit Section -->
-    <section class="kit-section" aria-labelledby="crank-title">
+    <!-- Crank Kit -->
+    <div class="kit-section">
       <div class="kit-content">
         <div class="kit-text pre-assembly">
-          <h3 id="crank-title">Crank: Understanding reciprocating motion</h3>
+          <h3>Crank: Understanding reciprocating motion</h3>
           <p>Illustrates how a rotating crank arm converts rotational motion into linear back-and-forth movement through connecting rods.</p>
         </div>
-        <div class="kit-image pre-assembly parallax-element" onclick="showKitDetail(2)" role="button" tabindex="0" aria-label="View Crank kit details">
+        <div class="kit-image pre-assembly parallax-element" onclick="showKitDetail(2)">
           <video class="kit-video" autoplay muted loop playsinline>
             <source src="images/kit3.mp4" type="video/mp4">
             <div class="placeholder-img">Crank Kit Video</div>
           </video>
         </div>
       </div>
-    </section>
+    </div>
 
-    <!-- Gear-A Kit Section -->
-    <section class="kit-section" aria-labelledby="gear-a-title">
+    <!-- Gear-A Kit -->
+    <div class="kit-section">
       <div class="kit-content reverse">
-        <div class="kit-image pre-assembly parallax-element" onclick="showKitDetail(3)" role="button" tabindex="0" aria-label="View Gear-A kit details">
+        <div class="kit-image pre-assembly parallax-element" onclick="showKitDetail(3)">
           <video class="kit-video" autoplay muted loop playsinline>
             <source src="images/kit4.mp4" type="video/mp4">
             <div class="placeholder-img">Gear-A Kit Video</div>
           </video>
         </div>
         <div class="kit-text pre-assembly">
-          <h3 id="gear-a-title">Gear-A: Exploring perpendicular power transmission</h3>
+          <h3>Gear-A: Exploring perpendicular power transmission</h3>
           <p>Demonstrates how bevel gears with cone-shaped teeth transfer rotational motion between perpendicular shafts at 90-degree angles.</p>
         </div>
       </div>
-    </section>
+    </div>
 
-    <!-- Gear-B Kit Section -->
-    <section class="kit-section" aria-labelledby="gear-b-title">
+    <!-- Gear-B Kit -->
+    <div class="kit-section">
       <div class="kit-content">
         <div class="kit-text pre-assembly">
-          <h3 id="gear-b-title">Gear-B: Variable speed and torque systems</h3>
+          <h3>Gear-B: Variable speed and torque systems</h3>
           <p>Shows how gear alignment and shape create variable speed and torque output from constant input through dynamic load distribution.</p>
         </div>
-        <div class="kit-image pre-assembly parallax-element" onclick="showKitDetail(4)" role="button" tabindex="0" aria-label="View Gear-B kit details">
+        <div class="kit-image pre-assembly parallax-element" onclick="showKitDetail(4)">
           <video class="kit-video" autoplay muted loop playsinline>
             <source src="images/kit5.mp4" type="video/mp4">
             <div class="placeholder-img">Gear-B Kit Video</div>
           </video>
         </div>
       </div>
-    </section>
+    </div>
 
-    <!-- Gear-C Kit Section -->
-    <section class="kit-section" aria-labelledby="gear-c-title">
+    <!-- Gear-C Kit -->
+    <div class="kit-section">
       <div class="kit-content reverse">
-        <div class="kit-image pre-assembly parallax-element" onclick="showKitDetail(5)" role="button" tabindex="0" aria-label="View Gear-C kit details">
+        <div class="kit-image pre-assembly parallax-element" onclick="showKitDetail(5)">
           <video class="kit-video" autoplay muted loop playsinline>
             <source src="images/kit6.mp4" type="video/mp4">
             <div class="placeholder-img">Gear-C Kit Video</div>
           </video>
         </div>
         <div class="kit-text pre-assembly">
-          <h3 id="gear-c-title">Gear-C: Mastering worm gear systems</h3>
+          <h3>Gear-C: Mastering worm gear systems</h3>
           <p>Gear-C is a worm gear system that converts rotational motion while significantly reducing speed & increasing torque. A screw-like worm drives a worm wheel, transferring motion at 90°. This design offers high torque output & a self-locking feature, so it can't be back-driven. Used in elevators, conveyors, tuning mechanisms—anywhere controlled motion & torque multiplication are vital.</p>
         </div>
       </div>
-    </section>
-  </main>
+    </div>
+  </section>
 
   <!-- Kit Detail Screen -->
-  <section id="kitDetailScreen" role="main" aria-labelledby="kit-detail-title">
+  <section id="kitDetailScreen">
     <div class="container">
       <div class="kit-detail">
         <div class="kit-detail-image">
@@ -807,19 +155,19 @@
           </video>
         </div>
         <div class="kit-detail-text">
-          <h2 id="kit-detail-title">Kit Name</h2>
+          <h2 id="kitDetailTitle">Kit Name</h2>
           <p id="kitDetailDesc">Kit description will appear here.</p>
-          <button class="back-button" id="kitBackHomeBtn" aria-label="Return to home screen">Back to Home</button>
+          <button class="back-button" id="kitBackHomeBtn">Back to Home</button>
         </div>
       </div>
     </div>
   </section>
 
   <!-- Manuals Screen -->
-  <section id="manualsScreen" class="modal-screen" role="main" aria-labelledby="manuals-title">
+  <section id="manualsScreen" class="modal-screen">
     <div class="modal-header">
-      <button class="modal-close-button" id="closeManualsBtn" aria-label="Close manuals screen">← Back</button>
-      <div class="modal-title" id="manuals-title">Instruction Manuals</div>
+      <button class="modal-close-button" id="closeManualsBtn">← Back</button>
+      <div class="modal-title">Instruction Manuals</div>
       <div class="modal-subtitle">Download comprehensive guides for each mechanical kit</div>
     </div>
     <div class="modal-content">
@@ -827,42 +175,42 @@
         <div class="content-card">
           <h3>Cam-A Manual</h3>
           <p>Complete assembly instructions and theory guide for the Cam-A rotational motion kit. Includes part diagrams, assembly steps, and engineering principles.</p>
-          <button class="download-button" onclick="openManual('1')" aria-label="View Cam-A manual">View Manual</button>
+          <button class="download-button" onclick="openManual('Automata Cam A Instruction Manual kopyası')">View Manual</button>
         </div>
         <div class="content-card">
           <h3>Cam-C Manual</h3>
           <p>Geneva wheel mechanism guide covering intermittent motion principles, assembly procedures, and practical applications in machinery.</p>
-          <button class="download-button" onclick="openManual('2')" aria-label="View Cam-C manual">View Manual</button>
+          <button class="download-button" onclick="openManual('Automata Cam C Geneva Stop Instruction Manual')">View Manual</button>
         </div>
         <div class="content-card">
           <h3>Crank Manual</h3>
           <p>Reciprocating motion system manual with detailed explanations of crank mechanisms, connecting rods, and motion conversion principles.</p>
-          <button class="download-button" onclick="openManual('3')" aria-label="View Crank manual">View Manual</button>
+          <button class="download-button" onclick="openManual('Automata Crank Instruction Manual Kopyası')">View Manual</button>
         </div>
         <div class="content-card">
           <h3>Gear-A Manual</h3>
           <p>Bevel gear system guide explaining perpendicular power transmission, gear ratios, and 90-degree motion transfer applications.</p>
-          <button class="download-button" onclick="openManual('4')" aria-label="View Gear-A manual">View Manual</button>
+          <button class="download-button" onclick="openManual('Automata Gear A Instruction Manual Kopyası')">View Manual</button>
         </div>
         <div class="content-card">
           <h3>Gear-B Manual</h3>
           <p>Variable speed gear system manual covering dynamic load distribution, torque variation, and adaptive transmission concepts.</p>
-          <button class="download-button" onclick="openManual('5')" aria-label="View Gear-B manual">View Manual</button>
+          <button class="download-button" onclick="openManual('Automata Gear B Instruction Manual')">View Manual</button>
         </div>
         <div class="content-card">
           <h3>Gear-C Manual</h3>
           <p>Worm gear system comprehensive guide including self-locking mechanisms, torque multiplication, and precision control applications.</p>
-          <button class="download-button" onclick="openManual('6')" aria-label="View Gear-C manual">View Manual</button>
+          <button class="download-button" onclick="openManual('Automata Gear C Instruction Manual Kopyası')">View Manual</button>
         </div>
       </div>
     </div>
   </section>
 
   <!-- Models Screen -->
-  <section id="modelsScreen" class="modal-screen" role="main" aria-labelledby="models-title">
+  <section id="modelsScreen" class="modal-screen">
     <div class="modal-header">
-      <button class="modal-close-button" id="closeModelsBtn" aria-label="Close models screen">← Back</button>
-      <div class="modal-title" id="models-title">3D Models</div>
+      <button class="modal-close-button" id="closeModelsBtn">← Back</button>
+      <div class="modal-title">3D Models</div>
       <div class="modal-subtitle">Download and explore the 3D models used in AR experiences</div>
     </div>
     <div class="modal-content">
@@ -870,48 +218,64 @@
         <div class="content-card">
           <h3>Cam-A 3D Model</h3>
           <p>High-resolution STL model of the cam mechanism. Compatible with 3D printers and CAD software for further analysis and modification.</p>
-          <button class="download-button" onclick="downloadModel('1')" aria-label="Download Cam-A 3D model">Download STL</button>
+          <button class="download-button" onclick="downloadModel('cam a')">Download STL</button>
         </div>
         <div class="content-card">
           <h3>Cam-C 3D Model</h3>
           <p>Geneva wheel mechanism 3D model including drive wheel and indexed output wheel. Perfect for educational demonstrations and prototyping.</p>
-          <button class="download-button" onclick="downloadModel('2')" aria-label="Download Cam-C 3D model">Download STL</button>
+          <button class="download-button" onclick="downloadModel('CAM-C (geneva stop)')">Download STL</button>
         </div>
         <div class="content-card">
           <h3>Crank 3D Model</h3>
           <p>Complete crank mechanism model with connecting rod and slider components. Ideal for studying reciprocating motion systems.</p>
-          <button class="download-button" onclick="downloadModel('3')" aria-label="Download Crank 3D model">Download STL</button>
+          <button class="download-button" onclick="downloadModel('crank')">Download STL</button>
         </div>
         <div class="content-card">
           <h3>Gear-A 3D Model</h3>
           <p>Precision bevel gear set model demonstrating 90-degree power transmission. Suitable for mechanical engineering education and analysis.</p>
-          <button class="download-button" onclick="downloadModel('4')" aria-label="Download Gear-A 3D model">Download STL</button>
+          <button class="download-button" onclick="downloadModel('gear a')">Download STL</button>
         </div>
         <div class="content-card">
           <h3>Gear-B 3D Model</h3>
           <p>Variable speed gear system model showcasing dynamic torque distribution and non-uniform motion characteristics.</p>
-          <button class="download-button" onclick="downloadModel('5')" aria-label="Download Gear-B 3D model">Download STL</button>
+          <button class="download-button" onclick="downloadModel('gear b')">Download STL</button>
         </div>
         <div class="content-card">
           <h3>Gear-C 3D Model</h3>
           <p>Worm gear assembly model featuring self-locking mechanism and high torque multiplication ratio components.</p>
-          <button class="download-button" onclick="downloadModel('6')" aria-label="Download Gear-C 3D model">Download STL</button>
+          <button class="download-button" onclick="downloadModel('gear c')">Download STL</button>
         </div>
         <div class="content-card">
           <h3>Base Platform Model</h3>
           <p>Universal base platform for mounting and testing all mechanical kits. Includes standardized mounting points and measurement references for educational experiments.</p>
-          <button class="download-button" onclick="downloadModel('7')" aria-label="Download Base Platform 3D model">Download STL</button>
+          <button class="download-button" onclick="downloadModel('base v7')">Download STL</button>
         </div>
       </div>
     </div>
   </section>
 
+  <!-- PDF Viewer Modal -->
+  <div id="pdfViewerModal" class="pdf-viewer-modal">
+    <div class="pdf-viewer-header">
+      <div class="pdf-viewer-title" id="pdfViewerTitle">Manual Viewer</div>
+      <button class="pdf-viewer-close" id="closePdfViewer">← Close</button>
+    </div>
+    <div class="pdf-viewer">
+      <iframe id="pdfFrame" src="" title="PDF Viewer"></iframe>
+      <div class="pdf-fallback" id="pdfFallback" style="display: none;">
+        <h3>PDF Viewer Not Available</h3>
+        <p>Your browser doesn't support embedded PDF viewing.</p>
+        <a href="" id="pdfDownloadLink" class="pdf-download-link" target="_blank">Open PDF in New Tab</a>
+      </div>
+    </div>
+  </div>
+
   <!-- AR Screen -->
-  <section id="arScreen" role="main" aria-labelledby="ar-title">
+  <section id="arScreen">
     <!-- AR Initial Overlay -->
-    <div class="ar-initial-overlay" id="arInitialOverlay" role="dialog" aria-labelledby="ar-instructions-title">
+    <div class="ar-initial-overlay" id="arInitialOverlay">
       <div class="ar-initial-content">
-        <h3 id="ar-instructions-title">AR Instructions</h3>
+        <h3>AR Instructions</h3>
         
         <div class="ar-instructions-grid">
           <div class="ar-instruction-item">
@@ -920,7 +284,7 @@
           </div>
         </div>
         
-        <button class="ar-start-button" id="arStartButton" aria-label="Start camera for AR experience">Start Camera</button>
+        <button class="ar-start-button" id="arStartButton">Start Camera</button>
       </div>
     </div>
 
@@ -930,16 +294,16 @@
     <div class="ar-header">
       <p><strong>Instructions:</strong> Point your camera at a kit marker to see the 3D demonstration</p>
     </div>
-    <button class="ar-back-button" id="backHomeBtn" aria-label="Return to home screen">← Home</button>
-    <button class="ar-help-button" id="arHelpBtn" aria-label="View AR help instructions">Help</button>
+    <button class="ar-back-button" id="backHomeBtn">← Home</button>
+    <button class="ar-help-button" id="arHelpBtn">Help</button>
 
     <!-- Left panel for additional coverage -->
     <div class="ar-left-panel"></div>
 
     <div class="ar-container">
-      <video id="video" width="320" height="240" autoplay playsinline muted aria-label="Camera feed for AR"></video>
-      <canvas id="canvas" width="320" height="240" aria-label="AR marker detection canvas"></canvas>
-      <div id="threeContainer" aria-label="3D model display area"></div>
+      <video id="video" autoplay playsinline muted></video>
+      <canvas id="canvas"></canvas>
+      <div id="threeContainer"></div>
     </div>
 
     <div class="ar-sidebar">
@@ -948,15 +312,15 @@
         <div class="ar-kit-name" id="arKitName">No kits detected</div>
         <div class="ar-kit-desc" id="arKitDesc">Point your camera at a marker to see kit information</div>
       </div>
-      <button class="debug-button" id="debugSideBtn" aria-label="Open debug overlay">Debug View</button>
+      <button class="debug-button" id="debugSideBtn">Debug View</button>
     </div>
 
     <!-- AR Instructions Overlay -->
-    <div class="ar-instructions-overlay" id="arInstructionsOverlay" role="dialog" aria-labelledby="ar-detailed-instructions">
+    <div class="ar-instructions-overlay" id="arInstructionsOverlay">
       <div class="ar-instructions-content">
         <div class="ar-instructions-header">
-          <h3 id="ar-detailed-instructions">AR Instructions</h3>
-          <button class="ar-instructions-close" id="arInstructionsClose" aria-label="Close instructions">Close</button>
+          <h3>AR Instructions</h3>
+          <button class="ar-instructions-close" id="arInstructionsClose">Close</button>
         </div>
         
         <div class="ar-instructions-section">
@@ -992,517 +356,17 @@
     </div>
 
     <!-- Debug overlay -->
-    <div class="debug-overlay" id="debugOverlay" role="dialog" aria-labelledby="debug-title">
+    <div class="debug-overlay" id="debugOverlay">
       <div class="debug-overlay-header">
-        <h3 id="debug-title">Debug Information</h3>
-        <button class="debug-close" onclick="toggleDebugOverlay()" aria-label="Close debug overlay">Close</button>
+        <h3>Debug Information</h3>
+        <button class="debug-close" onclick="toggleDebugOverlay()">Close</button>
       </div>
       <div class="marker-info" id="markerInfo">No debug information available</div>
       <div class="debug-canvas-container">
-        <canvas id="debugCanvas" width="320" height="240" aria-label="Debug marker detection visualization"></canvas>
+        <canvas id="debugCanvas"></canvas>
       </div>
     </div>
   </section>
-
-  <!-- AI Screen - Horizontal Card Layout -->
-  <section id="aiScreen" class="modal-screen" role="main" aria-labelledby="ai-title">
-<header class="ai-header">
-    <button class="ai-close-button" onclick="closeAI()">← Back</button>
-    <h1 class="ai-header-title">AI Assistant</h1>
-    <p class="ai-header-subtitle">Create unique AR scenarios to explore different mechanical systems</p>
-  </header>
-
-  <!-- Main Container -->
-  <div class="ai-main-container" id="aiMainContainer">
-    
-    <!-- Card 1 - 3D Models -->
-    <div class="ai-card-container">
-      <div class="ai-horizontal-card">
-        <div class="card-left-side">
-          <h2 class="card-title">3D Models</h2>
-          <p class="card-subtitle">Select marine-themed 3D models for AR visualization</p>
-          
-          <div class="custom-dropdown">
-            <button class="dropdown-trigger" onclick="toggleDropdown('models')">
-              <span id="modelsSelected">Select Model</span>
-              <span class="dropdown-arrow">▼</span>
-            </button>
-            <div class="dropdown-menu" id="modelsDropdown">
-              <div class="dropdown-option" onclick="selectOption('models', 'String Ray', 'string-ray.png')">String Ray</div>
-              <div class="dropdown-option" onclick="selectOption('models', 'Fish', 'fish.png')">Fish</div>
-              <div class="dropdown-option" onclick="selectOption('models', 'Dolphin', 'dolphin.png')">Dolphin</div>
-              <div class="dropdown-option" onclick="selectOption('models', 'Jellyfish', 'jellyfish.png')">Jellyfish</div>
-              <div class="dropdown-option" onclick="selectOption('models', 'Octopus', 'octopus.png')">Octopus</div>
-              <div class="dropdown-option" onclick="selectOption('models', 'Sea Turtle', 'sea-turtle.png')">Sea Turtle</div>
-            </div>
-          </div>
-          
-          <button class="help-button" onclick="showHelp('models')" title="Help with 3D Models">?</button>
-        </div>
-        
-        <div class="card-right-side">
-          <div class="card-image-container">
-            <div class="image-placeholder" id="modelsPlaceholder">?</div>
-            <img class="card-image" id="modelsImage" style="display: none;" alt="Selected 3D Model">
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Card 2 - Kit 1 -->
-    <div class="ai-card-container">
-      <div class="ai-horizontal-card">
-        <div class="card-left-side">
-          <h2 class="card-title">Kit 1</h2>
-          <p class="card-subtitle">Choose the first mechanical kit for your scenario</p>
-          
-          <div class="custom-dropdown">
-            <button class="dropdown-trigger" onclick="toggleDropdown('kit1')">
-              <span id="kit1Selected">Select Kit 1</span>
-              <span class="dropdown-arrow">▼</span>
-            </button>
-            <div class="dropdown-menu" id="kit1Dropdown">
-              <div class="dropdown-option" onclick="selectOption('kit1', 'Cam-A Model', 'kit1.png')">Cam-A Model</div>
-              <div class="dropdown-option" onclick="selectOption('kit1', 'Cam-C Model', 'kit2.png')">Cam-C Model</div>
-              <div class="dropdown-option" onclick="selectOption('kit1', 'Crank Model', 'kit3.png')">Crank Model</div>
-              <div class="dropdown-option" onclick="selectOption('kit1', 'Gear-A Model', 'kit4.png')">Gear-A Model</div>
-              <div class="dropdown-option" onclick="selectOption('kit1', 'Gear-B Model', 'kit5.png')">Gear-B Model</div>
-              <div class="dropdown-option" onclick="selectOption('kit1', 'Gear-C Model', 'kit6.png')">Gear-C Model</div>
-            </div>
-          </div>
-          
-          <button class="help-button" onclick="showHelp('kit1')" title="Help with Kit 1">?</button>
-        </div>
-        
-        <div class="card-right-side">
-          <div class="card-image-container">
-            <div class="image-placeholder" id="kit1Placeholder">?</div>
-            <img class="card-image" id="kit1Image" style="display: none;" alt="Selected Kit 1">
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Card 3 - Kit 2 -->
-    <div class="ai-card-container">
-      <div class="ai-horizontal-card">
-        <div class="card-left-side">
-          <h2 class="card-title">Kit 2</h2>
-          <p class="card-subtitle">Choose the second mechanical kit for your scenario</p>
-          
-          <div class="custom-dropdown">
-            <button class="dropdown-trigger" onclick="toggleDropdown('kit2')">
-              <span id="kit2Selected">Select Kit 2</span>
-              <span class="dropdown-arrow">▼</span>
-            </button>
-            <div class="dropdown-menu" id="kit2Dropdown">
-              <div class="dropdown-option" onclick="selectOption('kit2', 'Cam-A Model', 'kit1.png')">Cam-A Model</div>
-              <div class="dropdown-option" onclick="selectOption('kit2', 'Cam-C Model', 'kit2.png')">Cam-C Model</div>
-              <div class="dropdown-option" onclick="selectOption('kit2', 'Crank Model', 'kit3.png')">Crank Model</div>
-              <div class="dropdown-option" onclick="selectOption('kit2', 'Gear-A Model', 'kit4.png')">Gear-A Model</div>
-              <div class="dropdown-option" onclick="selectOption('kit2', 'Gear-B Model', 'kit5.png')">Gear-B Model</div>
-              <div class="dropdown-option" onclick="selectOption('kit2', 'Gear-C Model', 'kit6.png')">Gear-C Model</div>
-            </div>
-          </div>
-          
-          <button class="help-button" onclick="showHelp('kit2')" title="Help with Kit 2">?</button>
-        </div>
-        
-        <div class="card-right-side">
-          <div class="card-image-container">
-            <div class="image-placeholder" id="kit2Placeholder">?</div>
-            <img class="card-image" id="kit2Image" style="display: none;" alt="Selected Kit 2">
-          </div>
-        </div>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- Scenario Button -->
-  <div class="scenario-button-container">
-    <button class="scenario-button" onclick="openScenario()">View Scenario</button>
-  </div>
-
-  <!-- Scenario Popup -->
-  <div class="scenario-popup" id="scenarioPopup">
-    <div class="scenario-content">
-      <button class="scenario-close" onclick="closeScenario()">×</button>
-      <h2 class="scenario-title">Generated Scenario</h2>
-      <div class="scenario-text" id="scenarioText">
-        Welcome to AutomatAR AI Assistant! Select options from the cards above to create your custom mechanical engineering scenario. Each selection will provide detailed information about the components, assembly instructions, and educational objectives.
-      </div>
-    </div>
-  </div>
-  </section>
-
-  <!-- PDF Viewer Modal -->
-  <div id="pdfViewerModal" class="pdf-viewer-modal" role="dialog" aria-labelledby="pdf-viewer-title" aria-modal="true">
-    <div class="pdf-viewer-header">
-      <div class="pdf-viewer-title" id="pdf-viewer-title">Manual Viewer</div>
-      <button class="pdf-viewer-close" id="closePdfViewer" aria-label="Close PDF viewer">← Close</button>
-    </div>
-    <div class="pdf-viewer">
-      <iframe id="pdfFrame" src="" title="PDF Viewer" aria-label="PDF document viewer"></iframe>
-      <div class="pdf-fallback" id="pdfFallback">
-        <h3>PDF Viewer Not Available</h3>
-        <p>Your browser doesn't support embedded PDF viewing.</p>
-        <a href="" id="pdfDownloadLink" class="pdf-download-link" target="_blank" rel="noopener" aria-label="Open PDF in new tab">Open PDF in New Tab</a>
-      </div>
-    </div>
-  </div>
-
-  <!-- JavaScript Files -->
-  <script src="app.js"></script>
-
- <script>
-    // Global state
-    let selectedOptions = {
-      models: { name: null, image: null },
-      kit1: { name: null, image: null },
-      kit2: { name: null, image: null }
-    };
-
-    // Scenario data
-    const scenarioData = {
-      models: {
-        'String Ray': 'String Ray 3D Model: Graceful marine creature showcasing fluid motion dynamics. This model demonstrates hydrodynamic principles and streamlined design found in nature.',
-        'Fish': 'Fish 3D Model: Classic aquatic form demonstrating efficient swimming mechanics. Perfect for studying biomechanics and natural propulsion systems.',
-        'Dolphin': 'Dolphin 3D Model: Intelligent marine mammal model showcasing advanced hydrodynamics. Demonstrates echolocation systems and efficient underwater locomotion.',
-        'Jellyfish': 'Jellyfish 3D Model: Unique cnidarian form showing pulsatile propulsion. Illustrates soft-body mechanics and efficient underwater movement.',
-        'Octopus': 'Octopus 3D Model: Complex cephalopod demonstrating jet propulsion and flexible movement. Shows advanced neural control and adaptive mechanics.',
-        'Sea Turtle': 'Sea Turtle 3D Model: Ancient marine reptile showcasing efficient swimming with limb propulsion. Demonstrates long-distance migration mechanics.'
-      },
-      kits: {
-        'Cam-A Model': 'Cam-A Kit: Learn rotational motion conversion through hands-on assembly. Includes cam disc, follower, base plate, and mounting hardware for studying motion patterns.',
-        'Cam-C Model': 'Cam-C Kit: Explore intermittent motion with Geneva wheel mechanism. Features drive wheel with pin, Geneva wheel with slots, and timing guides.',
-        'Crank Model': 'Crank Kit: Master reciprocating motion mechanics. Includes crank arm, connecting rod, slider mechanism, and guide rails for motion study.',
-        'Gear-A Model': 'Gear-A Kit: Understand perpendicular power transmission with bevel gears. Contains matched bevel gear pair and right-angle mounting frame.',
-        'Gear-B Model': 'Gear-B Kit: Explore variable speed transmission systems. Features non-circular gear profiles and adjustable mounting for torque study.',
-        'Gear-C Model': 'Gear-C Kit: Experience worm gear systems and self-locking properties. Includes precision worm screw and worm wheel assembly.'
-      }
-    };
-
-    // Initialize page
-    document.addEventListener('DOMContentLoaded', function() {
-      initializeAnimations();
-      setupScrollAnimations();
-    });
-
-    // Initialize Apple-style animations
-    function initializeAnimations() {
-      setTimeout(() => {
-        const cards = document.querySelectorAll('.ai-card-container');
-        cards.forEach((card, index) => {
-          setTimeout(() => {
-            card.classList.add('animate-in');
-          }, index * 200);
-        });
-      }, 300);
-    }
-
-    // Setup scroll animations
-    function setupScrollAnimations() {
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('fade-in');
-          }
-        });
-      }, { threshold: 0.1 });
-
-      document.querySelectorAll('.ai-card-container').forEach(card => {
-        observer.observe(card);
-      });
-    }
-
-    // Toggle dropdown
-    function toggleDropdown(type) {
-      const dropdown = document.getElementById(type + 'Dropdown');
-      const trigger  = dropdown.previousElementSibling;
-      const card     = trigger.closest('.ai-card-container');
-
-      // if already open → close it
-      if (dropdown.classList.contains('open')) {
-        dropdown.classList.remove('open');
-        trigger.classList.remove('active');
-        card.classList.remove('dropdown-open');
-        return;
-      }
-
-      // otherwise close all then open this one
-      closeAllDropdowns();
-      dropdown.classList.add('open');
-      trigger.classList.add('active');
-      card.classList.add('dropdown-open');
-    }
-
-    function closeAllDropdowns() {
-      document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('open'));
-      document.querySelectorAll('.dropdown-trigger').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.ai-card-container').forEach(c => c.classList.remove('dropdown-open'));
-    }
-
-    // Select option
-    function selectOption(type, name, imagePath) {
-      // Update selected text
-      document.getElementById(type + 'Selected').textContent = name;
-      
-      // Update image
-      updateImage(type, imagePath);
-      
-      // Store selection
-      selectedOptions[type] = { name, image: imagePath };
-      
-      // Update selected state
-      const dropdown = document.getElementById(type + 'Dropdown');
-      dropdown.querySelectorAll('.dropdown-option').forEach(opt => {
-        opt.classList.remove('selected');
-      });
-      event.target.classList.add('selected');
-      
-      // Close dropdown
-      closeAllDropdowns();
-      
-      // Add animation feedback
-      const card = event.target.closest('.ai-horizontal-card');
-      card.style.transform = 'translateY(-8px) scale(1.02)';
-      setTimeout(() => {
-        card.style.transform = '';
-      }, 300);
-      
-      // Update scenario if popup is open
-      if (document.getElementById('scenarioPopup').classList.contains('open')) {
-        updateScenarioText();
-      }
-    }
-
-    // Update image
-    function updateImage(type, imagePath) {
-      const placeholder = document.getElementById(type + 'Placeholder');
-      const image = document.getElementById(type + 'Image');
-      
-      // Show loading state
-      placeholder.style.opacity = '0.5';
-      
-      // Set image source
-      image.src = `images/${imagePath}`;
-      image.onload = function() {
-        // Hide placeholder and show image
-        placeholder.style.display = 'none';
-        image.style.display = 'block';
-        image.classList.add('loaded', 'scale-in');
-        
-        // Reset loading state
-        placeholder.style.opacity = '1';
-      };
-      
-      // Handle error
-      image.onerror = function() {
-        console.warn(`Failed to load image: ${imagePath}`);
-        placeholder.style.opacity = '1';
-        showNotification(`Failed to load image: ${imagePath}`, 'error');
-      };
-    }
-
-    // Show help
-    function showHelp(type) {
-      let helpText = '';
-      switch(type) {
-        case 'models':
-          helpText = '3D Models: Select marine-themed models to visualize in AR. Each model demonstrates unique movement and design principles from nature.';
-          break;
-        case 'kit1':
-          helpText = 'Kit 1: Choose the first mechanical system for your scenario. Each kit teaches different motion conversion principles.';
-          break;
-        case 'kit2':
-          helpText = 'Kit 2: Select the second mechanical system to combine with Kit 1. Create complex multi-system scenarios.';
-          break;
-      }
-      showNotification(helpText, 'info');
-    }
-
-    // Open scenario popup
-    function openScenario() {
-      updateScenarioText();
-      document.getElementById('scenarioPopup').classList.add('open');
-    }
-
-    // Close scenario popup
-    function closeScenario() {
-      document.getElementById('scenarioPopup').classList.remove('open');
-    }
-
-    // Update scenario text
-    function updateScenarioText() {
-      let content = '';
-      let hasSelections = false;
-      
-      // Check for model selection
-      if (selectedOptions.models.name) {
-        content += '🎯 **3D MODEL SELECTED:**\n' + scenarioData.models[selectedOptions.models.name] + '\n\n';
-        hasSelections = true;
-      }
-      
-      // Check for kit1 selection
-      if (selectedOptions.kit1.name) {
-        content += '⚙️ **KIT 1 SELECTED:**\n' + scenarioData.kits[selectedOptions.kit1.name] + '\n\n';
-        hasSelections = true;
-      }
-      
-      // Check for kit2 selection
-      if (selectedOptions.kit2.name) {
-        content += '🔧 **KIT 2 SELECTED:**\n' + scenarioData.kits[selectedOptions.kit2.name] + '\n\n';
-        hasSelections = true;
-      }
-      
-      if (hasSelections) {
-        content += '✨ **SCENARIO SUMMARY:**\nCombine these elements to create an engaging AR learning experience. The marine model provides visual appeal while the mechanical kits demonstrate engineering principles. Use AR markers to activate each component and explore their interactions.';
-      } else {
-        content = 'Welcome to AutomatAR AI Assistant! Select options from the cards above to create your custom mechanical engineering scenario.\n\nEach selection will provide detailed information about the components, assembly instructions, and educational objectives.\n\nClick on any dropdown menu to begin exploring our mechanical engineering resources.';
-      }
-      
-      document.getElementById('scenarioText').textContent = content;
-    }
-
-    // Show notification
-    function showNotification(message, type) {
-      const notification = document.createElement('div');
-      notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: ${type === 'error' ? '#f44336' : type === 'info' ? '#2196F3' : '#4CAF50'};
-        color: white;
-        padding: 1rem 1.5rem;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        z-index: 10000;
-        font-weight: 600;
-        max-width: 300px;
-        transform: translateX(100%);
-        transition: transform 0.3s ease;
-      `;
-      notification.textContent = message;
-      
-      document.body.appendChild(notification);
-      
-      setTimeout(() => {
-        notification.style.transform = 'translateX(0)';
-      }, 100);
-      
-      setTimeout(() => {
-        notification.style.transform = 'translateX(100%)';
-        setTimeout(() => {
-          if (notification.parentNode) {
-            document.body.removeChild(notification);
-          }
-        }, 300);
-      }, 4000);
-    }
-
-    // Close AI (placeholder function)
-    function closeAI() {
-      if (window.showHomeScreen) {
-        window.showHomeScreen();
-      } else {
-        console.log('Closing AI Assistant');
-      }
-    }
-
-    // Close dropdowns when clicking outside
-    document.addEventListener('click', function(e) {
-      if (!e.target.closest('.custom-dropdown')) {
-        closeAllDropdowns();
-      }
-    });
-
-    // Close scenario popup when clicking outside
-    document.getElementById('scenarioPopup').addEventListener('click', function(e) {
-      if (e.target === this) {
-        closeScenario();
-      }
-    });
-
-    // Handle escape key
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape') {
-        closeAllDropdowns();
-        closeScenario();
-      }
-    });
-  </script>
-  <!-- Begin AI Integration Snippet -->
-  <script>
-    class CohereAITester {
-      constructor() {
-        this.apiKey = 'eb99UATWhfYjOpFKSt9vysoyqwCHM4WuAoZx02CU';
-        this.baseUrl = 'https://api.cohere.ai/v1/generate';
-      }
-
-      async generateScenario(seaModel, kit1, kit2) {
-        const prompt = this.buildPrompt(seaModel, kit1, kit2);
-        const response = await fetch(this.baseUrl, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${this.apiKey}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            model: 'command-light',
-            prompt,
-            max_tokens: 300,
-            temperature: 0.7,
-            k: 0,
-          })
-        });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const data = await response.json();
-        return data.generations[0].text.trim();
-      }
-
-      buildPrompt(seaModel, kit1, kit2) {
-        return `Generate a scenario in this exact structure:
-
-  Task X: [Catchy title related to motion or mechanics]
-  Mechanisms: ${kit1} vs. ${kit2}
-  Objective: [What is being compared]
-  Prompt:"Scan the ${seaModel} using each mechanism in AR. Which one performs better mechanically, and why?"`;
-      }
-    }
-
-    const cohereTester = new CohereAITester();
-
-    async function tryAutoGenerate() {
-      const sea = selectedOptions.models.name;
-      const k1 = selectedOptions.kit1.name;
-      const k2 = selectedOptions.kit2.name;
-      if (sea && k1 && k2) {
-        document.getElementById('scenarioText').textContent = '🤖 Generating scenario...';
-        try {
-          const scenario = await cohereTester.generateScenario(sea, k1, k2);
-          document.getElementById('scenarioText').textContent = scenario;
-        } catch (e) {
-          document.getElementById('scenarioText').textContent = 'Error generating scenario.';
-          console.error(e);
-        }
-      }
-    }
-
-    // Append auto-generate call inside existing selectOption
-    (function(){
-      const originalSelect = window.selectOption;
-      window.selectOption = function(type, name, imagePath) {
-        originalSelect(type, name, imagePath);
-        tryAutoGenerate();
-      };
-    })();
-  </script>
-  <!-- End AI Integration Snippet -->
-
-
-  <!-- Screen Reader Only Content -->
-  <div class="sr-only" aria-live="polite" id="screen-reader-announcements"></div>
-
 </body>
 </html>
+

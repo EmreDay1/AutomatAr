@@ -683,7 +683,10 @@
       <nav class="header-buttons" role="navigation" aria-label="Main navigation">
         <button class="header-button" id="createBtn" aria-label="Create new content">Create</button>
         <button class="header-button" id="manualsBtn" aria-label="View instruction manuals">Manuals</button>
-        <button class="header-ar-button" id="openARBtn" aria-label="Open augmented reality experience">Open AR</button>
+        <!-- new: links via fragment to the AR section -->
+        <a href="#arScreen" class="header-ar-button" aria-label="Open augmented reality experience" id="openARBtn">
+          Open AR
+        </a>
         <button class="header-button" id="modelsBtn" aria-label="Download 3D models">Models</button>
         <button class="header-button" id="aiBtn" aria-label="AI learning assistant">AI</button>
       </nav>
@@ -1228,7 +1231,13 @@
           </div>
           
         </div>
-         <button class="header-ar-button" id="openARBtn" aria-label="Open augmented reality experience">Open AR</button>
+        <button
+        class="header-ar-button"
+        type="button"
+        aria-label="Open augmented reality experience"
+        onclick="document.getElementById('openARBtn').click()">
+        Open AR
+      </button>
          
       </div>
 

@@ -187,7 +187,6 @@ body {
   max-width: 1400px;
   margin: 0 auto;
   width: 100%;
-  min-height: 200px; /* Ensure adequate height */
 }
 
 .kit-content > * {
@@ -355,11 +354,11 @@ body {
   filter: blur(clamp(10px, 2.5vw, 20px)) brightness(0.05) saturate(0.1);
 }
 
-/* Flexbox Header */
 .header-bar {
   background-color: #FF8C00;
   border-bottom: 1px solid #ffffff;
-  padding: clamp(1rem, 2.5vw, 1.5rem) 0;
+  padding: clamp(1rem, 2.5vw, 1.5rem) 0; /* top/bottom = clamp(...), left/right = 0 */
+  padding-bottom: clamp(0.5rem, 1.5vw, 1rem); /* smaller bottom padding */
   position: sticky;
   top: 0;
   z-index: 100;
@@ -1855,4 +1854,3 @@ html, body {
   overflow: auto;
   background: inherit; /* let the html/body bg show through when appropriate */
 }
-

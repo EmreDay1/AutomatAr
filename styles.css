@@ -1763,3 +1763,35 @@ p, li, span {
   left: auto;
   z-index: 1002;
 }
+
+/* 1) Allow the header row to wrap */
+#createScreen .modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;     /* ← let items drop to a new line if needed */
+}
+
+/* 2) Make the title container span full width when wrapped */
+#createScreen .modal-header-center {
+  order: 2;            /* sits beneath the buttons when wrapping */
+  flex: 1 1 100%;      /* take up full row */
+  text-align: center;
+  padding: 0.5rem 0;   /* a little breathing room */
+}
+
+/* 3) Scale the font responsively and prevent one‐word‐per‐line */
+#createScreen .modal-title {
+  font-size: clamp(1rem, 4vw, 2rem);  /* scales between 1rem and 2rem */
+  line-height: 1.2;
+  white-space: nowrap;               /* don’t break mid‐title */
+  overflow: hidden;
+  text-overflow: ellipsis;           /* optional: show “…” if it really overflows */
+}
+
+/* 4) On very small viewports, make it even smaller */
+@media (max-width: 400px) {
+  #createScreen .modal-title {
+    font-size: 0.9rem;
+  }
+}

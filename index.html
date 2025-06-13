@@ -725,47 +725,73 @@
   </section>
 
   <!-- Manuals Screen -->
-  <section id="manualsScreen" class="modal-screen" role="main" aria-labelledby="manuals-title">
-    <div class="modal-header">
-      <button class="modal-close-button" id="closeManualsBtn" aria-label="Close manuals screen">← Back</button>
-      <div class="modal-title" id="manuals-title">Instruction Manuals</div>
-      <div class="modal-subtitle">Download comprehensive guides for each mechanical kit</div>
-    </div>
-    <div class="modal-content">
-      <div class="content-grid">
-        <div class="content-card">
-          <h3>Cam-A Manual</h3>
-          <p>Complete assembly instructions and theory guide for the Cam-A rotational motion kit. Includes part diagrams, assembly steps, and engineering principles.</p>
-          <button class="download-button" onclick="openManual('1')" aria-label="View Cam-A manual">View Manual</button>
-        </div>
-        <div class="content-card">
-          <h3>Cam-C Manual</h3>
-          <p>Geneva wheel mechanism guide covering intermittent motion principles, assembly procedures, and practical applications in machinery.</p>
-          <button class="download-button" onclick="openManual('2')" aria-label="View Cam-C manual">View Manual</button>
-        </div>
-        <div class="content-card">
-          <h3>Crank Manual</h3>
-          <p>Reciprocating motion system manual with detailed explanations of crank mechanisms, connecting rods, and motion conversion principles.</p>
-          <button class="download-button" onclick="openManual('3')" aria-label="View Crank manual">View Manual</button>
-        </div>
-        <div class="content-card">
-          <h3>Gear-A Manual</h3>
-          <p>Bevel gear system guide explaining perpendicular power transmission, gear ratios, and 90-degree motion transfer applications.</p>
-          <button class="download-button" onclick="openManual('4')" aria-label="View Gear-A manual">View Manual</button>
-        </div>
-        <div class="content-card">
-          <h3>Gear-B Manual</h3>
-          <p>Variable speed gear system manual covering dynamic load distribution, torque variation, and adaptive transmission concepts.</p>
-          <button class="download-button" onclick="openManual('5')" aria-label="View Gear-B manual">View Manual</button>
-        </div>
-        <div class="content-card">
-          <h3>Gear-C Manual</h3>
-          <p>Worm gear system comprehensive guide including self-locking mechanisms, torque multiplication, and precision control applications.</p>
-          <button class="download-button" onclick="openManual('6')" aria-label="View Gear-C manual">View Manual</button>
-        </div>
+ <!-- Updated Manuals Screen HTML -->
+<section id="manualsScreen" class="modal-screen" role="main" aria-labelledby="manuals-title">
+  <div class="modal-header">
+    <button class="modal-close-button" id="closeManualsBtn" aria-label="Close manuals screen">← Back</button>
+    <div class="modal-title" id="manuals-title">Instruction Manuals</div>
+    <div class="modal-subtitle">Download comprehensive guides for each mechanical kit</div>
+  </div>
+  <div class="modal-content">
+    <div class="content-grid">
+      
+      <!-- Cam-A Manual -->
+      <div class="content-card">
+        <h3>Cam-A Manual</h3>
+        <p>Complete assembly instructions and theory guide for the Cam-A rotational motion kit. Includes part diagrams, assembly steps, and engineering principles.</p>
+        <button class="download-button" onclick="downloadManualPDF('1')" aria-label="Download Cam-A manual">
+          📄 Download Manual
+        </button>
       </div>
+      
+      <!-- Cam-C Manual -->
+      <div class="content-card">
+        <h3>Cam-C Manual</h3>
+        <p>Geneva wheel mechanism guide covering intermittent motion principles, assembly procedures, and practical applications in machinery.</p>
+        <button class="download-button" onclick="downloadManualPDF('2')" aria-label="Download Cam-C manual">
+          📄 Download Manual
+        </button>
+      </div>
+      
+      <!-- Crank Manual -->
+      <div class="content-card">
+        <h3>Crank Manual</h3>
+        <p>Reciprocating motion system manual with detailed explanations of crank mechanisms, connecting rods, and motion conversion principles.</p>
+        <button class="download-button" onclick="downloadManualPDF('3')" aria-label="Download Crank manual">
+          📄 Download Manual
+        </button>
+      </div>
+      
+      <!-- Gear-A Manual -->
+      <div class="content-card">
+        <h3>Gear-A Manual</h3>
+        <p>Bevel gear system guide explaining perpendicular power transmission, gear ratios, and 90-degree motion transfer applications.</p>
+        <button class="download-button" onclick="downloadManualPDF('4')" aria-label="Download Gear-A manual">
+          📄 Download Manual
+        </button>
+      </div>
+      
+      <!-- Gear-B Manual -->
+      <div class="content-card">
+        <h3>Gear-B Manual</h3>
+        <p>Variable speed gear system manual covering dynamic load distribution, torque variation, and adaptive transmission concepts.</p>
+        <button class="download-button" onclick="downloadManualPDF('5')" aria-label="Download Gear-B manual">
+          📄 Download Manual
+        </button>
+      </div>
+      
+      <!-- Gear-C Manual -->
+      <div class="content-card">
+        <h3>Gear-C Manual</h3>
+        <p>Worm gear system comprehensive guide including self-locking mechanisms, torque multiplication, and precision control applications.</p>
+        <button class="download-button" onclick="downloadManualPDF('6')" aria-label="Download Gear-C manual">
+          📄 Download Manual
+        </button>
+      </div>
+      
     </div>
-  </section>
+  </div>
+</section>
 
   <!-- Models Screen -->
   <section id="modelsScreen" class="modal-screen" role="main" aria-labelledby="models-title">
@@ -1062,14 +1088,17 @@
   </div>
 
   <!-- Create Screen -->
-  <section id="createScreen" class="modal-screen" role="main" aria-labelledby="create-title">
+   <section id="createScreen" class="modal-screen" role="main" aria-labelledby="create-title">
     <div class="modal-header">
       <button class="modal-close-button" id="closeCreateBtn" aria-label="Close create screen">← Back</button>
       
-      <div class="modal-title" id="create-title">Create Your Own AR Models</div>
-      <div class="modal-subtitle">Create your own unique AR models</div>
+      <div class="modal-header-center">
+        <div class="modal-title" id="create-title">Create Your Own AR Models</div>
+        <div class="modal-subtitle">Create your own unique AR models and markers</div>
+      </div>
+      
+      <button class="header-ar-button" id="createOpenARBtn" aria-label="Open AR to view created animations">Open AR</button>
     </div>
-    <div class="modal-content">
       
       <!-- Camera Section -->
       <div class="create-section">
@@ -1128,7 +1157,7 @@
           </div>
           
         </div>
-         <button class="header-ar-button" id="openARBtn" aria-label="Open augmented reality experience">Open AR</button>
+
          
       </div>
 

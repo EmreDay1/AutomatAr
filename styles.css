@@ -1796,22 +1796,23 @@ p, li, span {
   }
 }
 
-/* 1) Force the nav to be a single-row flex container */
+/* 1) Make the nav a single‐row flex with internal padding */
 .header-buttons {
   display: flex;
-  flex-wrap: nowrap;           /* never wrap to a second line */
-  justify-content: center;     /* center them if there’s extra space */
-  gap: clamp(0.8rem, 2vw, 1.2rem);
-  overflow: hidden;            /* hide any stray overflow */
+  flex-wrap: nowrap;             /* never wrap */
+  justify-content: space-between;/* spread them evenly */
+  width: 100%;
+  padding: 0 0.5rem;             /* small inset so first/last never touch the edges */
+  box-sizing: border-box;
 }
 
-/* 2) Let each button grow & shrink equally */
+/* 2) Give each button exactly 1/5 of the remaining space */
 .header-button,
 .header-ar-button {
-  flex: 1 1 auto;              /* allow buttons to shrink below their content width */
-  min-width: 0;                /* ensure they can shrink past default min-content */
-  white-space: nowrap;         /* keep text on a single line */
+  flex: 1 1 0;      /* grow/shrink equally, base size = 0 */
+  min-width: 0;     /* allow them to shrink below their content width */
   margin: 0 auto;            /* horizontal auto margins */
   margin-top: 30px;
   margin-bottom: 70px;
+  white-space: nowrap;
 }

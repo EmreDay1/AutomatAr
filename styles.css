@@ -1796,9 +1796,22 @@ p, li, span {
   }
 }
 
-/* 2) Make each button auto-center if it’s ever alone */
+/* 1) Force the nav to be a single-row flex container */
+.header-buttons {
+  display: flex;
+  flex-wrap: nowrap;           /* never wrap to a second line */
+  justify-content: center;     /* center them if there’s extra space */
+  gap: clamp(0.8rem, 2vw, 1.2rem);
+  overflow: hidden;            /* hide any stray overflow */
+}
+
+/* 2) Let each button grow & shrink equally */
 .header-button,
 .header-ar-button {
+  flex: 1 1 auto;              /* allow buttons to shrink below their content width */
+  min-width: 0;                /* ensure they can shrink past default min-content */
+  white-space: nowrap;         /* keep text on a single line */
   margin: 0 auto;            /* horizontal auto margins */
-  margin-top: 40px;
+  margin-top: 30px;
+  margin-bottom: 70px;
 }

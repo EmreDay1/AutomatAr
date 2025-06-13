@@ -671,6 +671,27 @@
     }
   </style>
 </head>
+<script>
+  function updateSnapOffsets() {
+    const header = document.querySelector('.header-bar');
+    const home   = document.getElementById('homeScreen');
+    if (!header || !home) return;
+    const h = header.getBoundingClientRect().height;
+    // 1) tell the container to inset its snap zone
+    home.style.scrollPaddingTop = h + 'px';
+    // 2) shift each section down by the same amount
+    document.querySelectorAll('.kit-section').forEach(sec => {
+      sec.style.scrollMarginTop = h + 'px';
+    });
+  }
+
+  window.addEventListener('load',  updateSnapOffsets);
+  window.addEventListener('resize', updateSnapOffsets);
+  // if your header may change height on scroll (unlikely)
+  // you can also throttle+call it on scroll:
+  // window.addEventListener('scroll', updateSnapOffsets);
+</script>
+
 <body>
   <!-- Parallax Background -->
   <div class="parallax-bg"></div>

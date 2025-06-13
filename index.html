@@ -1249,568 +1249,456 @@
   <!-- JavaScript Files -->
   <script src="app.js"></script>
 
- <script>
-    // Global state
-    let selectedOptions = {
-      models: { name: null, image: null },
-      kit1: { name: null, image: null },
-      kit2: { name: null, image: null }
-    };
-
-    // Scenario data
-    const scenarioData = {
-      models: {
-        'String Ray': 'String Ray 3D Model: Graceful marine creature showcasing fluid motion dynamics. This model demonstrates hydrodynamic principles and streamlined design found in nature.',
-        'Fish': 'Fish 3D Model: Classic aquatic form demonstrating efficient swimming mechanics. Perfect for studying biomechanics and natural propulsion systems.',
-        'Dolphin': 'Dolphin 3D Model: Intelligent marine mammal model showcasing advanced hydrodynamics. Demonstrates echolocation systems and efficient underwater locomotion.',
-        'Jellyfish': 'Jellyfish 3D Model: Unique cnidarian form showing pulsatile propulsion. Illustrates soft-body mechanics and efficient underwater movement.',
-        'Octopus': 'Octopus 3D Model: Complex cephalopod demonstrating jet propulsion and flexible movement. Shows advanced neural control and adaptive mechanics.',
-        'Sea Turtle': 'Sea Turtle 3D Model: Ancient marine reptile showcasing efficient swimming with limb propulsion. Demonstrates long-distance migration mechanics.'
-      },
-      kits: {
-        'Cam-A Model': 'Cam-A Kit: Learn rotational motion conversion through hands-on assembly. Includes cam disc, follower, base plate, and mounting hardware for studying motion patterns.',
-        'Cam-C Model': 'Cam-C Kit: Explore intermittent motion with Geneva wheel mechanism. Features drive wheel with pin, Geneva wheel with slots, and timing guides.',
-        'Crank Model': 'Crank Kit: Master reciprocating motion mechanics. Includes crank arm, connecting rod, slider mechanism, and guide rails for motion study.',
-        'Gear-A Model': 'Gear-A Kit: Understand perpendicular power transmission with bevel gears. Contains matched bevel gear pair and right-angle mounting frame.',
-        'Gear-B Model': 'Gear-B Kit: Explore variable speed transmission systems. Features non-circular gear profiles and adjustable mounting for torque study.',
-        'Gear-C Model': 'Gear-C Kit: Experience worm gear systems and self-locking properties. Includes precision worm screw and worm wheel assembly.'
-      }
-    };
-
-    // Initialize page
-    document.addEventListener('DOMContentLoaded', function() {
-      initializeAnimations();
-      setupScrollAnimations();
-    });
-
-    // Initialize Apple-style animations
-    function initializeAnimations() {
-      setTimeout(() => {
-        const cards = document.querySelectorAll('.ai-card-container');
-        cards.forEach((card, index) => {
-          setTimeout(() => {
-            card.classList.add('animate-in');
-          }, index * 200);
-        });
-      }, 300);
-    }
-
-    // Setup scroll animations
-    function setupScrollAnimations() {
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('fade-in');
-          }
-        });
-      }, { threshold: 0.1 });
-
-      document.querySelectorAll('.ai-card-container').forEach(card => {
-        observer.observe(card);
-      });
-    }
-
-    // Toggle dropdown
-    function toggleDropdown(type) {
-      const dropdown = document.getElementById(type + 'Dropdown');
-      const trigger  = dropdown.previousElementSibling;
-      const card     = trigger.closest('.ai-card-container');
-
-      // if already open → close it
-      if (dropdown.classList.contains('open')) {
-        dropdown.classList.remove('open');
-        trigger.classList.remove('active');
-        card.classList.remove('dropdown-open');
-        return;
-      }
-
-      // otherwise close all then open this one
-      closeAllDropdowns();
-      dropdown.classList.add('open');
-      trigger.classList.add('active');
-      card.classList.add('dropdown-open');
-    }
-
-    function closeAllDropdowns() {
-      document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('open'));
-      document.querySelectorAll('.dropdown-trigger').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.ai-card-container').forEach(c => c.classList.remove('dropdown-open'));
-    }
-
-    // Select option
-    function selectOption(type, name, imagePath) {
-      // Update selected text
-      document.getElementById(type + 'Selected').textContent = name;
-      
-      // Update image
-      updateImage(type, imagePath);
-      
-      // Store selection
-      selectedOptions[type] = { name, image: imagePath };
-      
-      // Update selected state
-      const dropdown = document.getElementById(type + 'Dropdown');
-      dropdown.querySelectorAll('.dropdown-option').forEach(opt => {
-        opt.classList.remove('selected');
-      });
-      event.target.classList.add('selected');
-      
-      // Close dropdown
-      closeAllDropdowns();
-      
-      // Add animation feedback
-      const card = event.target.closest('.ai-horizontal-card');
-      card.style.transform = 'translateY(-8px) scale(1.02)';
-      setTimeout(() => {
-        card.style.transform = '';
-      }, 300);
-      
-      // Update scenario if popup is open
-      if (document.getElementById('scenarioPopup').classList.contains('open')) {
-        updateScenarioText();
-      }
-    }
-
-    // Update image
-    function updateImage(type, imagePath) {
-      const placeholder = document.getElementById(type + 'Placeholder');
-      const image = document.getElementById(type + 'Image');
-      
-      // Show loading state
-      placeholder.style.opacity = '0.5';
-      
-      // Set image source
-      image.src = `images/${imagePath}`;
-      image.onload = function() {
-        // Hide placeholder and show image
-        placeholder.style.display = 'none';
-        image.style.display = 'block';
-        image.classList.add('loaded', 'scale-in');
-        
-        // Reset loading state
-        placeholder.style.opacity = '1';
-      };
-      
-      // Handle error
-      image.onerror = function() {
-        console.warn(`Failed to load image: ${imagePath}`);
-        placeholder.style.opacity = '1';
-        showNotification(`Failed to load image: ${imagePath}`, 'error');
-      };
-    }
-
-    // Show help
-    function showHelp(type) {
-      let helpText = '';
-      switch(type) {
-        case 'models':
-          helpText = '3D Models: Select marine-themed models to visualize in AR. Each model demonstrates unique movement and design principles from nature.';
-          break;
-        case 'kit1':
-          helpText = 'Kit 1: Choose the first mechanical system for your scenario. Each kit teaches different motion conversion principles.';
-          break;
-        case 'kit2':
-          helpText = 'Kit 2: Select the second mechanical system to combine with Kit 1. Create complex multi-system scenarios.';
-          break;
-      }
-      showNotification(helpText, 'info');
-    }
-
-    // Open scenario popup
-    function openScenario() {
-      updateScenarioText();
-      document.getElementById('scenarioPopup').classList.add('open');
-    }
-
-    // Close scenario popup
-    function closeScenario() {
-      document.getElementById('scenarioPopup').classList.remove('open');
-    }
-
-    // Update scenario text
-    function updateScenarioText() {
-      let content = '';
-      let hasSelections = false;
-      
-      // Check for model selection
-      if (selectedOptions.models.name) {
-        content += '🎯 **3D MODEL SELECTED:**\n' + scenarioData.models[selectedOptions.models.name] + '\n\n';
-        hasSelections = true;
-      }
-      
-      // Check for kit1 selection
-      if (selectedOptions.kit1.name) {
-        content += '⚙️ **KIT 1 SELECTED:**\n' + scenarioData.kits[selectedOptions.kit1.name] + '\n\n';
-        hasSelections = true;
-      }
-      
-      // Check for kit2 selection
-      if (selectedOptions.kit2.name) {
-        content += '🔧 **KIT 2 SELECTED:**\n' + scenarioData.kits[selectedOptions.kit2.name] + '\n\n';
-        hasSelections = true;
-      }
-      
-      if (hasSelections) {
-        content += '✨ **SCENARIO SUMMARY:**\nCombine these elements to create an engaging AR learning experience. The marine model provides visual appeal while the mechanical kits demonstrate engineering principles. Use AR markers to activate each component and explore their interactions.';
-      } else {
-        content = 'Welcome to AutomatAR AI Assistant! Select options from the cards above to create your custom mechanical engineering scenario.\n\nEach selection will provide detailed information about the components, assembly instructions, and educational objectives.\n\nClick on any dropdown menu to begin exploring our mechanical engineering resources.';
-      }
-      
-      document.getElementById('scenarioText').textContent = content;
-    }
-
-    // Show notification
-    function showNotification(message, type) {
-      const notification = document.createElement('div');
-      notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: ${type === 'error' ? '#f44336' : type === 'info' ? '#2196F3' : '#4CAF50'};
-        color: white;
-        padding: 1rem 1.5rem;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        z-index: 10000;
-        font-weight: 600;
-        max-width: 300px;
-        transform: translateX(100%);
-        transition: transform 0.3s ease;
-      `;
-      notification.textContent = message;
-      
-      document.body.appendChild(notification);
-      
-      setTimeout(() => {
-        notification.style.transform = 'translateX(0)';
-      }, 100);
-      
-      setTimeout(() => {
-        notification.style.transform = 'translateX(100%)';
-        setTimeout(() => {
-          if (notification.parentNode) {
-            document.body.removeChild(notification);
-          }
-        }, 300);
-      }, 4000);
-    }
-
-    // Close AI (placeholder function)
-    function closeAI() {
-      if (window.showHomeScreen) {
-        window.showHomeScreen();
-      } else {
-        console.log('Closing AI Assistant');
-      }
-    }
-
-    // Close dropdowns when clicking outside
-    document.addEventListener('click', function(e) {
-      if (!e.target.closest('.custom-dropdown')) {
-        closeAllDropdowns();
-      }
-    });
-
-    // Close scenario popup when clicking outside
-    document.getElementById('scenarioPopup').addEventListener('click', function(e) {
-      if (e.target === this) {
-        closeScenario();
-      }
-    });
-
-    // Handle escape key
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape') {
-        closeAllDropdowns();
-        closeScenario();
-      }
-    });
-  </script>
-  <!-- Begin AI Integration Snippet -->
   <script>
-class CohereAITester {
-  constructor() {
-    this.apiKey = 'eb99UATWhfYjOpFKSt9vysoyqwCHM4WuAoZx02CU';
-    this.baseUrl = 'https://api.cohere.ai/v1/generate';
-    this.currentAnswer = '';
-    this.currentExplanation = '';
-  }
+      // Global state
+      let selectedOptions = {
+        models: { name: null, image: null },
+        kit1: { name: null, image: null },
+        kit2: { name: null, image: null }
+      };
 
-  async generateScenario(seaModel, kit1, kit2) {
-    // Generate scenario structure directly in JavaScript
-    const scenario = this.buildScenario(seaModel, kit1, kit2);
-    
-    // Clean kit names for display
-    const kit1Clean = kit1.replace(/[-\s]?Model/g, '').replace(/-/g, ' ').replace(/Cam-([A-C])/g, 'Cam').replace(/Gear-([A-C])/g, '$1 Gear');
-    const kit2Clean = kit2.replace(/[-\s]?Model/g, '').replace(/-/g, ' ').replace(/Cam-([A-C])/g, 'Cam').replace(/Gear-([A-C])/g, '$1 Gear');
-    
-    // Only use AI for the explanation part
-    const prompt = `Write a 1-2 sentence mechanical engineering explanation for why ${scenario.winner} beats ${scenario.loser} in terms of ${scenario.focus}. Keep it under 30 words and focus on mechanical principles only.`;
-    
-    try {
-      const response = await fetch(this.baseUrl, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
-          'Content-Type': 'application/json',
+      // Scenario data
+      const scenarioData = {
+        models: {
+          'String Ray': 'String Ray 3D Model: Graceful marine creature showcasing fluid motion dynamics. This model demonstrates hydrodynamic principles and streamlined design found in nature.',
+          'Fish': 'Fish 3D Model: Classic aquatic form demonstrating efficient swimming mechanics. Perfect for studying biomechanics and natural propulsion systems.',
+          'Dolphin': 'Dolphin 3D Model: Intelligent marine mammal model showcasing advanced hydrodynamics. Demonstrates echolocation systems and efficient underwater locomotion.',
+          'Jellyfish': 'Jellyfish 3D Model: Unique cnidarian form showing pulsatile propulsion. Illustrates soft-body mechanics and efficient underwater movement.',
+          'Octopus': 'Octopus 3D Model: Complex cephalopod demonstrating jet propulsion and flexible movement. Shows advanced neural control and adaptive mechanics.',
+          'Sea Turtle': 'Sea Turtle 3D Model: Ancient marine reptile showcasing efficient swimming with limb propulsion. Demonstrates long-distance migration mechanics.'
         },
-        body: JSON.stringify({
-          model: 'command-light',
-          prompt,
-          max_tokens: 80,
-          temperature: 0.3,
-          k: 0,
-        })
+        kits: {
+          'Cam-A Model': 'Cam-A Kit: Learn rotational motion conversion through hands-on assembly. Includes cam disc, follower, base plate, and mounting hardware for studying motion patterns.',
+          'Cam-C Model': 'Cam-C Kit: Explore intermittent motion with Geneva wheel mechanism. Features drive wheel with pin, Geneva wheel with slots, and timing guides.',
+          'Crank Model': 'Crank Kit: Master reciprocating motion mechanics. Includes crank arm, connecting rod, slider mechanism, and guide rails for motion study.',
+          'Gear-A Model': 'Gear-A Kit: Understand perpendicular power transmission with bevel gears. Contains matched bevel gear pair and right-angle mounting frame.',
+          'Gear-B Model': 'Gear-B Kit: Explore variable speed transmission systems. Features non-circular gear profiles and adjustable mounting for torque study.',
+          'Gear-C Model': 'Gear-C Kit: Experience worm gear systems and self-locking properties. Includes precision worm screw and worm wheel assembly.'
+        }
+      };
+
+      // Initialize page
+      document.addEventListener('DOMContentLoaded', function() {
+        initializeAnimations();
+        setupScrollAnimations();
       });
-      
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const data = await response.json();
-      const aiExplanation = data.generations[0].text.trim();
-      
-      // Store answer and explanation for later reveal
-      this.currentAnswer = scenario.winner;
-      this.currentExplanation = aiExplanation;
-      
-      // Return scenario WITHOUT answer and explanation
-      return `Mechanisms: ${kit1Clean} vs. ${kit2Clean}
-Objective: ${scenario.objective}
-Prompt: "${scenario.prompt}"`;
-      
-    } catch (error) {
-      // Fallback to pre-written explanation if AI fails
-      this.currentAnswer = scenario.winner;
-      this.currentExplanation = `${scenario.winner} mechanisms provide ${scenario.reason}, making them more effective for ${seaModel} movement compared to ${scenario.loser} systems.`;
-      
-      return `Mechanisms: ${kit1Clean} vs. ${kit2Clean}
-Objective: ${scenario.objective}
-Prompt: "${scenario.prompt}"`;
-    }
-  }
 
-  revealAnswer() {
-    return `**Answer:** ${this.currentAnswer}
-**Explanation:** ${this.currentExplanation}`;
-  }
-
-  buildScenario(seaModel, kit1, kit2) {
-    // 🎯 Mechanism hierarchy (winner determination)
-    const mechanismPower = {
-      "Worm Gear": 5, 
-      "Crank": 4, 
-      "Bevel Gear": 3, 
-      "Geneva": 2, 
-      "Cam": 1
-    };
-    
-    // Clean kit names - remove "Model" and clean up formatting
-    const kit1Clean = kit1.replace(/[-\s]?Model/g, '').replace(/-/g, ' ').replace(/Cam-([A-C])/g, 'Cam').replace(/Gear-([A-C])/g, '$1 Gear');
-    const kit2Clean = kit2.replace(/[-\s]?Model/g, '').replace(/-/g, ' ').replace(/Cam-([A-C])/g, 'Cam').replace(/Gear-([A-C])/g, '$1 Gear');
-    
-    // Determine winner
-    const power1 = mechanismPower[kit1Clean] || mechanismPower[kit1.replace(/-[A-Z]/g, '')] || 1;
-    const power2 = mechanismPower[kit2Clean] || mechanismPower[kit2.replace(/-[A-Z]/g, '')] || 1;
-    
-    const winner = power1 >= power2 ? kit1Clean : kit2Clean;
-    const loser = winner === kit1Clean ? kit2Clean : kit1Clean;
-    
-    // 🎲 Scenario templates
-    const scenarios = [
-      {
-        objective: "Compare speed of motion between two systems", 
-        prompt: `Observe the ${seaModel} operating via ${kit1Clean} and ${kit2Clean} mechanisms. Which one swims faster in AR? Why do you think this happens mechanically?`,
-        focus: "speed and continuity",
-        reason: "continuous motion"
-      },
-      {
-        objective: "Compare force transmission efficiency",
-        prompt: `Activate each system with AR and observe the ${seaModel}. Which mechanism pushes forward most efficiently? Which seems smoothest? Why?`,
-        focus: "force transmission",
-        reason: "higher torque"
-      },
-      {
-        objective: "Compare torque and power output", 
-        prompt: `Scan the ${seaModel} using each mechanism in AR. Which one shows stronger, slower movement? Why is that?`,
-        focus: "torque and power",
-        reason: "stronger force output"
-      },
-      {
-        objective: "Match motion patterns to mechanisms",
-        prompt: `Observe how the ${seaModel} moves with each system. Which movement corresponds to which mechanism? What clues led you there?`,
-        focus: "motion patterns",
-        reason: "consistent motion patterns"
-      },
-      {
-        objective: "Determine best system for resistance",
-        prompt: `The ${seaModel} is swimming against strong current. Which mechanism helps it push through more effectively? Why?`,
-        focus: "efficiency under load", 
-        reason: "better power transmission"
-      },
-      {
-        objective: "Compare precision and control systems",
-        prompt: `Watch the ${seaModel} navigate through obstacles using each mechanism. Which provides better control? Why?`,
-        focus: "precision and control",
-        reason: "better motion control"
-      },
-      {
-        objective: "Evaluate long-term energy efficiency",
-        prompt: `If the ${seaModel} had to swim for hours, which mechanism would be more efficient? What makes you think so?`,
-        focus: "energy efficiency",
-        reason: "optimal energy transfer"
+      // Initialize Apple-style animations
+      function initializeAnimations() {
+        setTimeout(() => {
+          const cards = document.querySelectorAll('.ai-card-container');
+          cards.forEach((card, index) => {
+            setTimeout(() => {
+              card.classList.add('animate-in');
+            }, index * 200);
+          });
+        }, 300);
       }
-    ];
-    
-    const selectedScenario = scenarios[Math.floor(Math.random() * scenarios.length)];
-    
-    return {
-      // Removed title completely
-      objective: selectedScenario.objective,
-      prompt: selectedScenario.prompt,
-      winner: winner,
-      loser: loser,
-      focus: selectedScenario.focus,
-      reason: selectedScenario.reason
-    };
-  }
-}
 
-// Usage Integration
-const cohereTester = new CohereAITester();
+      // Setup scroll animations
+      function setupScrollAnimations() {
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('fade-in');
+            }
+          });
+        }, { threshold: 0.1 });
 
-async function tryAutoGenerate() {
-  const sea = selectedOptions.models.name;
-  const k1 = selectedOptions.kit1.name;
-  const k2 = selectedOptions.kit2.name;
-  if (sea && k1 && k2) {
-    document.getElementById('scenarioText').textContent = '🤖 Generating educational scenario...';
-    
-    // Hide answer section and show answer button
-    hideAnswerSection();
-    showAnswerButton();
-    
-    try {
-      const scenario = await cohereTester.generateScenario(sea, k1, k2);
-      document.getElementById('scenarioText').textContent = scenario;
-    } catch (e) {
-      document.getElementById('scenarioText').textContent = 'Error generating scenario. Please try again.';
-      console.error(e);
-    }
-  }
-}
+        document.querySelectorAll('.ai-card-container').forEach(card => {
+          observer.observe(card);
+        });
+      }
 
-function showAnswer() {
-  const answerText = cohereTester.revealAnswer();
-  const answerSection = document.getElementById('answerSection');
-  const showAnswerBtn = document.getElementById('showAnswerBtn');
+      // Toggle dropdown
+      function toggleDropdown(type) {
+        const dropdown = document.getElementById(type + 'Dropdown');
+        const trigger  = dropdown.previousElementSibling;
+        const card     = trigger.closest('.ai-card-container');
+
+        // if already open → close it
+        if (dropdown.classList.contains('open')) {
+          dropdown.classList.remove('open');
+          trigger.classList.remove('active');
+          card.classList.remove('dropdown-open');
+          return;
+        }
+
+        // otherwise close all then open this one
+        closeAllDropdowns();
+        dropdown.classList.add('open');
+        trigger.classList.add('active');
+        card.classList.add('dropdown-open');
+      }
+
+      function closeAllDropdowns() {
+        document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('open'));
+        document.querySelectorAll('.dropdown-trigger').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.ai-card-container').forEach(c => c.classList.remove('dropdown-open'));
+      }
+
+      // Select option
+      function selectOption(type, name, imagePath) {
+        // Update selected text
+        document.getElementById(type + 'Selected').textContent = name;
+        
+        // Update image
+        updateImage(type, imagePath);
+        
+        // Store selection
+        selectedOptions[type] = { name, image: imagePath };
+        
+        // Update selected state
+        const dropdown = document.getElementById(type + 'Dropdown');
+        dropdown.querySelectorAll('.dropdown-option').forEach(opt => {
+          opt.classList.remove('selected');
+        });
+        event.target.classList.add('selected');
+        
+        // Close dropdown
+        closeAllDropdowns();
+        
+        // Add animation feedback
+        const card = event.target.closest('.ai-horizontal-card');
+        card.style.transform = 'translateY(-8px) scale(1.02)';
+        setTimeout(() => {
+          card.style.transform = '';
+        }, 300);
+        
+        // Update scenario if popup is open
+        if (document.getElementById('scenarioPopup').classList.contains('open')) {
+          updateScenarioText();
+        }
+      }
+
+      // Update image
+      function updateImage(type, imagePath) {
+        const placeholder = document.getElementById(type + 'Placeholder');
+        const image = document.getElementById(type + 'Image');
+        
+        // Show loading state
+        placeholder.style.opacity = '0.5';
+        
+        // Set image source
+        image.src = `images/${imagePath}`;
+        image.onload = function() {
+          // Hide placeholder and show image
+          placeholder.style.display = 'none';
+          image.style.display = 'block';
+          image.classList.add('loaded', 'scale-in');
+          
+          // Reset loading state
+          placeholder.style.opacity = '1';
+        };
+        
+        // Handle error
+        image.onerror = function() {
+          console.warn(`Failed to load image: ${imagePath}`);
+          placeholder.style.opacity = '1';
+          showNotification(`Failed to load image: ${imagePath}`, 'error');
+        };
+      }
+
+      // Show help
+      function showHelp(type) {
+        let helpText = '';
+        switch(type) {
+          case 'models':
+            helpText = '3D Models: Select marine-themed models to visualize in AR. Each model demonstrates unique movement and design principles from nature.';
+            break;
+          case 'kit1':
+            helpText = 'Kit 1: Choose the first mechanical system for your scenario. Each kit teaches different motion conversion principles.';
+            break;
+          case 'kit2':
+            helpText = 'Kit 2: Select the second mechanical system to combine with Kit 1. Create complex multi-system scenarios.';
+            break;
+        }
+        showNotification(helpText, 'info');
+      }
+
+      // Open scenario popup
+      function openScenario() {
+        updateScenarioText();
+        document.getElementById('scenarioPopup').classList.add('open');
+      }
+
+      // Close scenario popup
+      function closeScenario() {
+        document.getElementById('scenarioPopup').classList.remove('open');
+      }
+
+      // Update scenario text
+      function updateScenarioText() {
+        let content = '';
+        let hasSelections = false;
+        
+        // Check for model selection
+        if (selectedOptions.models.name) {
+          content += '🎯 **3D MODEL SELECTED:**\n' + scenarioData.models[selectedOptions.models.name] + '\n\n';
+          hasSelections = true;
+        }
+        
+        // Check for kit1 selection
+        if (selectedOptions.kit1.name) {
+          content += '⚙️ **KIT 1 SELECTED:**\n' + scenarioData.kits[selectedOptions.kit1.name] + '\n\n';
+          hasSelections = true;
+        }
+        
+        // Check for kit2 selection
+        if (selectedOptions.kit2.name) {
+          content += '🔧 **KIT 2 SELECTED:**\n' + scenarioData.kits[selectedOptions.kit2.name] + '\n\n';
+          hasSelections = true;
+        }
+        
+        if (hasSelections) {
+          content += '✨ **SCENARIO SUMMARY:**\nCombine these elements to create an engaging AR learning experience. The marine model provides visual appeal while the mechanical kits demonstrate engineering principles. Use AR markers to activate each component and explore their interactions.';
+        } else {
+          content = 'Welcome to AutomatAR AI Assistant! Select options from the cards above to create your custom mechanical engineering scenario.\n\nEach selection will provide detailed information about the components, assembly instructions, and educational objectives.\n\nClick on any dropdown menu to begin exploring our mechanical engineering resources.';
+        }
+        
+        document.getElementById('scenarioText').textContent = content;
+      }
+
+      // Show notification
+      function showNotification(message, type) {
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          background: ${type === 'error' ? '#f44336' : type === 'info' ? '#2196F3' : '#4CAF50'};
+          color: white;
+          padding: 1rem 1.5rem;
+          border-radius: 8px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+          z-index: 10000;
+          font-weight: 600;
+          max-width: 300px;
+          transform: translateX(100%);
+          transition: transform 0.3s ease;
+        `;
+        notification.textContent = message;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+          notification.style.transform = 'translateX(0)';
+        }, 100);
+        
+        setTimeout(() => {
+          notification.style.transform = 'translateX(100%)';
+          setTimeout(() => {
+            if (notification.parentNode) {
+              document.body.removeChild(notification);
+            }
+          }, 300);
+        }, 4000);
+      }
+
+      // Close AI (placeholder function)
+      function closeAI() {
+        if (window.showHomeScreen) {
+          window.showHomeScreen();
+        } else {
+          console.log('Closing AI Assistant');
+        }
+      }
+
+      // Close dropdowns when clicking outside
+      document.addEventListener('click', function(e) {
+        if (!e.target.closest('.custom-dropdown')) {
+          closeAllDropdowns();
+        }
+      });
+
+      // Close scenario popup when clicking outside
+      document.getElementById('scenarioPopup').addEventListener('click', function(e) {
+        if (e.target === this) {
+          closeScenario();
+        }
+      });
+
+      // Handle escape key
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+          closeAllDropdowns();
+          closeScenario();
+        }
+      });
+    </script>
+    <!-- Begin AI Integration Snippet -->
+    <script id="ai-script" data-openai-key="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">
+      (function(){
+        // ── Grab API key from data attribute ───────────────────────────────────────
+        const API_KEY = document
+          .getElementById('ai-script')
+          .dataset.openaiKey
+          .trim();
+        if (!API_KEY) {
+          console.error('Missing OpenAI API key!');
+        }
+      
+        // ── 1) Debounce utility ─────────────────────────────────────────────────────
+        function debounce(fn, delay) {
+          let timer;
+          return function(...args) {
+            clearTimeout(timer);
+            timer = setTimeout(() => fn.apply(this, args), delay);
+          };
+        }
+      
+        // ── 2) Answer‐section helpers ────────────────────────────────────────────────
+        function hideAnswerSection() {
+          const sec = document.getElementById('answerSection');
+          if (sec) {
+            sec.style.display = 'none';
+            sec.textContent  = '';
+          }
+        }
+        function showAnswerButton() {
+          const btn = document.getElementById('showAnswerBtn');
+          if (btn) btn.style.display = 'block';
+        }
+      
+        // ── 3) OpenAI integration with retry on 429 ─────────────────────────────────
+        class OpenAIAITester {
+          constructor() {
+            this.currentAnswer      = '';
+            this.currentExplanation = '';
+          }
+      
+          async generateScenario(seaModel, kit1, kit2) {
+            const scenario = this.buildScenario(seaModel, kit1, kit2);
+            const prompt = `Write a 1–2 sentence mechanical engineering explanation (under 30 words) for why "${scenario.winner}" outperforms "${scenario.loser}" in terms of ${scenario.focus}, focusing only on mechanical principles.`;
+      
+            const maxRetries = 3;
+            let attempt = 0, resp;
+      
+            while (attempt < maxRetries) {
+              resp = await fetch('https://api.openai.com/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${API_KEY}`
+                },
+                body: JSON.stringify({
+                  model: 'gpt-3.5-turbo',
+                  messages: [
+                    { role: 'system', content: 'You are an expert mechanical engineering tutor.' },
+                    { role: 'user',   content: prompt }
+                  ],
+                  max_tokens: 60,
+                  temperature: 0.3
+                })
+              });
+      
+              if (resp.status !== 429) break;
+              // back off
+              const retryAfter = parseInt(resp.headers.get('Retry-After') || '1', 10);
+              await new Promise(r => setTimeout(r, (retryAfter + 1) * 1000));
+              attempt++;
+            }
+      
+            if (!resp.ok) {
+              console.error('OpenAI error', resp.status);
+              this.currentAnswer      = scenario.winner;
+              this.currentExplanation = `${scenario.winner} mechanisms provide ${scenario.reason}, making them more effective than ${scenario.loser}.`;
+            } else {
+              const data = await resp.json();
+              this.currentAnswer      = scenario.winner;
+              this.currentExplanation = data.choices[0].message.content.trim();
+            }
+      
+            return (
+              `🎯 **Objective:** ${scenario.objective}\n\n` +
+              `🔧 **Mechanisms:** ${kit1} vs. ${kit2}\n\n` +
+              `💬 **Prompt:** "${scenario.prompt}"`
+            );
+          }
+      
+          revealAnswer() {
+            return `**Answer:** ${this.currentAnswer}\n**Explanation:** ${this.currentExplanation}`;
+          }
+      
+          buildScenario(seaModel, kit1, kit2) {
+            const mechPower = { 'Worm Gear':5, 'Crank':4, 'Bevel Gear':3, 'Geneva':2, 'Cam':1 };
+            const clean = name =>
+              name.replace(/[-\s]?Model/, '')
+                  .replace(/Cam-([A-C])/,'Cam')
+                  .replace(/Gear-([A-C])/,'$1 Gear');
+            const k1 = clean(kit1), k2 = clean(kit2);
+            const p1 = mechPower[k1]||1, p2 = mechPower[k2]||1;
+            const winner = p1 >= p2 ? k1 : k2,
+                  loser  = winner === k1 ? k2 : k1;
+      
+            const templates = [
+              { objective:'Compare speed of motion',       prompt:`Which mechanism swims faster for the ${seaModel}? Why mechanically?`,    focus:'speed',      reason:'continuous motion' },
+              { objective:'Compare force transmission',    prompt:`Which mechanism applies force more efficiently to the ${seaModel}?`,     focus:'torque',     reason:'higher torque' },
+              { objective:'Compare precision and control', prompt:`Which mechanism offers better control for the ${seaModel}?`,              focus:'control',    reason:'consistent motion' },
+              { objective:'Evaluate energy efficiency',    prompt:`Which mechanism uses less energy if the ${seaModel} swims for hours?`,    focus:'efficiency', reason:'optimal transfer' },
+              { objective:'Test under load',               prompt:`Which mechanism pushes through resistance best for the ${seaModel}?`,     focus:'load',       reason:'stronger output' }
+            ];
+            const pick = templates[Math.floor(Math.random()*templates.length)];
+      
+            return {
+              objective: pick.objective,
+              prompt:   pick.prompt,
+              winner,
+              loser,
+              focus:    pick.focus,
+              reason:   pick.reason
+            };
+          }
+        }
+      
+        // ── 4) Instantiate & define generation/show functions ────────────────────────
+        const aiTester = new OpenAIAITester();
+      
+        async function tryAutoGenerate() {
+          const sea = selectedOptions.models?.name;
+          const k1  = selectedOptions.kit1?.name;
+          const k2  = selectedOptions.kit2?.name;
+          if (!sea || !k1 || !k2) return;
+      
+          document.getElementById('scenarioText').textContent = '🤖 Generating educational scenario…';
+          hideAnswerSection();
+          showAnswerButton();
+      
+          try {
+            const text = await aiTester.generateScenario(sea, k1, k2);
+            document.getElementById('scenarioText').textContent = text;
+          } catch (e) {
+            console.error(e);
+            document.getElementById('scenarioText').textContent = 'Error generating scenario.';
+          }
+        }
+      
+        function showAnswer() {
+          const sec = document.getElementById('answerSection');
+          sec.textContent = aiTester.revealAnswer();
+          sec.style.display = 'block';
+          document.getElementById('showAnswerBtn').style.display = 'none';
+        }
+      
+        // ── 5) Hook dropdowns with debounce ─────────────────────────────────────────
+        (function(){
+          const originalSelect = window.selectOption;
+          const debouncedTry   = debounce(tryAutoGenerate, 800);
+          window.selectOption = function(type, name, imagePath) {
+            originalSelect(type, name, imagePath);
+            debouncedTry();
+          };
+        })();
+      
+        // ── 6) Wire up the “Show Answer” button ─────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', () => {
+          const btn = document.getElementById('showAnswerBtn');
+          if (btn) btn.addEventListener('click', showAnswer);
+        });
+      })();
+      </script>
+      
   
-  if (answerSection) {
-    answerSection.textContent = answerText;
-    answerSection.style.display = 'block';
-  }
-  
-  if (showAnswerBtn) {
-    showAnswerBtn.style.display = 'none';
-  }
-}
-
-function hideAnswerSection() {
-  const answerSection = document.getElementById('answerSection');
-  if (answerSection) {
-    answerSection.style.display = 'none';
-    answerSection.textContent = '';
-  }
-}
-
-function showAnswerButton() {
-  const showAnswerBtn = document.getElementById('showAnswerBtn');
-  if (showAnswerBtn) {
-    showAnswerBtn.style.display = 'block';
-  }
-}
-
-// Auto-generate when selections change
-(function(){
-  const originalSelect = window.selectOption;
-  window.selectOption = function(type, name, imagePath) {
-    originalSelect(type, name, imagePath);
-    tryAutoGenerate();
-  };
-  
-  // Also hook into scenario popup opening to reset answer state
-  const originalOpenScenario = window.openScenario;
-  window.openScenario = function() {
-    if (originalOpenScenario) originalOpenScenario();
-    // Reset answer state when popup opens
-    hideAnswerSection();
-    if (cohereTester.currentAnswer) {
-      showAnswerButton();
-    }
-  };
-})();
-
-// Initialize answer section and button in popup when DOM loads
-document.addEventListener('DOMContentLoaded', function() {
-  // Find the scenario popup content
-  const scenarioContent = document.querySelector('.scenario-content');
-  if (scenarioContent) {
-    
-    // Add answer section (hidden by default)
-    const answerSection = document.createElement('div');
-    answerSection.id = 'answerSection';
-    answerSection.style.cssText = `
-      display: none;
-      background: rgba(76, 175, 80, 0.1);
-      border: 2px solid #4CAF50;
-      border-radius: 8px;
-      padding: 1rem;
-      margin-top: 1rem;
-      color: #2E7D32;
-      font-weight: 600;
-      white-space: pre-line;
-    `;
-    
-    // Add show answer button
-    const showAnswerBtn = document.createElement('button');
-    showAnswerBtn.id = 'showAnswerBtn';
-    showAnswerBtn.textContent = 'Show Answer';
-    showAnswerBtn.style.cssText = `
-      display: none;
-      background: #4CAF50;
-      color: white;
-      border: none;
-      padding: 0.8rem 1.5rem;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 600;
-      margin-top: 1rem;
-      transition: all 0.3s ease;
-    `;
-    
-    showAnswerBtn.onmouseover = function() {
-      this.style.background = '#45a049';
-      this.style.transform = 'translateY(-2px)';
-    };
-    
-    showAnswerBtn.onmouseout = function() {
-      this.style.background = '#4CAF50';
-      this.style.transform = 'translateY(0)';
-    };
-    
-    showAnswerBtn.onclick = showAnswer;
-    
-    // Insert after scenario text but before close button
-    const scenarioText = document.getElementById('scenarioText');
-    if (scenarioText) {
-      scenarioText.parentNode.insertBefore(showAnswerBtn, scenarioText.nextSibling);
-      scenarioText.parentNode.insertBefore(answerSection, showAnswerBtn.nextSibling);
-    }
-  }
-});
-  </script>
-  
-  
-  
-
-
   <!-- Screen Reader Only Content -->
   <div class="sr-only" aria-live="polite" id="screen-reader-announcements"></div>
 

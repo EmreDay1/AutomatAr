@@ -947,7 +947,6 @@ cleanup() {
     Utils.log('Animation Library button created and positioned', 'success');
   }  
 
-
   updateLibraryButton() {
     if (this.libraryButton) {
       this.libraryButton.textContent = `Animation Library (${this.animationLibrary.size})`;
@@ -2018,7 +2017,7 @@ class PDFManager {
       '6': 'Gear-C Worm Gears Manual'
     };
 
-    const pdfPath = `manuals/${manualNumber}.pdf`;
+    const pdfPath = `manuels/${manualNumber}.pdf`;
     const pdfFrame = Utils.$('pdfFrame');
     const pdfFallback = Utils.$('pdfFallback');
     const pdfDownloadLink = Utils.$('pdfDownloadLink');
@@ -2071,13 +2070,13 @@ class PDFManager {
 class ModelManager {
   static downloadModel(modelNumber) {
     const kitNames = {
-      'cam a': 'Cam-A 3D Model',
-      'CAM-C (geneva stop)': 'Cam-C 3D Model',
-      'crank': 'Crank 3D Model',
-      'gear a': 'Gear-A 3D Model',
-      'gear b': 'Gear-B 3D Model',
-      'gear c': 'Gear-C 3D Model',
-      'base v7': 'Base Platform Model'
+      '1': 'Cam-A 3D Model',
+      '2': 'Cam-C 3D Model',
+      '3': 'Crank 3D Model',
+      '4': 'Gear-A 3D Model',
+      '5': 'Gear-B 3D Model',
+      '6': 'Gear-C 3D Model',
+      '7': 'Base Platform Model'
     };
 
     const modelPath = `kits-stl/${modelNumber}.stl`;

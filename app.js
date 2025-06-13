@@ -886,30 +886,36 @@ cleanup() {
   // Create the persistent animation library button at the top
   // Inside CreateManager class, replace your existing method with this:
   createAnimationLibraryButton() {
-    // Remove any existing button first
+    // 1) Remove any existing button first
     const existing = document.querySelector('#animLibraryTopBtn');
     if (existing) existing.remove();
-
-    // Find the create screen header
-    const createScreen = Utils.$('createScreen');
+  
+    // 2) Find the create screen header
+    const createScreen = document.getElementById('createScreen');
     if (!createScreen) return;
     const header = createScreen.querySelector('.modal-header');
     if (!header) return;
-
-    // 1) Add spacing to the back button
+  
+    // 3) Make header a flex container
+    header.style.display        = 'flex';
+    header.style.alignItems     = 'center';
+    header.style.justifyContent = 'space-between';
+  
+    // 4) Add spacing to the Back button
     const backBtn = header.querySelector('#closeCreateBtn');
     if (backBtn) {
-      backBtn.style.margin = '0 2rem 0 0';   // top 0, right 2rem, bottom 0, left 0
+      backBtn.style.margin = '0 2rem 0 0';  // top 0, right 2rem, bottom 0, left 0
     }
-
-    // 2) Create the library button
+  
+    // 5) Create the “Animation Library” button
     this.libraryButton = document.createElement('button');
     this.libraryButton.id = 'animLibraryTopBtn';
     this.libraryButton.textContent = 'Animation Library';
-
-    // Let flex do the heavy lifting; just add left + right margin
+  
+    // 6) Push it to the far right with margin-left:auto
     this.libraryButton.style.cssText = `
-      margin: 0 auto 2rem 2rem;     /* top 0, right 2rem, bottom 0, left auto */
+      margin: 0 1rem 0 0;    /* top 0, right 1rem, bottom 0, left 0 */
+      margin-left: auto;     /* ← pushes this button all the way to the right */
       background: #9C27B0;
       color: white;
       border: 2px solid #9C27B0;
@@ -921,26 +927,25 @@ cleanup() {
       transition: all 0.3s ease;
       box-shadow: 0 2px 8px rgba(156, 39, 176, 0.3);
     `;
-
-    this.libraryButton.onclick = () => this.openLibrary();
+  
+    // 7) Hover states
     this.libraryButton.onmouseenter = () => {
-      this.libraryButton.style.background = '#7B1FA2';
-      this.libraryButton.style.transform = 'translateY(-2px)';
-      this.libraryButton.style.boxShadow = '0 4px 12px rgba(156, 39, 176, 0.4)';
+      this.libraryButton.style.background   = '#7B1FA2';
+      this.libraryButton.style.transform    = 'translateY(-2px)';
+      this.libraryButton.style.boxShadow    = '0 4px 12px rgba(156, 39, 176, 0.4)';
     };
     this.libraryButton.onmouseleave = () => {
-      this.libraryButton.style.background = '#9C27B0';
-      this.libraryButton.style.transform = 'translateY(0)';
-      this.libraryButton.style.boxShadow = '0 2px 8px rgba(156, 39, 176, 0.3)';
+      this.libraryButton.style.background   = '#9C27B0';
+      this.libraryButton.style.transform    = 'translateY(0)';
+      this.libraryButton.style.boxShadow    = '0 2px 8px rgba(156, 39, 176, 0.3)';
     };
-
-    // 3) Append it as the last flex‐child (justify-content: space-between / flex:1 will handle layout)
+    this.libraryButton.onclick = () => this.openLibrary();
+  
+    // 8) Append it as the last flex-child
     header.appendChild(this.libraryButton);
-
+  
     Utils.log('Animation Library button created and positioned', 'success');
-  }
-
-
+  }  
 
   updateLibraryButton() {
     if (this.libraryButton) {

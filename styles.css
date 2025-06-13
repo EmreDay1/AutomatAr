@@ -1816,3 +1816,13 @@ p, li, span {
   white-space: nowrap;
   font-size: clamp(0.6rem, calc(100vw / 30), 0.9rem);
 }
+
+#homeScreen {
+  scroll-snap-type: y mandatory;
+}
+
+.kit-section {
+  scroll-snap-align: start;
+  /* always stop exactly at the snap point */
+  scroll-snap-stop: always;
+}

@@ -1796,15 +1796,9 @@ p, li, span {
   }
 }
 
-/* 1) Center the header-buttons flex container */
-.header-buttons {
-  display: flex;             /* ensure it’s a flex container */
-  justify-content: center;   /* center all children */
-  gap: clamp(1.2rem, 2vw, 1.2rem);
-}
-
 /* 2) Make each button auto-center if it’s ever alone */
 .header-button,
 .header-ar-button {
   margin: 0 auto;            /* horizontal auto margins */
+  margin-top: 40px;
 }

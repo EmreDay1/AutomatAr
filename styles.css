@@ -1806,7 +1806,6 @@ p, li, span {
   box-sizing: border-box;
 }
 
-/* 2) Give each button exactly 1/5 of the remaining space */
 .header-button,
 .header-ar-button {
   flex: 1 1 0;      /* grow/shrink equally, base size = 0 */
@@ -1815,4 +1814,5 @@ p, li, span {
   margin-top: 30px;
   margin-bottom: 70px;
   white-space: nowrap;
+  font-size: clamp(0.6rem, calc(100vw / 30), 0.9rem);
 }

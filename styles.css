@@ -165,13 +165,14 @@ body {
   }
 }
 
-/* Scroll-triggered sections - NO SCROLL SNAP */
+/* Scroll-triggered sections - FREE SCROLL */
 .scroll-section {
-  min-height: 100vh;
+  min-height: auto;
   display: flex;
   align-items: center;
   position: relative;
   overflow: hidden;
+  padding: clamp(1rem, 3vw, 2rem) 0;
 }
 
 /* Flexbox-based responsive content */
@@ -185,7 +186,7 @@ body {
   max-width: 1400px;
   margin: 0 auto;
   width: 100%;
-  min-height: 70vh; /* Ensure adequate height */
+  min-height: auto; /* Remove viewport height forcing */
 }
 
 .kit-content > * {
@@ -434,15 +435,15 @@ body {
   padding: 0 clamp(1rem, 3vw, 2rem);
 }
 
-/* Home Screen - NO SCROLL SNAP */
+/* Home Screen - FREE SCROLL */
 #homeScreen {
   display: none;
   overflow-y: auto;
-  height: 100vh;
+  height: auto;
 }
 
 .intro-section {
-  min-height: 100vh;
+  min-height: auto;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -472,9 +473,9 @@ body {
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
-/* Kit sections - NO SCROLL SNAP */
+/* Kit sections - FREE SCROLL */
 .kit-section {
-  min-height: 100vh;
+  min-height: auto;
   display: flex;
   align-items: center;
   padding: clamp(2rem, 8vw, 4rem) 0;
@@ -1429,7 +1430,7 @@ body {
   .kit-content {
     gap: clamp(1.5rem, 4vw, 2.5rem);
     padding: clamp(1.5rem, 4vw, 2rem);
-    min-height: 60vh;
+    min-height: auto;
   }
   
   .kit-content > * {

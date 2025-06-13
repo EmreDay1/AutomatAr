@@ -1523,7 +1523,6 @@ p, li, span {
   min-font-size: 12px;
 }
 
-/* Create Screen Styles */
 /* Create Screen Styles - Improved Layout */
 .create-section {
   background: rgba(255, 255, 255, 0.1);
@@ -1857,47 +1856,58 @@ p, li, span {
   font-size: clamp(0.85rem, 2vw, 0.95rem);
 }
 
-/* Create Screen Header - Improved Layout */
+/* Create Screen Header - Better Mobile Flexbox */
 #createScreen .modal-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  padding: clamp(1rem, 3vw, 1.5rem) clamp(1rem, 4vw, 2rem);
+  justify-content: center;
+  flex-wrap: nowrap;
+  padding: clamp(1rem, 3vw, 2rem);
   position: relative;
   background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(20px);
   border-bottom: 2px solid rgba(255, 255, 255, 0.1);
-  gap: 1rem;
+  min-height: clamp(60px, 12vw, 80px);
 }
 
 #createScreen .modal-close-button {
-  order: 1;
-  position: static !important;
+  position: absolute;
+  left: clamp(1rem, 3vw, 2rem);
+  top: 50%;
+  transform: translateY(-50%);
   flex-shrink: 0;
   margin: 0;
-  font-size: clamp(0.8rem, 2vw, 0.9rem);
-  padding: clamp(0.6rem, 2vw, 0.8rem) clamp(1rem, 3vw, 1.2rem);
+  font-size: clamp(0.7rem, 2vw, 0.9rem);
+  padding: clamp(0.5rem, 1.5vw, 0.8rem) clamp(0.8rem, 2.5vw, 1.2rem);
+  white-space: nowrap;
+  z-index: 10;
 }
 
 #createScreen .modal-header-center {
-  order: 2;
-  flex: 1 1 auto;
+  flex: 1;
   text-align: center;
-  min-width: 200px;
+  padding: 0 clamp(6rem, 15vw, 8rem); /* Space for back button */
+  max-width: 100%;
+  overflow: hidden;
 }
 
 #createScreen .modal-title {
-  font-size: clamp(1.2rem, 4vw, 2rem);
+  font-size: clamp(1rem, 4vw, 1.8rem);
   line-height: 1.2;
-  margin-bottom: 0.25rem;
+  margin-bottom: clamp(0.2rem, 1vw, 0.4rem);
   font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 #createScreen .modal-subtitle {
-  font-size: clamp(0.8rem, 2vw, 1rem);
+  font-size: clamp(0.7rem, 2vw, 0.9rem);
   margin: 0;
   opacity: 0.9;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* AR Button in Header */
@@ -1916,89 +1926,176 @@ p, li, span {
   background: linear-gradient(145deg, #45a049, #3d8b40);
 }
 
-/* Responsive Improvements */
+/* Enhanced Mobile Responsive Design */
 @media (max-width: 768px) {
   .create-section {
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
+    padding: clamp(1rem, 4vw, 1.5rem);
+    margin-bottom: clamp(1rem, 3vw, 1.5rem);
   }
   
   .create-controls {
     flex-direction: column;
-    gap: 0.8rem;
+    gap: clamp(0.8rem, 2vw, 1rem);
     width: 100%;
+    padding: 1rem 0;
   }
   
   .create-capture-btn, .create-clear-btn {
     width: 100%;
-    max-width: 300px;
+    max-width: none;
+    padding: clamp(0.8rem, 2.5vw, 1rem) clamp(1.2rem, 4vw, 1.5rem);
+    font-size: clamp(0.8rem, 2.2vw, 1rem);
   }
   
   .create-animation-controls {
     flex-direction: column;
-    gap: 1rem;
+    gap: clamp(0.8rem, 2vw, 1rem);
     text-align: center;
+    width: 100%;
+    padding: 1rem;
+  }
+  
+  .create-animation-controls button {
+    width: 100%;
+    max-width: 250px;
+    margin: 0 auto;
   }
   
   .create-animation-controls label {
     flex-direction: column;
-    gap: 0.5rem;
+    gap: clamp(0.4rem, 1vw, 0.6rem);
+    width: 100%;
+  }
+  
+  .create-animation-controls input[type="range"] {
+    width: 100%;
+    max-width: 200px;
+    margin: 0 auto;
   }
   
   .create-tips {
     grid-template-columns: 1fr;
+    gap: clamp(1rem, 3vw, 1.5rem);
   }
   
+  /* Mobile Header Layout */
   #createScreen .modal-header {
-    flex-direction: column;
-    text-align: center;
-    gap: 1rem;
+    padding: clamp(0.8rem, 2vw, 1.2rem);
+    min-height: clamp(50px, 10vw, 70px);
   }
   
-  #createScreen .modal-close-button,
-  #createScreen .header-ar-button {
-    order: 3;
-    width: auto;
-    min-width: 120px;
+  #createScreen .modal-close-button {
+    left: clamp(0.8rem, 2vw, 1.2rem);
+    font-size: clamp(0.7rem, 1.8vw, 0.8rem);
+    padding: clamp(0.4rem, 1.2vw, 0.6rem) clamp(0.6rem, 2vw, 0.8rem);
   }
   
   #createScreen .modal-header-center {
-    order: 1;
+    padding: 0 clamp(4rem, 12vw, 6rem);
+  }
+  
+  #createScreen .modal-title {
+    font-size: clamp(0.9rem, 3.5vw, 1.4rem);
+    margin-bottom: clamp(0.1rem, 0.5vw, 0.3rem);
+  }
+  
+  #createScreen .modal-subtitle {
+    font-size: clamp(0.65rem, 1.8vw, 0.8rem);
   }
 }
 
 @media (max-width: 480px) {
+  /* Very Small Mobile Devices */
   .create-camera-box {
     width: 95vw;
     height: 71.25vw;
     border-radius: 12px;
+    margin: 0 auto;
   }
   
   .create-animation-box {
     width: 95vw;
     height: 35vw;
+    margin: 0 auto;
   }
   
   .create-results {
-    gap: 0.5rem;
-    padding: 0.8rem;
+    gap: clamp(0.4rem, 1vw, 0.6rem);
+    padding: clamp(0.6rem, 2vw, 0.8rem);
+    flex-wrap: wrap;
+    justify-content: center;
   }
   
   .create-result-img {
-    width: 70px;
-    height: 52px;
+    width: clamp(60px, 12vw, 80px);
+    height: clamp(45px, 9vw, 60px);
   }
   
+  /* Ultra-compact header for very small screens */
   #createScreen .modal-header {
-    padding: 1rem;
+    padding: clamp(0.6rem, 1.5vw, 0.8rem);
+    min-height: clamp(45px, 9vw, 60px);
+  }
+  
+  #createScreen .modal-close-button {
+    left: clamp(0.6rem, 1.5vw, 0.8rem);
+    font-size: clamp(0.6rem, 1.5vw, 0.7rem);
+    padding: clamp(0.3rem, 1vw, 0.4rem) clamp(0.5rem, 1.5vw, 0.6rem);
+  }
+  
+  #createScreen .modal-header-center {
+    padding: 0 clamp(3.5rem, 10vw, 5rem);
+  }
+  
+  #createScreen .modal-title {
+    font-size: clamp(0.8rem, 3vw, 1.1rem);
+    margin-bottom: clamp(0.1rem, 0.3vw, 0.2rem);
+  }
+  
+  #createScreen .modal-subtitle {
+    font-size: clamp(0.6rem, 1.5vw, 0.7rem);
   }
   
   .create-controls {
-    padding: 0.8rem;
+    padding: clamp(0.6rem, 2vw, 0.8rem) 0;
   }
   
   .create-animation-controls {
-    padding: 0.8rem;
+    padding: clamp(0.6rem, 2vw, 0.8rem);
+  }
+  
+  .create-section {
+    padding: clamp(0.8rem, 3vw, 1.2rem);
+    margin-bottom: clamp(0.8rem, 2vw, 1.2rem);
+  }
+  
+  .create-section h3 {
+    font-size: clamp(1.1rem, 3.5vw, 1.4rem);
+    margin-bottom: clamp(0.8rem, 2.5vw, 1.2rem);
+  }
+}
+
+@media (max-width: 360px) {
+  /* Extra Small Devices (older phones) */
+  #createScreen .modal-title {
+    font-size: clamp(0.75rem, 2.8vw, 1rem);
+    white-space: normal;
+    line-height: 1.1;
+  }
+  
+  #createScreen .modal-subtitle {
+    font-size: clamp(0.55rem, 1.4vw, 0.65rem);
+    white-space: normal;
+    line-height: 1.2;
+  }
+  
+  #createScreen .modal-header-center {
+    padding: 0 clamp(3rem, 8vw, 4rem);
+  }
+  
+  .create-capture-btn, .create-clear-btn {
+    font-size: clamp(0.7rem, 2vw, 0.8rem);
+    padding: clamp(0.7rem, 2vw, 0.8rem) clamp(1rem, 3vw, 1.2rem);
   }
 }
 
@@ -2160,90 +2257,48 @@ p, li, span {
   transform: translateY(-2px) !important;
 }
 
-/* Responsive adjustments for Create screen */
-@media (max-width: 768px) {
-  .create-section {
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
-  }
-  
-  .create-controls {
-    flex-direction: column;
-    gap: 0.8rem;
-  }
-  
-  .create-capture-btn, .create-clear-btn {
-    width: 100%;
-    padding: 0.8rem 1.5rem;
-  }
-  
-  .create-animation-controls {
-    gap: 0.8rem;
-  }
-  
-  .create-animation-controls label {
-    flex-direction: column;
-    text-align: center;
-  }
-  
-  .create-tips {
-    grid-template-columns: 1fr;
-  }
+/* Prevent Button Overlaps and Layout Issues */
+#createScreen .modal-header * {
+  box-sizing: border-box;
 }
 
-@media (max-width: 480px) {
-  .create-camera-box {
-    width: 95vw;
-    height: 71.25vw; /* Maintain 4:3 aspect ratio */
+#createScreen .modal-close-button {
+  z-index: 20;
+  background: #ffffff;
+  color: #FF8C00;
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+#createScreen .modal-close-button:hover {
+  background: #FF8C00;
+  color: #ffffff;
+  transform: translateY(-50%) translateY(-1px);
+}
+
+/* Ensure proper text wrapping on very small screens */
+@media (max-width: 320px) {
+  #createScreen .modal-title {
+    font-size: 0.7rem;
+    white-space: normal;
+    word-break: break-word;
   }
   
-  .create-animation-box {
-    width: 95vw;
-    height: 23.75vw;
+  #createScreen .modal-subtitle {
+    font-size: 0.5rem;
+    white-space: normal;
+    word-break: break-word;
   }
   
-  .create-results {
-    gap: 0.5rem;
+  #createScreen .modal-header-center {
+    padding: 0 2.5rem;
   }
   
-  .create-result-img {
-    width: 80px;
-    height: 60px;
+  #createScreen .modal-close-button {
+    left: 0.5rem;
+    font-size: 0.55rem;
+    padding: 0.3rem 0.4rem;
   }
-}
-
-/* Create-screen header as a flex container */
-#createScreen .modal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  padding: 1rem 2rem;
-  position: relative;
-}
-
-/* override the absolute positioning on those buttons */
-#createScreen .modal-header .modal-close-button,
-#createScreen .modal-header .header-ar-button {
-  position: static !important;
-  top: auto;
-  left: auto;
-  right: auto;
-  margin: 0;
-}
-
-/* center wrapper takes remaining space */
-#createScreen .modal-header-center {
-  order: 2;
-  flex: 1 1 100%;
-  text-align: center;
-  padding: 0.5rem 0;
-}
-
-/* small tweak on subtitle spacing */
-#createScreen .modal-header-center .modal-subtitle {
-  margin-top: 0.25rem;
-  font-size: 0.9rem;
 }
 
 /* Responsive title */

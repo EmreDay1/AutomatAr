@@ -187,7 +187,7 @@ body {
   max-width: 1400px;
   margin: 0 auto;
   width: 100%;
-  min-height: 70vh; /* Ensure adequate height */
+  min-height: 200px; /* Ensure adequate height */
 }
 
 .kit-content > * {

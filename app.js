@@ -2338,8 +2338,9 @@ class ARManager {
  * PDF MANAGER
  ********************************************/
 
+// FIXED: Direct download without file existence check
 class PDFManager {
-  static openManual(manualNumber) {
+  static downloadManual(manualNumber) {
     const kitNames = {
       '1': 'Cam-A Rotational Motion Manual',
       '2': 'Cam-C Intermittent Motion Manual',
@@ -2350,50 +2351,163 @@ class PDFManager {
     };
 
     const pdfPath = `manuels/${manualNumber}.pdf`;
-    const pdfFrame = Utils.$('pdfFrame');
-    const pdfFallback = Utils.$('pdfFallback');
-    const pdfDownloadLink = Utils.$('pdfDownloadLink');
-    const pdfViewerTitle = Utils.$('pdf-viewer-title');
+    const kitName = kitNames[manualNumber] || 'Manual';
 
-    if (pdfViewerTitle) pdfViewerTitle.textContent = kitNames[manualNumber] || 'Manual Viewer';
-    if (pdfFrame) pdfFrame.src = pdfPath;
-    if (pdfDownloadLink) pdfDownloadLink.href = pdfPath;
-    
-    Utils.addClass('pdfViewerModal', 'active');
-
-    if (pdfFrame) {
-      pdfFrame.onload = function() {
-        try {
-          if (pdfFrame.contentDocument === null) {
-            Utils.hideElement('pdfFrame');
-            Utils.showElement('pdfFallback');
-          } else {
-            Utils.showElement('pdfFrame');
-            Utils.hideElement('pdfFallback');
-          }
-        } catch (e) {
-          Utils.hideElement('pdfFrame');
-          Utils.showElement('pdfFallback');
-        }
-      };
-
-      pdfFrame.onerror = function() {
-        Utils.hideElement('pdfFrame');
-        Utils.showElement('pdfFallback');
-      };
+    try {
+      // Create download link immediately (no file check)
+      const downloadLink = document.createElement('a');
+      downloadLink.href = pdfPath;
+      downloadLink.download = `AutomatAR_${kitName.replace(/\s+/g, '_')}.pdf`;
+      downloadLink.target = '_blank'; // Fallback for browsers that don't support download
+      
+      // Add to DOM temporarily and trigger download
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+      
+      // Show success notification
+      NotificationManager.show(`Downloading ${kitName}...`, 'success');
+      Utils.log(`Download initiated: ${kitName}`, 'success');
+      
+    } catch (error) {
+      Utils.log(`Download failed: ${error.message}`, 'error');
+      NotificationManager.show('Download failed. Please try again.', 'error');
     }
-
-    Utils.log(`Opening manual: ${kitNames[manualNumber]}`, 'info');
   }
 
-  static close() {
-    Utils.removeClass('pdfViewerModal', 'active');
-    const pdfFrame = Utils.$('pdfFrame');
-    if (pdfFrame) pdfFrame.src = '';
-    Utils.log('PDF viewer closed', 'info');
+  // Alternative method with error handling after download attempt
+  static downloadManualWithErrorHandling(manualNumber) {
+    const kitNames = {
+      '1': 'Cam-A Rotational Motion Manual',
+      '2': 'Cam-C Intermittent Motion Manual',
+      '3': 'Crank Reciprocating Motion Manual',
+      '4': 'Gear-A Bevel Gears Manual',
+      '5': 'Gear-B Variable Speed Manual',
+      '6': 'Gear-C Worm Gears Manual'
+    };
+
+    const pdfPath = `manuels/${manualNumber}.pdf`;
+    const kitName = kitNames[manualNumber] || 'Manual';
+
+    // Create download link
+    const downloadLink = document.createElement('a');
+    downloadLink.href = pdfPath;
+    downloadLink.download = `AutomatAR_${kitName.replace(/\s+/g, '_')}.pdf`;
+    downloadLink.target = '_blank';
+    
+    // Handle download errors
+    downloadLink.onerror = function() {
+      NotificationManager.show(`${kitName} not found. Please contact support.`, 'error');
+      Utils.log(`Manual not found: ${pdfPath}`, 'error');
+    };
+    
+    // Handle successful download start
+    downloadLink.onclick = function() {
+      NotificationManager.show(`Downloading ${kitName}...`, 'success');
+      Utils.log(`Download started: ${kitName}`, 'success');
+    };
+    
+    // Trigger download
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
   }
 }
 
+// SIMPLE VERSION: Just direct download
+function downloadManualPDF(manualNumber) {
+  const kitNames = {
+    '1': 'Cam-A_Manual',
+    '2': 'Cam-C_Manual', 
+    '3': 'Crank_Manual',
+    '4': 'Gear-A_Manual',
+    '5': 'Gear-B_Manual',
+    '6': 'Gear-C_Manual'
+  };
+
+  const pdfPath = `manuels/${manualNumber}.pdf`;
+  const fileName = `AutomatAR_${kitNames[manualNumber] || 'Manual'}.pdf`;
+
+  // Create and trigger download
+  const a = document.createElement('a');
+  a.href = pdfPath;
+  a.download = fileName;
+  a.target = '_blank';
+  
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  
+  // Show notification
+  console.log(`Download initiated: ${fileName}`);
+  if (typeof NotificationManager !== 'undefined') {
+    NotificationManager.show(`Downloading ${fileName}...`, 'success');
+  }
+}
+
+// ALTERNATIVE: Open in new tab if download fails
+function downloadOrOpenManual(manualNumber) {
+  const pdfPath = `manuels/${manualNumber}.pdf`;
+  
+  // Try download first
+  const downloadLink = document.createElement('a');
+  downloadLink.href = pdfPath;
+  downloadLink.download = `AutomatAR_Manual_${manualNumber}.pdf`;
+  
+  // If download doesn't work, it will open in new tab due to target="_blank"
+  downloadLink.target = '_blank';
+  
+  document.body.appendChild(downloadLink);
+  downloadLink.click();
+  document.body.removeChild(downloadLink);
+  
+  console.log(`Manual ${manualNumber} download/open initiated`);
+}
+
+// DEBUGGING VERSION: Check what's happening
+function debugDownloadManual(manualNumber) {
+  const pdfPath = `manuels/${manualNumber}.pdf`;
+  
+  console.log('=== DOWNLOAD DEBUG ===');
+  console.log('Manual Number:', manualNumber);
+  console.log('PDF Path:', pdfPath);
+  console.log('Full URL:', window.location.origin + '/' + pdfPath);
+  console.log('Current Location:', window.location.href);
+  
+  // Test if we can access the file
+  const img = new Image();
+  img.onload = function() {
+    console.log('✅ File exists and is accessible');
+    proceedWithDownload();
+  };
+  img.onerror = function() {
+    console.log('❌ File not accessible as image, trying direct download anyway...');
+    proceedWithDownload();
+  };
+  img.src = pdfPath;
+  
+  function proceedWithDownload() {
+    const a = document.createElement('a');
+    a.href = pdfPath;
+    a.download = `Manual_${manualNumber}.pdf`;
+    a.target = '_blank';
+    
+    console.log('Download link created:', a);
+    
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    
+    console.log('Download triggered');
+  }
+}
+
+// FALLBACK: If nothing works, open in new window
+function openManualInNewWindow(manualNumber) {
+  const pdfPath = `manuels/${manualNumber}.pdf`;
+  window.open(pdfPath, '_blank');
+  console.log(`Opened manual ${manualNumber} in new window`);
+}
 /********************************************
  * MODEL DOWNLOAD MANAGER
  ********************************************/
@@ -2505,6 +2619,7 @@ class EventHandlerManager {
       { id: 'createBtn', action: () => App.screenManager.switchTo(SCREENS.CREATE) },
       { id: 'manualsBtn', action: () => App.screenManager.switchTo(SCREENS.MANUALS) },
       { id: 'openARBtn', action: () => App.screenManager.switchTo(SCREENS.AR) },
+      { id: 'createOpenARBtn', action: () => App.screenManager.switchTo(SCREENS.AR) },
       { id: 'modelsBtn', action: () => App.screenManager.switchTo(SCREENS.MODELS) },
       { id: 'aiBtn', action: () => App.screenManager.switchTo(SCREENS.AI) },
       

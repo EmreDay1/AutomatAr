@@ -1403,3 +1403,348 @@ h1, h2, h3, h4, h5, h6 {
 p, li, span {
   min-font-size: 12px;
 }
+
+/* Create Screen Styles */
+.create-section {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+}
+
+.create-section h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 1.5rem;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+.create-status {
+  text-align: center;
+  margin: 1rem 0;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+}
+
+.create-camera-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.create-camera-box {
+  position: relative;
+  width: min(400px, 90vw);
+  height: min(300px, 67.5vw);
+  border: 3px solid rgba(255, 255, 255, 0.4);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+#createVideo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.create-grid {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* Changed from 4 to 2 columns */
+  grid-template-rows: repeat(2, 1fr);
+  pointer-events: none;
+}
+
+.create-cell {
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.create-golden {
+  border: 2px solid #FFD700;
+  background: rgba(255, 215, 0, 0.15);
+  box-shadow: inset 0 0 20px rgba(255, 215, 0, 0.2);
+}
+
+.create-controls {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.create-capture-btn, .create-clear-btn {
+  background: #ffffff;
+  color: #FF8C00;
+  border: 2px solid #ffffff;
+  padding: 1rem 2rem;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
+}
+
+.create-capture-btn:hover:not(:disabled),
+.create-clear-btn:hover {
+  background: #FF8C00;
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 255, 255, 0.3);
+}
+
+.create-capture-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.create-clear-btn {
+  background: #ff4444;
+  color: #ffffff;
+  border-color: #ff4444;
+}
+
+.create-clear-btn:hover {
+  background: #cc0000;
+  border-color: #cc0000;
+}
+
+.create-instructions {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  border-left: 4px solid #FFD700;
+}
+
+.create-instructions p {
+  margin: 0.5rem 0;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.create-results {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+
+.create-result-img {
+  width: 100px;
+  height: 75px;
+  border: 3px solid #FFD700;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  object-fit: cover;
+}
+
+.create-result-img:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+}
+
+.create-animation-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.create-animation-box {
+  width: min(400px, 90vw);
+  height: min(100px, 22.5vw);
+  border: 2px dashed rgba(255, 255, 255, 0.4);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.2);
+  position: relative;
+}
+
+.create-animation-box img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.create-animation-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.8);
+  font-style: italic;
+  text-align: center;
+  padding: 1rem;
+}
+
+.create-animation-controls {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.create-animation-controls button {
+  background: rgba(255, 255, 255, 0.9);
+  color: #FF8C00;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  padding: 0.8rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.create-animation-controls button:hover:not(:disabled) {
+  background: #FF8C00;
+  color: #ffffff;
+}
+
+.create-animation-controls button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.create-animation-controls label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+}
+
+.create-animation-controls input[type="range"] {
+  width: 100px;
+}
+
+.create-tips {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.create-tip {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.create-tip h4 {
+  color: #FFD700;
+  margin-bottom: 0.8rem;
+  font-size: 1.1rem;
+}
+
+.create-tip p {
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Responsive adjustments for Create screen */
+@media (max-width: 768px) {
+  .create-section {
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .create-controls {
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+  
+  .create-capture-btn, .create-clear-btn {
+    width: 100%;
+    padding: 0.8rem 1.5rem;
+  }
+  
+  .create-animation-controls {
+    gap: 0.8rem;
+  }
+  
+  .create-animation-controls label {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .create-tips {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .create-camera-box {
+    width: 95vw;
+    height: 71.25vw; /* Maintain 4:3 aspect ratio */
+  }
+  
+  .create-animation-box {
+    width: 95vw;
+    height: 23.75vw;
+  }
+  
+  .create-results {
+    gap: 0.5rem;
+  }
+  
+  .create-result-img {
+    width: 80px;
+    height: 60px;
+  }
+}
+/*—— Create-screen header as a flex container ——*/
+#createScreen .modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  /* optional: give it some height if needed */
+  padding: 1rem 2rem;
+  position: relative;  /* reset any inherited absolute contexts */
+}
+
+/* override the absolute positioning on those buttons */
+#createScreen .modal-header .modal-close-button,
+#createScreen .modal-header .header-ar-button {
+  position: static !important;
+  top: auto;
+  left: auto;
+  right: auto;
+  margin: 0;           /* reset any absolute-button margins */
+}
+
+/* center wrapper takes remaining space */
+#createScreen .modal-header-center {
+  flex: 1;
+  text-align: center;
+}
+
+/* small tweak on subtitle spacing */
+#createScreen .modal-header-center .modal-subtitle {
+  margin-top: 0.25rem;
+  font-size: 0.9rem;
+}
+
+/* Ensure modal header is positioned for absolute children */
+#createScreen .modal-header {
+  position: relative;
+}

@@ -8,6 +8,7 @@
  * GLOBAL CONSTANTS AND STATE
  ********************************************/
 
+
 const SCREENS = {
   HOME: "HOME",
   KIT_DETAIL: "KITDETAIL",
@@ -492,616 +493,466 @@ class ScreenManager {
 
 class CreateManager {
   constructor() {
+    // Supabase configuration - using official docs format
+    this.supabaseUrl = 'https://ztsqvqngifqwcoufptve.supabase.co';
+    this.supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp0c3F2cW5naWZxd2NvdWZwdHZlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk4OTY1MDksImV4cCI6MjA2NTQ3MjUwOX0.Q-SIWniCEdKhlUjOBxcgezlAx6QSgB6LYLpGdFr_eo0';
+    this.supabase = null;
+    
+    // Camera and animation state
     this.stream = null;
     this.frames = [];
     this.isPlaying = false;
     this.currentFrame = 0;
     this.animSpeed = 500;
     this.animInterval = null;
-    
-    // Animation Library with Marker Support
-    this.animationLibrary = new Map();
-    this.animationCounter = 0;
-    this.libraryButton = null;
-    
-    // Marker Detection
     this.detectedMarkers = [];
     this.markerHistory = new Map();
+    
+    // Initialize Supabase
+    this.initSupabase();
   }
 
-  async init() {
-    Utils.log('Initializing Create Manager with Marker Detection', 'info');
-    
-    this.createAnimationLibraryButton();
-    await this.initCamera();
-    this.setupControls();
-    this.createSaveButton();
-    this.initMarkerDetection();
-    this.setupBackButton();
-    
-    Utils.log('Create Manager ready with marker detection', 'success');
-  }
+  async initSupabase() {
+    try {
+      // Check if Supabase is loaded
+      if (typeof window.supabase === 'undefined') {
+        throw new Error('Supabase library not loaded. Add <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script> to your HTML head.');
+      }
 
-  setupBackButton() {
-    const attempts = 5;
-    let currentAttempt = 0;
-    
-    const trySetupButton = () => {
-      const backBtn = document.getElementById('closeCreateBtn');
+      // Create client following official docs
+      this.supabase = window.supabase.createClient(this.supabaseUrl, this.supabaseKey, {
+        auth: {
+          persistSession: false,
+          autoRefreshToken: false
+        }
+      });
+
+      console.log('✅ Supabase client created');
+
+      // Test connection immediately
+      await this.testConnection();
       
-      if (backBtn) {
-        backBtn.onclick = null;
-        backBtn.removeEventListener('click', this.backButtonHandler);
-        
-        this.backButtonHandler = (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          console.log('Back button clicked - cleaning up...');
-          
-          this.cleanup();
-          
-          if (window.App && window.App.screenManager) {
-            window.App.screenManager.switchTo('HOME');
-          } else if (window.showHomeScreen) {
-            window.showHomeScreen();
-          } else {
-            document.getElementById('createScreen').style.display = 'none';
-            document.getElementById('createScreen').classList.remove('active');
-            document.getElementById('homeScreen').style.display = 'block';
+      // Setup storage
+      await this.setupStorage();
+
+    } catch (error) {
+      console.error('❌ Supabase initialization failed:', error);
+      this.showStatus('Supabase connection failed');
+    }
+  }
+
+  async testConnection() {
+    try {
+      console.log('🔌 Testing Supabase connection...');
+      
+      // Simple test query following docs format
+      const { data, error } = await this.supabase
+        .from('animations')
+        .select('count', { count: 'exact', head: true });
+
+      if (error) {
+        console.error('❌ Connection test failed:', error);
+        throw new Error(`Database connection failed: ${error.message}`);
+      }
+
+      console.log('✅ Supabase connection successful');
+      return true;
+    } catch (error) {
+      console.error('❌ Connection test error:', error);
+      throw error;
+    }
+  }
+
+  async setupStorage() {
+    try {
+      console.log('🪣 Setting up storage bucket...');
+      
+      // List buckets to check if ours exists
+      const { data: buckets, error: listError } = await this.supabase.storage.listBuckets();
+      
+      if (listError) {
+        console.warn('Storage list error:', listError);
+        return;
+      }
+
+      const bucketExists = buckets?.find(bucket => bucket.id === 'animation-frames');
+      
+      if (!bucketExists) {
+        // Create bucket following docs
+        const { data, error } = await this.supabase.storage.createBucket('animation-frames', {
+          public: true,
+          allowedMimeTypes: ['image/png', 'image/jpeg'],
+          fileSizeLimit: 10485760 // 10MB
+        });
+
+        if (error) {
+          console.warn('Storage bucket creation error:', error);
+        } else {
+          console.log('✅ Storage bucket created');
+        }
+      } else {
+        console.log('✅ Storage bucket exists');
+      }
+    } catch (error) {
+      console.warn('Storage setup warning:', error);
+    }
+  }
+
+  // =============================================
+  // SUPABASE OPERATIONS - Following Official Docs
+  // =============================================
+
+  async saveAnimation(animationData) {
+    try {
+      console.log('💾 Saving animation:', animationData.name);
+
+      // Insert following official docs format
+      const { data, error } = await this.supabase
+        .from('animations')
+        .insert([
+          {
+            name: animationData.name,
+            frame_count: animationData.frame_count,
+            frame_rate: animationData.frame_rate,
+            marker_tags: animationData.marker_tags,
+            metadata: animationData.metadata
           }
-        };
-        
-        backBtn.addEventListener('click', this.backButtonHandler);
-        console.log('Back button handler successfully attached');
-        return true;
-      } else {
-        currentAttempt++;
-        if (currentAttempt < attempts) {
-          setTimeout(trySetupButton, 100);
-        } else {
-          console.error('Could not find back button after', attempts, 'attempts');
-        }
-        return false;
-      }
-    };
-    
-    trySetupButton();
-  }
+        ])
+        .select();
 
-  cleanup() {
-    console.log('Cleaning up Create Manager...');
-    
-    if (this.stream) {
-      this.stream.getTracks().forEach(track => track.stop());
-      this.stream = null;
-    }
-    
-    clearInterval(this.animInterval);
-    
-    if (this.libraryButton && this.libraryButton.parentNode) {
-      this.libraryButton.parentNode.removeChild(this.libraryButton);
-      this.libraryButton = null;
-    }
-    
-    const backBtn = document.getElementById('closeCreateBtn');
-    if (backBtn && this.backButtonHandler) {
-      backBtn.removeEventListener('click', this.backButtonHandler);
-    }
-    
-    this.frames = [];
-    this.detectedMarkers = [];
-    
-    console.log('Create Manager cleaned up');
-  }
-
-  initMarkerDetection() {
-    try {
-      if (typeof AR !== 'undefined') {
-        this.detector = new AR.Detector();
-        Utils.log('Marker detector initialized', 'success');
-      } else {
-        Utils.log('AR library not available - marker detection disabled', 'warning');
+      if (error) {
+        console.error('❌ Insert error:', error);
+        throw new Error(`Save failed: ${error.message}`);
       }
+
+      if (!data || data.length === 0) {
+        throw new Error('No data returned from insert');
+      }
+
+      console.log('✅ Animation saved:', data[0]);
+      return data[0];
+
     } catch (error) {
-      Utils.log(`Marker detection initialization failed: ${error.message}`, 'warning');
+      console.error('❌ Save animation failed:', error);
+      throw error;
     }
   }
 
-createAnimationLibraryButton() {
-  const existing = document.querySelector('#animLibraryTopBtn');
-  if (existing) {
-    existing.onclick = () => this.openLibrary();
-    Utils.log('Animation Library button functionality added to existing button', 'success');
-    return;
-  }
-  
-  Utils.log('Animation Library button not found in DOM', 'warning');
-}
-  updateLibraryButton() {
-    if (this.libraryButton) {
-      this.libraryButton.textContent = `Animation Library (${this.animationLibrary.size})`;
-    }
-  }
-
-  async initCamera() {
-    const video = Utils.$('createVideo');
-    const status = Utils.$('createStatus');
-    
-    if (!video || !status) {
-      Utils.log('Video or status element not found', 'error');
-      return;
-    }
-
+  async loadAnimations() {
     try {
-      status.textContent = 'Starting camera...';
-      
-      this.stream = await navigator.mediaDevices.getUserMedia({
-        video: { 
-          facingMode: 'environment',
-          width: { ideal: 1280 },
-          height: { ideal: 720 }
-        }
-      });
-      
-      video.srcObject = this.stream;
-      await video.play();
-      
-      status.textContent = 'Camera ready - Point at markers and capture';
-      
-      const captureBtn = Utils.$('createCapture');
-      if (captureBtn) captureBtn.disabled = false;
-      
-    } catch (err) {
-      status.textContent = 'Camera failed - Check permissions';
-      Utils.log(`Camera error: ${err.message}`, 'error');
-    }
-  }
+      console.log('📥 Loading animations...');
 
-  setupControls() {
-    const captureBtn = Utils.$('createCapture');
-    const clearBtn = Utils.$('createClear');
-    const playBtn = Utils.$('createPlayPause');
-    const resetBtn = Utils.$('createResetAnim');
-    const speedSlider = Utils.$('createSpeedSlider');
+      // Select following official docs format
+      const { data, error } = await this.supabase
+        .from('animations')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-    if (captureBtn) captureBtn.onclick = () => this.capture();
-    if (clearBtn) clearBtn.onclick = () => this.clearAll();
-    if (playBtn) playBtn.onclick = () => this.togglePlay();
-    if (resetBtn) resetBtn.onclick = () => this.reset();
-    if (speedSlider) speedSlider.oninput = () => this.updateSpeed();
-  }
-
-  createSaveButton() {
-    const controls = document.querySelector('.create-animation-controls');
-    if (!controls) return;
-
-    const existing = controls.querySelector('#saveTolibBtn');
-    if (existing) existing.remove();
-
-    const saveBtn = document.createElement('button');
-    saveBtn.id = 'saveToLibBtn';
-    saveBtn.style.cssText = `
-      background: #9C27B0;
-      color: white;
-      border: 2px solid #9C27B0;
-      padding: 0.7rem 1.5rem;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 600;
-      margin-left: 1rem;
-      transition: all 0.3s ease;
-      display: none;
-    `;
-    saveBtn.textContent = 'Save to Library';
-    saveBtn.onclick = () => this.saveToLibrary();
-
-    controls.appendChild(saveBtn);
-  }
-
-  detectMarkers(imageData) {
-    if (!this.detector) return [];
-    
-    try {
-      const markers = this.detector.detect(imageData);
-      
-      markers.forEach(marker => {
-        const id = marker.id;
-        if (!this.markerHistory.has(id)) {
-          this.markerHistory.set(id, { count: 0, lastSeen: Date.now() });
-        }
-        const history = this.markerHistory.get(id);
-        history.count++;
-        history.lastSeen = Date.now();
-      });
-      
-      return markers;
-    } catch (error) {
-      Utils.log(`Marker detection failed: ${error.message}`, 'warning');
-      return [];
-    }
-  }
-
-  capture() {
-    const video = Utils.$('createVideo');
-    const status = Utils.$('createStatus');
-    
-    if (!video || video.readyState < 2) {
-      if (status) status.textContent = 'Camera not ready';
-      return;
-    }
-
-    if (status) status.textContent = 'Capturing 3 golden squares from visible area...';
-
-    try {
-      const videoRect = video.getBoundingClientRect();
-      const displayWidth = video.clientWidth;
-      const displayHeight = video.clientHeight;
-      
-      const videoAspect = video.videoWidth / video.videoHeight;
-      const displayAspect = displayWidth / displayHeight;
-      
-      let visibleWidth, visibleHeight, offsetX, offsetY;
-      
-      if (video.style.objectFit === 'cover' || displayAspect !== videoAspect) {
-        if (videoAspect > displayAspect) {
-          visibleHeight = video.videoHeight;
-          visibleWidth = video.videoHeight * displayAspect;
-          offsetX = (video.videoWidth - visibleWidth) / 2;
-          offsetY = 0;
-        } else {
-          visibleWidth = video.videoWidth;
-          visibleHeight = video.videoWidth / displayAspect;
-          offsetX = 0;
-          offsetY = (video.videoHeight - visibleHeight) / 2;
-        }
-      } else {
-        visibleWidth = video.videoWidth;
-        visibleHeight = video.videoHeight;
-        offsetX = 0;
-        offsetY = 0;
+      if (error) {
+        console.error('❌ Load error:', error);
+        throw new Error(`Load failed: ${error.message}`);
       }
-      
-      console.log('📹 Video Analysis:');
-      console.log(`  Full video: ${video.videoWidth}×${video.videoHeight}`);
-      console.log(`  Displayed: ${displayWidth}×${displayHeight}`);
-      console.log(`  Visible area: ${Math.round(visibleWidth)}×${Math.round(visibleHeight)}`);
-      console.log(`  Offset: (${Math.round(offsetX)}, ${Math.round(offsetY)})`);
 
-      const fullCanvas = document.createElement('canvas');
-      fullCanvas.width = video.videoWidth;
-      fullCanvas.height = video.videoHeight;
-      const fullCtx = fullCanvas.getContext('2d');
-      fullCtx.drawImage(video, 0, 0);
+      console.log('✅ Animations loaded:', data?.length || 0);
+      return data || [];
 
-      const imageData = fullCtx.getImageData(0, 0, fullCanvas.width, fullCanvas.height);
-      const detectedMarkers = this.detectMarkers(imageData);
-      
-      this.detectedMarkers = detectedMarkers.map(marker => ({
-        id: marker.id,
-        corners: marker.corners,
-        confidence: marker.confidence || 1,
-        timestamp: Date.now()
-      }));
+    } catch (error) {
+      console.error('❌ Load animations failed:', error);
+      throw error;
+    }
+  }
 
-      const cellW = Math.floor(visibleWidth / 3);
-      const cellH = Math.floor(visibleHeight / 2);
-      
-      const goldenCells = [
-        { col: 0, row: 1, name: 'Golden Square 1 (Bottom-Left)' },
-        { col: 1, row: 1, name: 'Golden Square 2 (Bottom-Center)' },
-        { col: 2, row: 1, name: 'Golden Square 3 (Bottom-Right)' }
-      ];
-      
-      console.log('🎯 Capturing from visible viewport:');
-      console.log(`  Grid cell size: ${Math.round(cellW)}×${Math.round(cellH)}`);
-      
-      goldenCells.forEach((cell, index) => {
-        const cellCanvas = document.createElement('canvas');
-        cellCanvas.width = cellW;
-        cellCanvas.height = cellH;
-        const cellCtx = cellCanvas.getContext('2d');
-        
-        const sourceX = offsetX + (cell.col * cellW);
-        const sourceY = offsetY + (cell.row * cellH);
-        
-        const actualW = Math.min(cellW, video.videoWidth - sourceX);
-        const actualH = Math.min(cellH, video.videoHeight - sourceY);
-        
-        const clampedW = Math.min(actualW, visibleWidth - (cell.col * cellW));
-        const clampedH = Math.min(actualH, visibleHeight - (cell.row * cellH));
-        
-        cellCtx.drawImage(
-          video,
-          sourceX, sourceY,
-          clampedW, clampedH,
-          0, 0,
-          cellW, cellH
+  async deleteAnimation(animationId) {
+    try {
+      console.log('🗑️ Deleting animation:', animationId);
+
+      // Get animation first to clean up files
+      const { data: animation } = await this.supabase
+        .from('animations')
+        .select('frame_urls')
+        .eq('id', animationId)
+        .single();
+
+      // Delete files from storage
+      if (animation?.frame_urls?.length > 0) {
+        const filePaths = animation.frame_urls.map(frame => 
+          `${animationId}/frame_${frame.frame_index + 1}.png`
         );
         
-        cellCtx.strokeStyle = '#FFD700';
-        cellCtx.lineWidth = 3;
-        cellCtx.strokeRect(0, 0, cellW, cellH);
-        
-        cellCtx.fillStyle = '#FFD700';
-        cellCtx.font = 'bold 16px Arial';
-        cellCtx.fillText(`G${index + 1}`, 10, 25);
-        
-        this.frames.push({
-          id: this.frames.length,
-          url: cellCanvas.toDataURL('image/png'),
-          timestamp: Date.now(),
-          cellIndex: index,
-          cellName: cell.name,
-          gridPosition: { col: cell.col, row: cell.row },
-          sourceArea: { 
-            x: Math.round(sourceX), 
-            y: Math.round(sourceY), 
-            width: Math.round(clampedW), 
-            height: Math.round(clampedH)
-          },
-          visibleArea: {
-            totalWidth: Math.round(visibleWidth),
-            totalHeight: Math.round(visibleHeight),
-            offset: { x: Math.round(offsetX), y: Math.round(offsetY) }
-          },
-          isComplete: true,
-          isGoldenSquare: true,
-          markers: this.detectedMarkers.slice()
-        });
-        
-        console.log(`✅ Captured ${cell.name}:`);
-        console.log(`   Grid: (${cell.col}, ${cell.row})`);
-        console.log(`   Source: (${Math.round(sourceX)}, ${Math.round(sourceY)}) ${Math.round(clampedW)}×${Math.round(clampedH)}`);
-        console.log(`   Visible bounds respected: ✓`);
-      });
+        const { error: storageError } = await this.supabase.storage
+          .from('animation-frames')
+          .remove(filePaths);
 
-      this.updateDisplay();
-      this.startAnimation();
-      
-      const markerInfo = detectedMarkers.length > 0 
-        ? ` | Markers: ${detectedMarkers.map(m => m.id).join(', ')}`
-        : '';
-      
-      if (status) status.textContent = `✅ Captured 3 golden squares from visible area${markerInfo}`;
-      
-      console.log(`🎉 Successfully captured golden squares from visible viewport only!`);
-      
-    } catch (err) {
-      Utils.log(`Capture error: ${err.message}`, 'error');
-      if (status) status.textContent = 'Capture failed';
-      console.error('Capture error details:', err);
+        if (storageError) {
+          console.warn('Storage cleanup warning:', storageError);
+        }
+      }
+
+      // Delete record following docs format
+      const { error } = await this.supabase
+        .from('animations')
+        .delete()
+        .eq('id', animationId);
+
+      if (error) {
+        console.error('❌ Delete error:', error);
+        throw new Error(`Delete failed: ${error.message}`);
+      }
+
+      console.log('✅ Animation deleted');
+      return true;
+
+    } catch (error) {
+      console.error('❌ Delete animation failed:', error);
+      throw error;
     }
   }
 
-  updateDisplay() {
-    Utils.showElement('createResultsSection');
-    Utils.showElement('createAnimSection');
-    Utils.showElement('createClear');
-    
-    const saveBtn = Utils.$('saveToLibBtn');
-    if (saveBtn) saveBtn.style.display = 'inline-block';
-    
-    this.renderFrames();
+  async uploadFrames(animationId, frames) {
+    try {
+      console.log('📤 Uploading frames for animation:', animationId);
+      
+      const frameUrls = [];
+      
+      for (let i = 0; i < frames.length; i++) {
+        const frame = frames[i];
+        
+        try {
+          this.showStatus(`Uploading frame ${i + 1}/${frames.length}...`);
+
+          // Convert base64 to blob
+          const blob = this.dataURLToBlob(frame.url);
+          const fileName = `${animationId}/frame_${i + 1}.png`;
+          
+          // Upload following docs format
+          const { data, error } = await this.supabase.storage
+            .from('animation-frames')
+            .upload(fileName, blob, {
+              cacheControl: '3600',
+              upsert: true
+            });
+
+          if (error) {
+            console.error(`Frame ${i + 1} upload error:`, error);
+            continue;
+          }
+
+          // Get public URL following docs format
+          const { data: publicUrlData } = this.supabase.storage
+            .from('animation-frames')
+            .getPublicUrl(fileName);
+
+          frameUrls.push({
+            frame_index: i,
+            url: publicUrlData.publicUrl,
+            cell_index: frame.cellIndex,
+            timestamp: frame.timestamp,
+            markers: frame.markers || []
+          });
+
+          console.log(`✅ Frame ${i + 1} uploaded`);
+
+        } catch (frameError) {
+          console.error(`Frame ${i + 1} failed:`, frameError);
+        }
+      }
+      
+      console.log(`📋 Uploaded ${frameUrls.length}/${frames.length} frames`);
+      return frameUrls;
+
+    } catch (error) {
+      console.error('❌ Upload frames failed:', error);
+      throw error;
+    }
   }
 
-  renderFrames() {
-    const results = Utils.$('createResults');
-    if (!results) return;
+  async updateAnimationFrames(animationId, frameUrls) {
+    try {
+      console.log('🔄 Updating animation with frame URLs...');
 
-    results.innerHTML = '';
+      // Update following docs format
+      const { data, error } = await this.supabase
+        .from('animations')
+        .update({ frame_urls: frameUrls })
+        .eq('id', animationId)
+        .select();
 
-    const markerSummary = this.createMarkerSummary();
-    if (markerSummary) results.appendChild(markerSummary);
-
-    const container = document.createElement('div');
-    container.style.cssText = `
-      display: flex;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-      justify-content: center;
-      margin-bottom: 1rem;
-      padding: 1rem;
-      background: rgba(255,255,255,0.1);
-      border-radius: 12px;
-    `;
-
-    this.frames.forEach((frame, index) => {
-      const frameDiv = document.createElement('div');
-      frameDiv.style.cssText = `
-        position: relative;
-        cursor: pointer;
-        border: 2px solid rgba(255,255,255,0.3);
-        border-radius: 8px;
-        overflow: hidden;
-        transition: all 0.3s ease;
-      `;
-
-      const img = document.createElement('img');
-      img.src = frame.url;
-      img.style.cssText = `
-        width: 80px;
-        height: 60px;
-        object-fit: cover;
-        display: block;
-      `;
-
-      const label = document.createElement('div');
-      label.style.cssText = `
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: rgba(0,0,0,0.8);
-        color: white;
-        font-size: 0.7rem;
-        text-align: center;
-        padding: 2px;
-        font-weight: 600;
-      `;
-      label.textContent = index + 1;
-
-      if (frame.markers && frame.markers.length > 0) {
-        const markerBadge = document.createElement('div');
-        markerBadge.style.cssText = `
-          position: absolute;
-          top: 2px;
-          right: 2px;
-          background: #FF9800;
-          color: white;
-          border-radius: 50%;
-          width: 16px;
-          height: 16px;
-          font-size: 0.6rem;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-weight: bold;
-        `;
-        markerBadge.textContent = frame.markers.length;
-        markerBadge.title = `Markers: ${frame.markers.map(m => m.id).join(', ')}`;
-        frameDiv.appendChild(markerBadge);
+      if (error) {
+        console.error('❌ Update error:', error);
+        throw new Error(`Update failed: ${error.message}`);
       }
 
-      frameDiv.onclick = () => this.downloadFrame(frame, index);
-      frameDiv.onmouseenter = () => {
-        frameDiv.style.borderColor = '#9C27B0';
-        frameDiv.style.transform = 'scale(1.05)';
-      };
-      frameDiv.onmouseleave = () => {
-        frameDiv.style.borderColor = 'rgba(255,255,255,0.3)';
-        frameDiv.style.transform = 'scale(1)';
-      };
+      console.log('✅ Animation updated with frame URLs');
+      return data[0];
 
-      frameDiv.appendChild(img);
-      frameDiv.appendChild(label);
-      container.appendChild(frameDiv);
-    });
-
-    const downloadBtn = document.createElement('button');
-    downloadBtn.style.cssText = `
-      padding: 0.8rem 1.5rem;
-      background: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 600;
-      width: 100%;
-      margin-top: 1rem;
-      transition: all 0.3s ease;
-    `;
-    downloadBtn.textContent = `Download All ${this.frames.length} Frames`;
-    downloadBtn.onclick = () => this.downloadAll();
-
-    results.appendChild(container);
-    results.appendChild(downloadBtn);
+    } catch (error) {
+      console.error('❌ Update animation failed:', error);
+      throw error;
+    }
   }
 
-  createMarkerSummary() {
-    const allMarkers = new Set();
-    this.frames.forEach(frame => {
-      if (frame.markers) {
-        frame.markers.forEach(marker => allMarkers.add(marker.id));
+  async getAnimationByMarker(markerId) {
+    try {
+      console.log('🔍 Getting animation by marker:', markerId);
+
+      // Query following docs format with array contains
+      const { data, error } = await this.supabase
+        .from('animations')
+        .select('*')
+        .contains('marker_tags', [markerId])
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (error) {
+        console.error('❌ Query error:', error);
+        return null;
       }
-    });
 
-    if (allMarkers.size === 0) return null;
+      const result = data && data.length > 0 ? data[0] : null;
+      console.log(result ? '✅ Animation found' : '❌ No animation found');
+      return result;
 
-    const summary = document.createElement('div');
-    summary.style.cssText = `
-      background: rgba(255, 152, 0, 0.2);
-      border: 1px solid rgba(255, 152, 0, 0.3);
-      border-radius: 8px;
-      padding: 1rem;
-      margin-bottom: 1rem;
-      text-align: center;
-    `;
-
-    const title = document.createElement('div');
-    title.style.cssText = `
-      color: #FF9800;
-      font-weight: 600;
-      margin-bottom: 0.5rem;
-    `;
-    title.textContent = 'Detected Markers';
-
-    const markerList = document.createElement('div');
-    markerList.style.cssText = `
-      display: flex;
-      gap: 0.5rem;
-      justify-content: center;
-      flex-wrap: wrap;
-    `;
-
-    Array.from(allMarkers).sort((a, b) => a - b).forEach(markerId => {
-      const badge = document.createElement('span');
-      badge.style.cssText = `
-        background: #FF9800;
-        color: white;
-        padding: 0.3rem 0.6rem;
-        border-radius: 12px;
-        font-size: 0.8rem;
-        font-weight: 600;
-      `;
-      badge.textContent = `ID: ${markerId}`;
-      markerList.appendChild(badge);
-    });
-
-    summary.appendChild(title);
-    summary.appendChild(markerList);
-    return summary;
+    } catch (error) {
+      console.error('❌ Get animation by marker failed:', error);
+      return null;
+    }
   }
 
-  saveToLibrary() {
-    if (this.frames.length === 0) return;
+  // =============================================
+  // UTILITY METHODS
+  // =============================================
 
-    const name = prompt('Enter animation name:', `Animation ${this.animationCounter + 1}`);
+  dataURLToBlob(dataURL) {
+    try {
+      const arr = dataURL.split(',');
+      const mime = arr[0].match(/:(.*?);/)[1];
+      const bstr = atob(arr[1]);
+      let n = bstr.length;
+      const u8arr = new Uint8Array(n);
+      while (n--) {
+        u8arr[n] = bstr.charCodeAt(n);
+      }
+      return new Blob([u8arr], { type: mime });
+    } catch (error) {
+      console.error('Blob conversion failed:', error);
+      throw error;
+    }
+  }
+
+  // =============================================
+  // MAIN SAVE TO LIBRARY METHOD
+  // =============================================
+
+  async saveToLibrary() {
+    if (this.frames.length === 0) {
+      this.showStatus('No frames to save');
+      return;
+    }
+
+    const name = prompt('Enter animation name:', `Animation ${Date.now()}`);
     if (!name) return;
 
-    const detectedTags = new Set();
-    this.frames.forEach(frame => {
-      if (frame.markers) {
-        frame.markers.forEach(marker => detectedTags.add(marker.id));
-      }
-    });
+    this.showStatus('Saving to cloud...');
 
-    const animation = {
-      id: ++this.animationCounter,
-      name: name.trim(),
-      frames: this.frames.map(f => ({
-        url: f.url,
-        timestamp: f.timestamp,
-        cellIndex: f.cellIndex,
-        markers: f.markers || []
-      })),
-      tags: Array.from(detectedTags).sort(),
-      metadata: {
-        totalFrames: this.frames.length,
-        frameRate: 1000 / this.animSpeed,
-        createdAt: Date.now(),
-        markerCount: detectedTags.size,
-        captureSequences: Math.floor(this.frames.length / 4)
+    try {
+      // Check Supabase is ready
+      if (!this.supabase) {
+        throw new Error('Supabase not initialized');
       }
-    };
 
-    this.animationLibrary.set(animation.id, animation);
-    this.updateLibraryButton();
-    
-    const tagInfo = detectedTags.size > 0 
-      ? ` with markers: ${Array.from(detectedTags).join(', ')}`
-      : ' (no markers detected)';
-    
-    const status = Utils.$('createStatus');
-    if (status) status.textContent = `"${name}" saved to library${tagInfo}`;
-    
-    Utils.log(`Animation "${name}" saved with ${detectedTags.size} marker tags`, 'success');
+      // Collect marker tags
+      const detectedTags = new Set();
+      this.frames.forEach(frame => {
+        if (frame.markers) {
+          frame.markers.forEach(marker => detectedTags.add(marker.id));
+        }
+      });
+
+      const tags = Array.from(detectedTags).sort();
+
+      // Prepare animation data
+      const animationData = {
+        name: name.trim(),
+        frame_count: this.frames.length,
+        frame_rate: 1000 / this.animSpeed,
+        marker_tags: tags,
+        metadata: {
+          totalFrames: this.frames.length,
+          frameRate: 1000 / this.animSpeed,
+          createdAt: Date.now(),
+          markerCount: detectedTags.size,
+          captureType: 'golden_squares'
+        }
+      };
+
+      // Step 1: Save animation record
+      this.showStatus('Creating animation record...');
+      const savedAnimation = await this.saveAnimation(animationData);
+
+      // Step 2: Upload frames
+      this.showStatus('Uploading frames...');
+      const frameUrls = await this.uploadFrames(savedAnimation.id, this.frames);
+
+      // Step 3: Update with frame URLs
+      this.showStatus('Finalizing...');
+      await this.updateAnimationFrames(savedAnimation.id, frameUrls);
+
+      // Success
+      const tagInfo = tags.length > 0 
+        ? ` with markers: ${tags.join(', ')}`
+        : ' (no markers detected)';
+      
+      this.showStatus(`✅ "${name}" saved to cloud${tagInfo}`);
+      console.log('🎉 Complete animation saved successfully!');
+
+    } catch (error) {
+      console.error('❌ Save to library failed:', error);
+      this.showStatus(`❌ Save failed: ${error.message}`);
+      
+      // Show user-friendly error
+      if (error.message.includes('fetch')) {
+        alert('Network error: Check your internet connection and try again.');
+      } else if (error.message.includes('table')) {
+        alert('Database error: Please make sure the animations table exists in Supabase.');
+      } else {
+        alert(`Save failed: ${error.message}`);
+      }
+    }
   }
 
-  openLibrary() {
-    this.createLibraryModal();
+  // =============================================
+  // LIBRARY MANAGEMENT
+  // =============================================
+
+  async openLibrary() {
+    try {
+      this.showStatus('Loading animation library...');
+
+      // Check Supabase is ready
+      if (!this.supabase) {
+        throw new Error('Supabase not initialized');
+      }
+
+      const animations = await this.loadAnimations();
+      this.showStatus('Library loaded');
+      this.createLibraryModal(animations);
+
+    } catch (error) {
+      console.error('❌ Failed to load library:', error);
+      this.showStatus(`❌ Failed to load library: ${error.message}`);
+      
+      // Show user-friendly error
+      if (error.message.includes('fetch')) {
+        alert('Network error: Check your internet connection and try again.');
+      } else if (error.message.includes('table')) {
+        alert('Database error: Please make sure the animations table exists in Supabase.');
+      } else {
+        alert(`Failed to load library: ${error.message}`);
+      }
+    }
   }
 
-  createLibraryModal() {
+  createLibraryModal(animations = []) {
     const existing = document.getElementById('libModal');
     if (existing) existing.remove();
 
@@ -1134,10 +985,10 @@ createAnimationLibraryButton() {
     `;
 
     header.innerHTML = `
-      <h2 style="margin: 0; font-size: 1.5rem;">Animation Library</h2>
+      <h2 style="margin: 0; font-size: 1.5rem;">Cloud Animation Library</h2>
       <div style="display: flex; gap: 1rem; align-items: center;">
         <span style="background: rgba(255,255,255,0.2); padding: 0.4rem 0.8rem; border-radius: 16px; font-size: 0.9rem;">
-          ${this.animationLibrary.size} saved
+          ${animations.length} saved
         </span>
         <button onclick="document.getElementById('libModal').remove()" 
                 style="background: rgba(255,255,255,0.2); color: white; border: none; padding: 0.6rem 1rem; border-radius: 6px; cursor: pointer;">
@@ -1155,19 +1006,20 @@ createAnimationLibraryButton() {
       width: 100%;
     `;
 
-    if (this.animationLibrary.size === 0) {
+    if (animations.length === 0) {
       content.innerHTML = `
         <div style="text-align: center; padding: 3rem; color: rgba(255,255,255,0.7);">
-          <div style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;">📚</div>
-          <h3 style="margin-bottom: 1rem;">No animations saved yet</h3>
-          <p>Point camera at ArUco markers, capture frames, and save them to build your library.</p>
-          <div style="background: rgba(255,152,0,0.2); border: 1px solid rgba(255,152,0,0.3); border-radius: 8px; padding: 1rem; margin-top: 1rem; font-size: 0.9rem;">
-            <strong>Tip:</strong> Animations with detected markers will be tagged for easy organization and AR integration.
+          <div style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;">☁️</div>
+          <h3 style="margin-bottom: 1rem;">No animations in cloud yet</h3>
+          <p>Create and save animations to see them here.</p>
+          <div style="background: rgba(76, 175, 80, 0.1); border: 1px solid #4CAF50; border-radius: 8px; padding: 1rem; margin-top: 1rem; text-align: left;">
+            <strong>✅ Connection successful!</strong><br>
+            Your Supabase database is working correctly. Start capturing animations to populate your library.
           </div>
         </div>
       `;
     } else {
-      this.renderLibraryContent(content);
+      this.renderLibraryContent(content, animations);
     }
 
     modal.appendChild(header);
@@ -1179,7 +1031,7 @@ createAnimationLibraryButton() {
     };
   }
 
-  renderLibraryContent(container) {
+  renderLibraryContent(container, animations) {
     const grid = document.createElement('div');
     grid.style.cssText = `
       display: grid;
@@ -1187,15 +1039,15 @@ createAnimationLibraryButton() {
       gap: 1.5rem;
     `;
 
-    this.animationLibrary.forEach(animation => {
-      const card = this.createAnimCard(animation);
+    animations.forEach(animation => {
+      const card = this.createAnimationCard(animation);
       grid.appendChild(card);
     });
 
     container.appendChild(grid);
   }
 
-  createAnimCard(animation) {
+  createAnimationCard(animation) {
     const card = document.createElement('div');
     card.style.cssText = `
       background: rgba(255,255,255,0.1);
@@ -1203,17 +1055,7 @@ createAnimationLibraryButton() {
       padding: 1rem;
       border: 1px solid rgba(255,255,255,0.2);
       transition: all 0.3s ease;
-      cursor: pointer;
     `;
-
-    card.onmouseenter = () => {
-      card.style.transform = 'translateY(-4px)';
-      card.style.background = 'rgba(255,255,255,0.15)';
-    };
-    card.onmouseleave = () => {
-      card.style.transform = 'translateY(0)';
-      card.style.background = 'rgba(255,255,255,0.1)';
-    };
 
     const preview = document.createElement('div');
     preview.style.cssText = `
@@ -1222,151 +1064,63 @@ createAnimationLibraryButton() {
       background: rgba(0,0,0,0.3);
       border-radius: 8px;
       margin-bottom: 1rem;
-      position: relative;
-      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(255,255,255,0.5);
+      font-size: 0.9rem;
     `;
 
-    if (animation.frames.length > 0) {
+    if (animation.frame_urls && animation.frame_urls.length > 0) {
       const img = document.createElement('img');
-      img.src = animation.frames[0].url;
-      img.style.cssText = `
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-      `;
+      img.src = animation.frame_urls[0].url;
+      img.style.cssText = `width: 100%; height: 100%; object-fit: cover;`;
+      img.onerror = () => preview.textContent = 'Preview unavailable';
       preview.appendChild(img);
-
-      const playBtn = document.createElement('div');
-      playBtn.style.cssText = `
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background: rgba(156,39,176,0.8);
-        color: white;
-        border-radius: 50%;
-        width: 40px;
-        height: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-      `;
-      playBtn.innerHTML = '▶';
-      playBtn.onclick = (e) => {
-        e.stopPropagation();
-        this.playFullscreen(animation);
-      };
-      preview.appendChild(playBtn);
+    } else {
+      preview.textContent = 'No preview available';
     }
 
     const info = document.createElement('div');
     info.innerHTML = `
       <h3 style="margin: 0 0 0.5rem 0; color: white; font-size: 1.1rem;">${animation.name}</h3>
-      <div style="color: rgba(255,255,255,0.7); font-size: 0.9rem; margin-bottom: 0.8rem;">
-        ${animation.frames.length} frames • ${Math.round(animation.metadata.frameRate)} FPS<br>
+      <div style="color: rgba(255,255,255,0.7); font-size: 0.9rem; margin-bottom: 1rem;">
+        ${animation.frame_count} frames • ${(animation.frame_rate || 2).toFixed(1)} FPS<br>
         <span style="font-size: 0.8rem; color: rgba(255,255,255,0.5);">
-          ${new Date(animation.metadata.createdAt).toLocaleDateString()}
+          ${new Date(animation.created_at).toLocaleDateString()}
         </span>
       </div>
     `;
 
-    if (animation.tags && animation.tags.length > 0) {
-      const tagsContainer = document.createElement('div');
-      tagsContainer.style.cssText = `
-        display: flex;
-        gap: 0.3rem;
-        flex-wrap: wrap;
-        margin-bottom: 1rem;
-      `;
-
-      animation.tags.forEach(tag => {
-        const tagBadge = document.createElement('span');
-        tagBadge.style.cssText = `
-          background: #FF9800;
-          color: white;
-          padding: 0.2rem 0.5rem;
-          border-radius: 10px;
-          font-size: 0.7rem;
-          font-weight: 600;
+    if (animation.marker_tags && animation.marker_tags.length > 0) {
+      const tags = document.createElement('div');
+      tags.style.cssText = `display: flex; gap: 0.3rem; flex-wrap: wrap; margin-bottom: 1rem;`;
+      
+      animation.marker_tags.forEach(tag => {
+        const badge = document.createElement('span');
+        badge.style.cssText = `
+          background: #FF9800; color: white; padding: 0.2rem 0.5rem; 
+          border-radius: 10px; font-size: 0.7rem; font-weight: 600;
         `;
-        tagBadge.textContent = `ID:${tag}`;
-        tagsContainer.appendChild(tagBadge);
+        badge.textContent = `ID:${tag}`;
+        tags.appendChild(badge);
       });
-
-      info.appendChild(tagsContainer);
-    } else {
-      const noTags = document.createElement('div');
-      noTags.style.cssText = `
-        color: rgba(255,255,255,0.4);
-        font-size: 0.8rem;
-        margin-bottom: 1rem;
-        font-style: italic;
-      `;
-      noTags.textContent = 'No markers detected';
-      info.appendChild(noTags);
+      
+      info.appendChild(tags);
     }
 
     const actions = document.createElement('div');
-    actions.style.cssText = `
-      display: flex;
-      gap: 0.5rem;
-    `;
-
-    const playBtn = document.createElement('button');
-    playBtn.style.cssText = `
-      flex: 1;
-      background: #4CAF50;
-      color: white;
-      border: none;
-      padding: 0.6rem;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 600;
-    `;
-    playBtn.textContent = 'Play';
-    playBtn.onclick = (e) => {
-      e.stopPropagation();
-      this.playFullscreen(animation);
-    };
-
-    const downloadBtn = document.createElement('button');
-    downloadBtn.style.cssText = `
-      flex: 1;
-      background: #2196F3;
-      color: white;
-      border: none;
-      padding: 0.6rem;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 600;
-    `;
-    downloadBtn.textContent = 'Download';
-    downloadBtn.onclick = (e) => {
-      e.stopPropagation();
-      this.downloadAnimation(animation);
-    };
+    actions.style.cssText = `display: flex; gap: 0.5rem;`;
 
     const deleteBtn = document.createElement('button');
     deleteBtn.style.cssText = `
-      background: #f44336;
-      color: white;
-      border: none;
-      padding: 0.6rem 0.8rem;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 600;
+      flex: 1; background: #f44336; color: white; border: none; 
+      padding: 0.6rem; border-radius: 6px; cursor: pointer; font-weight: 600;
     `;
     deleteBtn.textContent = 'Delete';
-    deleteBtn.onclick = (e) => {
-      e.stopPropagation();
-      this.deleteAnimation(animation.id);
-    };
+    deleteBtn.onclick = () => this.deleteAnimationFromLibrary(animation.id);
 
-    actions.appendChild(playBtn);
-    actions.appendChild(downloadBtn);
     actions.appendChild(deleteBtn);
-
     card.appendChild(preview);
     card.appendChild(info);
     card.appendChild(actions);
@@ -1374,134 +1128,337 @@ createAnimationLibraryButton() {
     return card;
   }
 
-  playFullscreen(animation) {
-    const player = document.createElement('div');
-    player.style.cssText = `
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100vh;
-      background: rgba(0,0,0,0.95);
-      z-index: 3000;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      color: white;
-    `;
+  async deleteAnimationFromLibrary(animationId) {
+    if (!confirm('Delete this animation from cloud storage?')) return;
 
-    const controls = document.createElement('div');
-    controls.style.cssText = `
-      position: absolute;
-      top: 2rem;
-      background: rgba(0,0,0,0.8);
-      padding: 1rem 2rem;
-      border-radius: 8px;
-      display: flex;
-      gap: 1rem;
-      align-items: center;
-    `;
-
-    const tagInfo = animation.tags && animation.tags.length > 0 
-      ? ` • Tags: ${animation.tags.join(', ')}`
-      : '';
-
-    controls.innerHTML = `
-      <h3 style="margin: 0; color: #9C27B0;">${animation.name}</h3>
-      <span>${animation.frames.length} frames${tagInfo}</span>
-      <button onclick="this.parentElement.parentElement.remove()" 
-              style="background: #f44336; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer;">
-        Close
-      </button>
-    `;
-
-    const img = document.createElement('img');
-    img.style.cssText = `
-      max-width: 80%;
-      max-height: 70%;
-      border-radius: 8px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-    `;
-    img.src = animation.frames[0].url;
-
-    let frame = 0;
-    const interval = setInterval(() => {
-      frame = (frame + 1) % animation.frames.length;
-      img.src = animation.frames[frame].url;
-    }, 1000 / animation.metadata.frameRate);
-
-    player.onclick = (e) => {
-      if (e.target === player) {
-        clearInterval(interval);
-        player.remove();
-      }
-    };
-
-    setTimeout(() => {
-      clearInterval(interval);
-      player.remove();
-    }, (1000 / animation.metadata.frameRate) * animation.frames.length * 3);
-
-    player.appendChild(controls);
-    player.appendChild(img);
-    document.body.appendChild(player);
-  }
-
-  downloadAnimation(animation) {
-    animation.frames.forEach((frame, index) => {
-      setTimeout(() => {
-        const a = document.createElement('a');
-        a.download = `${animation.name}_frame_${index + 1}.png`;
-        a.href = frame.url;
-        a.click();
-      }, index * 200);
-    });
-
-    setTimeout(() => {
-      const metadata = {
-        name: animation.name,
-        id: animation.id,
-        tags: animation.tags,
-        metadata: animation.metadata,
-        frameCount: animation.frames.length,
-        markerData: animation.frames.map((frame, index) => ({
-          frameNumber: index + 1,
-          markers: frame.markers || [],
-          cellIndex: frame.cellIndex
-        })),
-        exportedAt: new Date().toISOString()
-      };
-
-      const blob = new Blob([JSON.stringify(metadata, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.download = `${animation.name}_metadata.json`;
-      link.href = url;
-      link.click();
-      setTimeout(() => URL.revokeObjectURL(url), 100);
-    }, animation.frames.length * 200 + 500);
-  }
-
-  deleteAnimation(id) {
-    const animation = this.animationLibrary.get(id);
-    if (animation && confirm(`Delete "${animation.name}"?`)) {
-      this.animationLibrary.delete(id);
-      this.updateLibraryButton();
+    try {
+      this.showStatus('Deleting animation...');
+      await this.deleteAnimation(animationId);
       
       const modal = document.getElementById('libModal');
       if (modal) {
         modal.remove();
         this.openLibrary();
       }
+      
+      this.showStatus('Animation deleted');
+    } catch (error) {
+      console.error('Delete failed:', error);
+      this.showStatus('Delete failed');
+      alert(`Delete failed: ${error.message}`);
     }
+  }
+
+  // =============================================
+  // CAMERA AND CAPTURE (keeping existing methods)
+  // =============================================
+
+  async init() {
+    await this.initCamera();
+    this.setupControls();
+    this.initMarkerDetection();
+    this.setupBackButton();
+  }
+
+  async initCamera() {
+    const video = document.getElementById('createVideo');
+    if (!video) return;
+
+    try {
+      this.showStatus('Starting camera...');
+      this.stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
+      });
+      
+      video.srcObject = this.stream;
+      await video.play();
+      this.showStatus('Camera ready - Point at markers and capture');
+      
+      const captureBtn = document.getElementById('createCapture');
+      if (captureBtn) captureBtn.disabled = false;
+    } catch (err) {
+      this.showStatus('Camera failed - Check permissions');
+      console.error('Camera error:', err);
+    }
+  }
+
+  setupControls() {
+    const captureBtn = document.getElementById('createCapture');
+    const clearBtn = document.getElementById('createClear');
+    const playBtn = document.getElementById('createPlayPause');
+    const resetBtn = document.getElementById('createResetAnim');
+    const speedSlider = document.getElementById('createSpeedSlider');
+    const libraryBtn = document.getElementById('animLibraryTopBtn');
+
+    if (captureBtn) captureBtn.onclick = () => this.capture();
+    if (clearBtn) clearBtn.onclick = () => this.clearAll();
+    if (playBtn) playBtn.onclick = () => this.togglePlay();
+    if (resetBtn) resetBtn.onclick = () => this.reset();
+    if (speedSlider) speedSlider.oninput = () => this.updateSpeed();
+    if (libraryBtn) libraryBtn.onclick = () => this.openLibrary();
+  }
+
+  initMarkerDetection() {
+    try {
+      if (typeof AR !== 'undefined') {
+        this.detector = new AR.Detector();
+      }
+    } catch (error) {
+      console.log('Marker detection unavailable');
+    }
+  }
+
+  setupBackButton() {
+    const backBtn = document.getElementById('closeCreateBtn');
+    if (backBtn) {
+      this.backButtonHandler = (e) => {
+        e.preventDefault();
+        this.cleanup();
+        if (window.App && window.App.screenManager) {
+          window.App.screenManager.switchTo('HOME');
+        } else {
+          document.getElementById('createScreen').style.display = 'none';
+          document.getElementById('homeScreen').style.display = 'block';
+        }
+      };
+      backBtn.addEventListener('click', this.backButtonHandler);
+    }
+  }
+
+  detectMarkers(imageData) {
+    if (!this.detector) return [];
+    try {
+      const markers = this.detector.detect(imageData);
+      markers.forEach(marker => {
+        const id = marker.id;
+        if (!this.markerHistory.has(id)) {
+          this.markerHistory.set(id, { count: 0, lastSeen: Date.now() });
+        }
+        const history = this.markerHistory.get(id);
+        history.count++;
+        history.lastSeen = Date.now();
+      });
+      return markers;
+    } catch (error) {
+      return [];
+    }
+  }
+
+  capture() {
+    const video = document.getElementById('createVideo');
+    if (!video || video.readyState < 2) {
+      this.showStatus('Camera not ready');
+      return;
+    }
+
+    this.showStatus('Capturing 3 golden squares...');
+
+    try {
+      const displayWidth = video.clientWidth;
+      const displayHeight = video.clientHeight;
+      const videoAspect = video.videoWidth / video.videoHeight;
+      const displayAspect = displayWidth / displayHeight;
+      
+      let visibleWidth, visibleHeight, offsetX, offsetY;
+      
+      if (videoAspect > displayAspect) {
+        visibleHeight = video.videoHeight;
+        visibleWidth = video.videoHeight * displayAspect;
+        offsetX = (video.videoWidth - visibleWidth) / 2;
+        offsetY = 0;
+      } else {
+        visibleWidth = video.videoWidth;
+        visibleHeight = video.videoWidth / displayAspect;
+        offsetX = 0;
+        offsetY = (video.videoHeight - visibleHeight) / 2;
+      }
+
+      const fullCanvas = document.createElement('canvas');
+      fullCanvas.width = video.videoWidth;
+      fullCanvas.height = video.videoHeight;
+      const fullCtx = fullCanvas.getContext('2d');
+      fullCtx.drawImage(video, 0, 0);
+
+      const imageData = fullCtx.getImageData(0, 0, fullCanvas.width, fullCanvas.height);
+      const detectedMarkers = this.detectMarkers(imageData);
+      
+      this.detectedMarkers = detectedMarkers.map(marker => ({
+        id: marker.id,
+        corners: marker.corners,
+        confidence: marker.confidence || 1,
+        timestamp: Date.now()
+      }));
+
+      const cellW = Math.floor(visibleWidth / 3);
+      const cellH = Math.floor(visibleHeight / 2);
+      
+      const goldenCells = [
+        { col: 0, row: 1, name: 'Golden Square 1' },
+        { col: 1, row: 1, name: 'Golden Square 2' },
+        { col: 2, row: 1, name: 'Golden Square 3' }
+      ];
+      
+      goldenCells.forEach((cell, index) => {
+        const cellCanvas = document.createElement('canvas');
+        cellCanvas.width = cellW;
+        cellCanvas.height = cellH;
+        const cellCtx = cellCanvas.getContext('2d');
+        
+        const sourceX = offsetX + (cell.col * cellW);
+        const sourceY = offsetY + (cell.row * cellH);
+        const clampedW = Math.min(cellW, video.videoWidth - sourceX);
+        const clampedH = Math.min(cellH, video.videoHeight - sourceY);
+        
+        cellCtx.drawImage(video, sourceX, sourceY, clampedW, clampedH, 0, 0, cellW, cellH);
+        cellCtx.strokeStyle = '#FFD700';
+        cellCtx.lineWidth = 3;
+        cellCtx.strokeRect(0, 0, cellW, cellH);
+        cellCtx.fillStyle = '#FFD700';
+        cellCtx.font = 'bold 16px Arial';
+        cellCtx.fillText(`G${index + 1}`, 10, 25);
+        
+        this.frames.push({
+          id: this.frames.length,
+          url: cellCanvas.toDataURL('image/png'),
+          timestamp: Date.now(),
+          cellIndex: index,
+          cellName: cell.name,
+          markers: this.detectedMarkers.slice(),
+          isGoldenSquare: true
+        });
+      });
+
+      this.updateDisplay();
+      this.startAnimation();
+      
+      const markerInfo = detectedMarkers.length > 0 
+        ? ` | Markers: ${detectedMarkers.map(m => m.id).join(', ')}`
+        : '';
+      
+      this.showStatus(`Captured 3 golden squares${markerInfo}`);
+    } catch (err) {
+      console.error('Capture error:', err);
+      this.showStatus('Capture failed');
+    }
+  }
+
+  updateDisplay() {
+    const resultsSection = document.getElementById('createResultsSection');
+    const animSection = document.getElementById('createAnimSection');
+    const clearBtn = document.getElementById('createClear');
+    
+    if (resultsSection) resultsSection.style.display = 'block';
+    if (animSection) animSection.style.display = 'block';
+    if (clearBtn) clearBtn.style.display = 'inline-block';
+    
+    this.renderFrames();
+  }
+
+  renderFrames() {
+    const results = document.getElementById('createResults');
+    if (!results) return;
+
+    results.innerHTML = '';
+
+    const markerSummary = this.createMarkerSummary();
+    if (markerSummary) results.appendChild(markerSummary);
+
+    const container = document.createElement('div');
+    container.style.cssText = `
+      display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center;
+      margin-bottom: 1rem; padding: 1rem; background: rgba(255,255,255,0.1); border-radius: 12px;
+    `;
+
+    this.frames.forEach((frame, index) => {
+      const frameDiv = document.createElement('div');
+      frameDiv.style.cssText = `
+        position: relative; cursor: pointer; border: 2px solid rgba(255,255,255,0.3);
+        border-radius: 8px; overflow: hidden; transition: all 0.3s ease;
+      `;
+
+      const img = document.createElement('img');
+      img.src = frame.url;
+      img.style.cssText = `width: 80px; height: 60px; object-fit: cover; display: block;`;
+
+      const label = document.createElement('div');
+      label.style.cssText = `
+        position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.8);
+        color: white; font-size: 0.7rem; text-align: center; padding: 2px; font-weight: 600;
+      `;
+      label.textContent = index + 1;
+
+      if (frame.markers && frame.markers.length > 0) {
+        const markerBadge = document.createElement('div');
+        markerBadge.style.cssText = `
+          position: absolute; top: 2px; right: 2px; background: #FF9800; color: white;
+          border-radius: 50%; width: 16px; height: 16px; font-size: 0.6rem;
+          display: flex; align-items: center; justify-content: center; font-weight: bold;
+        `;
+        markerBadge.textContent = frame.markers.length;
+        frameDiv.appendChild(markerBadge);
+      }
+
+      frameDiv.onclick = () => this.downloadFrame(frame, index);
+      frameDiv.appendChild(img);
+      frameDiv.appendChild(label);
+      container.appendChild(frameDiv);
+    });
+
+    const saveBtn = document.createElement('button');
+    saveBtn.style.cssText = `
+      padding: 0.8rem 1.5rem; background: #9C27B0; color: white; border: none;
+      border-radius: 8px; cursor: pointer; font-weight: 600; width: 100%; margin-top: 1rem;
+    `;
+    saveBtn.textContent = `Save to Cloud Library`;
+    saveBtn.onclick = () => this.saveToLibrary();
+
+    results.appendChild(container);
+    results.appendChild(saveBtn);
+  }
+
+  createMarkerSummary() {
+    const allMarkers = new Set();
+    this.frames.forEach(frame => {
+      if (frame.markers) {
+        frame.markers.forEach(marker => allMarkers.add(marker.id));
+      }
+    });
+
+    if (allMarkers.size === 0) return null;
+
+    const summary = document.createElement('div');
+    summary.style.cssText = `
+      background: rgba(255, 152, 0, 0.2); border: 1px solid rgba(255, 152, 0, 0.3);
+      border-radius: 8px; padding: 1rem; margin-bottom: 1rem; text-align: center;
+    `;
+
+    const title = document.createElement('div');
+    title.style.cssText = `color: #FF9800; font-weight: 600; margin-bottom: 0.5rem;`;
+    title.textContent = 'Detected Markers';
+
+    const markerList = document.createElement('div');
+    markerList.style.cssText = `display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap;`;
+
+    Array.from(allMarkers).sort((a, b) => a - b).forEach(markerId => {
+      const badge = document.createElement('span');
+      badge.style.cssText = `
+        background: #FF9800; color: white; padding: 0.3rem 0.6rem;
+        border-radius: 12px; font-size: 0.8rem; font-weight: 600;
+      `;
+      badge.textContent = `ID: ${markerId}`;
+      markerList.appendChild(badge);
+    });
+
+    summary.appendChild(title);
+    summary.appendChild(markerList);
+    return summary;
   }
 
   startAnimation() {
     if (this.frames.length === 0) return;
 
-    const animFrame = Utils.$('createAnimFrame');
-    const overlay = Utils.$('createAnimOverlay');
+    const animFrame = document.getElementById('createAnimFrame');
+    const overlay = document.getElementById('createAnimOverlay');
     
     if (overlay) overlay.style.display = 'none';
     if (animFrame) animFrame.src = this.frames[0].url;
@@ -1509,16 +1466,16 @@ createAnimationLibraryButton() {
     this.currentFrame = 0;
     this.isPlaying = true;
     
-    const playBtn = Utils.$('createPlayPause');
+    const playBtn = document.getElementById('createPlayPause');
     if (playBtn) {
-      playBtn.textContent = 'Pause';
+      playBtn.textContent = '⏸ Pause';
       playBtn.disabled = false;
     }
     
-    const resetBtn = Utils.$('createResetAnim');
+    const resetBtn = document.getElementById('createResetAnim');
     if (resetBtn) resetBtn.disabled = false;
     
-    const speedSlider = Utils.$('createSpeedSlider');
+    const speedSlider = document.getElementById('createSpeedSlider');
     if (speedSlider) speedSlider.disabled = false;
 
     this.animInterval = setInterval(() => {
@@ -1531,26 +1488,28 @@ createAnimationLibraryButton() {
 
   togglePlay() {
     this.isPlaying = !this.isPlaying;
-    const playBtn = Utils.$('createPlayPause');
-    if (playBtn) playBtn.textContent = this.isPlaying ? 'Pause' : 'Play';
+    const playBtn = document.getElementById('createPlayPause');
+    if (playBtn) {
+      playBtn.textContent = this.isPlaying ? '⏸ Pause' : '▶ Play';
+    }
   }
 
   reset() {
     this.currentFrame = 0;
     this.isPlaying = false;
     
-    const playBtn = Utils.$('createPlayPause');
-    if (playBtn) playBtn.textContent = 'Play';
+    const playBtn = document.getElementById('createPlayPause');
+    if (playBtn) playBtn.textContent = '▶ Play';
     
-    const animFrame = Utils.$('createAnimFrame');
+    const animFrame = document.getElementById('createAnimFrame');
     if (animFrame && this.frames.length > 0) {
       animFrame.src = this.frames[0].url;
     }
   }
 
   updateSpeed() {
-    const slider = Utils.$('createSpeedSlider');
-    const display = Utils.$('createSpeedDisplay');
+    const slider = document.getElementById('createSpeedSlider');
+    const display = document.getElementById('createSpeedDisplay');
     
     if (slider) {
       this.animSpeed = parseInt(slider.value);
@@ -1561,7 +1520,7 @@ createAnimationLibraryButton() {
         this.animInterval = setInterval(() => {
           if (this.isPlaying && this.frames.length > 0) {
             this.currentFrame = (this.currentFrame + 1) % this.frames.length;
-            const animFrame = Utils.$('createAnimFrame');
+            const animFrame = document.getElementById('createAnimFrame');
             if (animFrame) animFrame.src = this.frames[this.currentFrame].url;
           }
         }, this.animSpeed);
@@ -1576,14 +1535,6 @@ createAnimationLibraryButton() {
     a.click();
   }
 
-  downloadAll() {
-    this.frames.forEach((frame, index) => {
-      setTimeout(() => {
-        this.downloadFrame(frame, index);
-      }, index * 200);
-    });
-  }
-
   clearAll() {
     clearInterval(this.animInterval);
     this.isPlaying = false;
@@ -1591,36 +1542,58 @@ createAnimationLibraryButton() {
     this.frames = [];
     this.detectedMarkers = [];
 
-    const results = Utils.$('createResults');
+    const results = document.getElementById('createResults');
     if (results) results.innerHTML = '';
     
-    const animFrame = Utils.$('createAnimFrame');
+    const animFrame = document.getElementById('createAnimFrame');
     if (animFrame) animFrame.src = '';
     
-    const overlay = Utils.$('createAnimOverlay');
+    const overlay = document.getElementById('createAnimOverlay');
     if (overlay) overlay.style.display = 'flex';
     
-    const playBtn = Utils.$('createPlayPause');
+    const playBtn = document.getElementById('createPlayPause');
     if (playBtn) {
-      playBtn.textContent = 'Play';
+      playBtn.textContent = '▶ Play';
       playBtn.disabled = true;
     }
     
-    const resetBtn = Utils.$('createResetAnim');
+    const resetBtn = document.getElementById('createResetAnim');
     if (resetBtn) resetBtn.disabled = true;
     
-    const speedSlider = Utils.$('createSpeedSlider');
+    const speedSlider = document.getElementById('createSpeedSlider');
     if (speedSlider) speedSlider.disabled = true;
 
-    Utils.hideElement('createResultsSection');
-    Utils.hideElement('createAnimSection');
-    Utils.hideElement('createClear');
+    const resultsSection = document.getElementById('createResultsSection');
+    const animSection = document.getElementById('createAnimSection');
+    const clearBtn = document.getElementById('createClear');
+    
+    if (resultsSection) resultsSection.style.display = 'none';
+    if (animSection) animSection.style.display = 'none';
+    if (clearBtn) clearBtn.style.display = 'none';
+  }
 
-    const saveBtn = Utils.$('saveToLibBtn');
-    if (saveBtn) saveBtn.style.display = 'none';
+  showStatus(message) {
+    const status = document.getElementById('createStatus');
+    if (status) status.textContent = message;
+  }
+
+  cleanup() {
+    if (this.stream) {
+      this.stream.getTracks().forEach(track => track.stop());
+      this.stream = null;
+    }
+    
+    clearInterval(this.animInterval);
+    
+    const backBtn = document.getElementById('closeCreateBtn');
+    if (backBtn && this.backButtonHandler) {
+      backBtn.removeEventListener('click', this.backButtonHandler);
+    }
+    
+    this.frames = [];
+    this.detectedMarkers = [];
   }
 }
-
 /********************************************
  * AR MANAGER WITH ANIMATION INTEGRATION
  ********************************************/
@@ -1651,6 +1624,11 @@ class ARManager {
     this.overlayContainer = null;
     this.activeOverlays = new Map();
     this.animationIntervals = new Map();
+    
+    // Animation Library Cache - NEW
+    this.animationLibrary = new Map();
+    this.animationsLoaded = false;
+    this.loadingAnimations = false;
   }
 
   async init() {
@@ -1663,6 +1641,10 @@ class ARManager {
       this.initRenderer();
       this.initSTLLoader();
       this.initOverlaySystem();
+      
+      // Load animations from cloud - NEW
+      await this.loadAnimationsFromCloud();
+      
       this.startRenderLoop();
       
       this.isInitialized = true;
@@ -1671,6 +1653,121 @@ class ARManager {
       Utils.log(`AR initialization failed: ${error.message}`, 'error');
       throw error;
     }
+  }
+
+  // NEW: Load animations from Supabase
+  async loadAnimationsFromCloud() {
+    if (this.animationsLoaded || this.loadingAnimations) {
+      console.log('⏭️ Animations already loaded or loading...');
+      return;
+    }
+
+    this.loadingAnimations = true;
+    Utils.log('Loading animations from cloud for AR...', 'info');
+
+    try {
+      // Get CreateManager instance
+      const createManager = this.getCreateManager();
+      
+      if (!createManager || !createManager.supabase) {
+        Utils.log('CreateManager or Supabase not available, skipping animation loading', 'warning');
+        this.loadingAnimations = false;
+        return;
+      }
+
+      // Load animations from Supabase
+      const animations = await createManager.loadAnimations();
+      
+      if (!animations || animations.length === 0) {
+        Utils.log('No animations found in cloud', 'info');
+        this.animationsLoaded = true;
+        this.loadingAnimations = false;
+        return;
+      }
+      
+      // Clear existing cache
+      this.animationLibrary.clear();
+      
+      // Process and cache animations
+      let successCount = 0;
+      for (const animation of animations) {
+        try {
+          if (animation.marker_tags && animation.marker_tags.length > 0) {
+            const processedAnimation = this.processAnimationData(animation);
+            this.animationLibrary.set(animation.id, processedAnimation);
+            
+            Utils.log(`Cached animation "${animation.name}" with markers: ${animation.marker_tags.join(', ')}`, 'success');
+            successCount++;
+          }
+        } catch (error) {
+          console.error(`Failed to process animation "${animation.name}":`, error);
+        }
+      }
+      
+      this.animationsLoaded = true;
+      Utils.log(`Loaded ${successCount}/${animations.length} animations for AR`, 'success');
+      
+    } catch (error) {
+      Utils.log(`Failed to load animations: ${error.message}`, 'error');
+    } finally {
+      this.loadingAnimations = false;
+    }
+  }
+
+  // NEW: Process animation data from Supabase format
+  processAnimationData(animation) {
+    const frames = [];
+    
+    if (animation.frame_urls && Array.isArray(animation.frame_urls)) {
+      frames.push(...animation.frame_urls.map(frameData => ({
+        url: frameData.url,
+        cellIndex: frameData.cell_index || 0,
+        timestamp: frameData.timestamp || Date.now(),
+        markers: frameData.markers || []
+      })));
+    }
+    
+    return {
+      id: animation.id,
+      name: animation.name,
+      frames: frames,
+      tags: animation.marker_tags, // Array of marker IDs
+      metadata: {
+        frameCount: animation.frame_count,
+        frameRate: animation.frame_rate || 2,
+        createdAt: animation.created_at,
+        ...animation.metadata
+      }
+    };
+  }
+
+  // NEW: Get CreateManager instance
+  getCreateManager() {
+    if (window.AppState && window.AppState.createManager) {
+      return window.AppState.createManager;
+    }
+    if (window.App && window.App.createManager) {
+      return window.App.createManager;
+    }
+    if (window.createManager) {
+      return window.createManager;
+    }
+    return null;
+  }
+
+  // NEW: Refresh animation cache
+  async refreshAnimations() {
+    Utils.log('Refreshing animation cache...', 'info');
+    this.animationsLoaded = false;
+    this.animationLibrary.clear();
+    
+    // Stop all active animations
+    this.animationIntervals.forEach(intervalId => clearInterval(intervalId));
+    this.animationIntervals.clear();
+    this.activeOverlays.forEach(animState => animState.element.remove());
+    this.activeOverlays.clear();
+    
+    await this.loadAnimationsFromCloud();
   }
 
   initOverlaySystem() {
@@ -1850,21 +1947,16 @@ class ARManager {
     }
   }
 
+  // FIXED: Animation lookup using local cache
   getAnimationForMarker(markerId) {
     try {
-      let library = null;
-      
-      if (AppState.createManager && AppState.createManager.animationLibrary) {
-        library = AppState.createManager.animationLibrary;
-      } else if (window.App && window.App.createManager && window.App.createManager.animationLibrary) {
-        library = window.App.createManager.animationLibrary;
-      }
-      
-      if (!library || library.size === 0) {
+      // Use local animation cache instead of non-existent property
+      if (!this.animationLibrary || this.animationLibrary.size === 0) {
         return null;
       }
       
-      for (let [animId, animation] of library) {
+      // Search through cached animations for matching tags
+      for (let [animId, animation] of this.animationLibrary) {
         if (animation.tags && Array.isArray(animation.tags)) {
           const hasMatch = animation.tags.some(tag => {
             return tag === markerId || 
@@ -1874,7 +1966,7 @@ class ARManager {
           });
           
           if (hasMatch) {
-            Utils.log(`Found animation "${animation.name}" for marker ${markerId}`, 'success');
+            Utils.log(`Found cached animation "${animation.name}" for marker ${markerId}`, 'success');
             return animation;
           }
         }
@@ -2140,6 +2232,7 @@ class ARManager {
     });
   }
 
+  // UPDATED: Enhanced UI info with cache status
   updateKitInfo(markers) {
     const kitNameEl = Utils.$('arKitName');
     const kitDescEl = Utils.$('arKitDesc');
@@ -2168,11 +2261,21 @@ class ARManager {
 
       if (kitNameEl) kitNameEl.textContent = markerInfos.join(', ');
       if (kitDescEl) {
-        kitDescEl.textContent = `Displaying ${animationCount} animation(s) and ${modelCount} 3D model(s)`;
+        let description = `Displaying ${animationCount} animation(s) and ${modelCount} 3D model(s)`;
+        if (this.animationLibrary.size > 0) {
+          description += ` • ${this.animationLibrary.size} animations cached`;
+        }
+        kitDescEl.textContent = description;
       }
     } else {
       if (kitNameEl) kitNameEl.textContent = 'No markers detected';
-      if (kitDescEl) kitDescEl.textContent = 'Point your camera at a marker to see content';
+      if (kitDescEl) {
+        let description = 'Point your camera at a marker to see content';
+        if (this.animationLibrary.size > 0) {
+          description += ` • ${this.animationLibrary.size} animations ready`;
+        }
+        kitDescEl.textContent = description;
+      }
     }
   }
 
@@ -2211,6 +2314,7 @@ class ARManager {
     if (markerInfo) {
       let text = markers.length === 0 ? 'No markers detected.\n' : '';
       text += `Active 2D animations: ${this.activeOverlays.size}\n`;
+      text += `Animation cache: ${this.animationLibrary.size}\n`;
       markers.forEach(marker => {
         const animation = this.getAnimationForMarker(marker.id);
         if (animation) {
@@ -2223,12 +2327,18 @@ class ARManager {
     }
   }
 
+  // UPDATED: Start experience with animation refresh
   startExperience() {
     Utils.addClass('arInitialOverlay', 'hidden');
     if (!this.isInitialized) {
       this.init().catch(error => {
         Utils.log(`Failed to start AR: ${error.message}`, 'error');
         NotificationManager.show('Failed to start AR experience', 'error');
+      });
+    } else {
+      // Refresh animations in case new ones were created
+      this.refreshAnimations().catch(error => {
+        Utils.log(`Failed to refresh animations: ${error.message}`, 'warning');
       });
     }
   }
@@ -2269,10 +2379,16 @@ class ARManager {
     window.CV_RENDER_HEIGHT = renderHeight;
   }
 
+  // UPDATED: Enhanced cleanup with animation cache
   cleanup() {
     this.animationIntervals.forEach(intervalId => clearInterval(intervalId));
     this.animationIntervals.clear();
     this.activeOverlays.clear();
+    
+    // Clear animation cache
+    this.animationLibrary.clear();
+    this.animationsLoaded = false;
+    this.loadingAnimations = false;
     
     if (this.overlayContainer) {
       this.overlayContainer.remove();

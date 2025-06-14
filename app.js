@@ -1755,6 +1755,29 @@ class ARManager {
     return null;
   }
 
+  // NEW: Direct marker-to-model mapping (bypasses complex scenario system)
+  getDirectModelForMarker(markerId) {
+    // Direct mapping of marker IDs to 3D models
+    const directModelMap = {
+      0: "sea_models/stringray.stl",
+      1: "sea_models/jellyfish.stl", 
+      2: "sea_models/dolphin.stl",
+      3: "sea_models/octopus.stl",
+      4: "sea_models/fishes.stl",
+      5: "sea_models/sea_turtle.stl",
+      6: "sea_models/stringray.stl",
+      7: "octopus_exotic_tropic_0409194610_texture.stl",
+      8: "coral_reef_fish_uniqu_0409193350_texture.stl", 
+      9: "marine_animal_exotic__0409191724_texture.stl",
+      10: "jellyfish_exotic_trop_0409193559_texture.stl",
+      11: "sea_models/sea_turtle.stl",
+      15: "octopus_baby_exotic_t_0409195159_texture.stl",
+      31: "fish_tropical_0409190013_texture.stl"
+    };
+    
+    return directModelMap[markerId] || null;
+  }
+
   // NEW: Refresh animation cache
   async refreshAnimations() {
     Utils.log('Refreshing animation cache...', 'info');
@@ -2150,14 +2173,23 @@ class ARManager {
         }
       } else {
         // Fall back to 3D models if no animation
-        const activeScenario = extendedScenarios.find(s => s.identifierTag === bestScenarioID);
-        if (activeScenario) {
-          activeScenario.objects.forEach(obj => {
-            const scenarioMarker = markerMap.get(obj.tag);
-            if (scenarioMarker && scenarioMarker.id === markerId) {
-              this.placeObject(scenarioMarker, obj.stl);
-            }
-          });
+        // FIXED: Check for direct marker match first, then scenario-based matching
+        
+        // Direct marker-to-model mapping
+        const directModel = this.getDirectModelForMarker(markerId);
+        if (directModel) {
+          this.placeObject(marker, directModel);
+        } else {
+          // Legacy scenario-based system (confidence tracking)
+          const activeScenario = extendedScenarios.find(s => s.identifierTag === bestScenarioID);
+          if (activeScenario) {
+            activeScenario.objects.forEach(obj => {
+              const scenarioMarker = markerMap.get(obj.tag);
+              if (scenarioMarker && scenarioMarker.id === markerId) {
+                this.placeObject(scenarioMarker, obj.stl);
+              }
+            });
+          }
         }
       }
     });

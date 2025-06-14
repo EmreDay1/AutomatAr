@@ -577,6 +577,490 @@
         transform: rotate(360deg);
       }
     }
+
+     #createScreen {
+      background: linear-gradient(135deg, #FF8C00 0%, #FF7F00 100%);
+      min-height: 100vh;
+      color: white;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.5rem 2rem;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .modal-close-button {
+      background: #ffffff;
+      color: #FF8C00;
+      border: 2px solid #ffffff;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 700;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+    }
+
+    .modal-close-button:hover {
+      background: #FF8C00;
+      color: #ffffff;
+      transform: translateY(-1px);
+    }
+
+    .modal-header-center {
+      text-align: center;
+      flex: 1;
+      margin: 0 2rem;
+    }
+
+    .modal-title {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+    }
+
+    .modal-subtitle {
+      font-size: 1.1rem;
+      opacity: 0.9;
+      font-weight: 500;
+    }
+
+    .create-section {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 2rem;
+      margin: 2rem;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+    }
+
+    .create-section h3 {
+      font-size: 1.8rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      text-align: center;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    }
+
+    .create-status {
+      text-align: center;
+      margin: 1rem 0;
+      font-weight: 500;
+      padding: 0.8rem;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .create-camera-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+      padding: 1rem 0;
+    }
+
+    .create-camera-box {
+      position: relative;
+      width: 100%;
+      max-width: 600px;
+      height: 450px;
+      border: 3px solid rgba(255, 255, 255, 0.4);
+      border-radius: 16px;
+      overflow: hidden;
+      background: rgba(0, 0, 0, 0.8);
+      margin: 0 auto;
+    }
+
+    #createVideo {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 13px;
+    }
+
+    .create-grid {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(2, 1fr);
+      pointer-events: none;
+      z-index: 10;
+      gap: 2px;
+    }
+
+    .create-cell {
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      position: relative;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .create-golden {
+      border: 3px solid #FFD700;
+      background: rgba(255, 215, 0, 0.2);
+      box-shadow: 
+        inset 0 0 20px rgba(255, 215, 0, 0.4),
+        0 0 20px rgba(255, 215, 0, 0.3);
+      animation: golden-pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes golden-pulse {
+      0%, 100% { 
+        box-shadow: 
+          inset 0 0 20px rgba(255, 215, 0, 0.4),
+          0 0 20px rgba(255, 215, 0, 0.3);
+        border-color: #FFD700;
+      }
+      50% { 
+        box-shadow: 
+          inset 0 0 30px rgba(255, 215, 0, 0.6),
+          0 0 30px rgba(255, 215, 0, 0.5);
+        border-color: #FFF700;
+      }
+    }
+
+    .create-controls {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .create-capture-btn, .create-clear-btn {
+      background: linear-gradient(145deg, #ffffff, #f8f9fa);
+      color: #FF8C00;
+      border: 2px solid #FF8C00;
+      padding: 1rem 2rem;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      min-width: 200px;
+    }
+
+    .create-capture-btn:hover:not(:disabled),
+    .create-clear-btn:hover {
+      background: linear-gradient(145deg, #FF8C00, #FF7F00);
+      color: #ffffff;
+      transform: translateY(-2px);
+      border-color: #ffffff;
+    }
+
+    .create-capture-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .create-clear-btn {
+      background: linear-gradient(145deg, #ff6b6b, #ff5252);
+      color: #ffffff;
+      border-color: #ff5252;
+    }
+
+    .create-instructions {
+      background: rgba(255, 215, 0, 0.15);
+      padding: 1rem;
+      border-radius: 12px;
+      margin-bottom: 1rem;
+      border: 1px solid rgba(255, 215, 0, 0.3);
+    }
+
+    .create-instructions p {
+      margin: 0.5rem 0;
+      line-height: 1.6;
+    }
+
+    .create-results {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      padding: 1rem;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .create-animation-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .create-animation-box {
+      width: 100%;
+      max-width: 500px;
+      height: 250px;
+      border: 3px dashed rgba(255, 255, 255, 0.4);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background: rgba(0, 0, 0, 0.3);
+      position: relative;
+    }
+
+    .create-animation-box img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      border-radius: 8px;
+    }
+
+    .create-animation-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(255, 255, 255, 0.8);
+      text-align: center;
+      padding: 1rem;
+      border-radius: 8px;
+    }
+
+    .create-animation-controls {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: center;
+      padding: 1rem;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .create-animation-controls button {
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(248, 249, 250, 0.9));
+      color: #FF8C00;
+      border: 2px solid rgba(255, 140, 0, 0.4);
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      min-width: 100px;
+    }
+
+    .create-animation-controls button:hover:not(:disabled) {
+      background: linear-gradient(145deg, #FF8C00, #FF7F00);
+      color: #ffffff;
+      border-color: #ffffff;
+      transform: translateY(-1px);
+    }
+
+    .create-animation-controls button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .create-animation-controls label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: rgba(255, 255, 255, 0.9);
+      font-weight: 500;
+    }
+
+    .create-animation-controls input[type="range"] {
+      width: 120px;
+      margin: 0 0.5rem;
+    }
+
+    /* Bottom Button Container - Two Buttons 50/50 */
+    .create-ar-button-container {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      display: flex;
+      background: rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(10px);
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .animation-library-btn {
+      flex: 1;
+      height: 70px;
+      background: linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%);
+      border: none;
+      border-right: 1px solid rgba(255, 255, 255, 0.2);
+      color: #ffffff;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .animation-library-btn:hover {
+      background: linear-gradient(135deg, #7B1FA2 0%, #6A1B9A 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px rgba(156, 39, 176, 0.4);
+    }
+
+    .create-ar-button {
+      flex: 1;
+      height: 70px;
+      background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+      border: none;
+      color: #ffffff;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .create-ar-button:hover {
+      background: linear-gradient(135deg, #45a049 0%, #3d8b40 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px rgba(76, 175, 80, 0.4);
+    }
+
+    .create-ar-button:active,
+    .animation-library-btn:active {
+      transform: translateY(0);
+    }
+
+    /* Add bottom padding to prevent content overlap */
+    #createScreen {
+      padding-bottom: 90px;
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+      .modal-header {
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1rem;
+      }
+
+      .modal-header-center {
+        margin: 0;
+      }
+
+      .modal-title {
+        font-size: 1.5rem;
+      }
+
+      .modal-subtitle {
+        font-size: 1rem;
+      }
+
+      .create-section {
+        margin: 1rem;
+        padding: 1.5rem;
+      }
+
+      .create-camera-box {
+        height: 300px;
+      }
+
+      .create-controls {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .create-capture-btn, .create-clear-btn {
+        width: 100%;
+        max-width: 300px;
+      }
+
+      .create-animation-controls {
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .animation-library-btn,
+      .create-ar-button {
+        height: 60px;
+        font-size: 1rem;
+      }
+
+      #createScreen {
+        padding-bottom: 80px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .create-section {
+        margin: 0.5rem;
+        padding: 1rem;
+      }
+
+      .create-camera-box {
+        height: 250px;
+      }
+
+      .create-animation-box {
+        height: 200px;
+      }
+
+      .animation-library-btn,
+      .create-ar-button {
+        height: 55px;
+        font-size: 0.9rem;
+        letter-spacing: 0.3px;
+      }
+
+      .create-ar-button {
+        gap: 0.3rem;
+      }
+
+      #createScreen {
+        padding-bottom: 75px;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .animation-library-btn,
+      .create-ar-button {
+        font-size: 0.8rem;
+        height: 50px;
+      }
+      
+      .animation-library-btn {
+        text-transform: none;
+      }
+      
+      .create-ar-button {
+        gap: 0.2rem;
+      }
+      
+      #createScreen {
+        padding-bottom: 70px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -1087,9 +1571,7 @@
     </div>
   </div>
 
-  <!-- Create Screen -->
-   <section id="createScreen" class="modal-screen" role="main" aria-labelledby="create-title">
-  
+<section id="createScreen" class="modal-screen" role="main" aria-labelledby="create-title">
   <!-- Header Section -->
   <div class="modal-header">
     <button class="modal-close-button" id="closeCreateBtn" aria-label="Close create screen">← Back</button>
@@ -1097,99 +1579,79 @@
       <div class="modal-title" id="create-title">Create Your Own AR Models</div>
       <div class="modal-subtitle">Create your own unique AR models and markers</div>
     </div>
-  </div>
-
-  <!-- Main Content Container -->
-  <div class="modal-content">
     
-    <!-- Camera Section -->
-    <div class="create-section">
-      <h3>Capture Animation Grid</h3>
-      <div class="create-status" id="createStatus">Starting camera...</div>
+  </div>
+
+  <!-- Camera Section -->
+   
+  <div class="create-section">
+    <h3>Capture Animation Grid</h3>
+    <div class="create-status" id="createStatus">Starting camera...</div>
+    
+    <div class="create-camera-container">
+      <div class="create-camera-box">
+        <video id="createVideo" autoplay muted playsinline></video>
+        <div class="create-grid">
+          <div class="create-cell"></div>
+          <div class="create-cell"></div>
+          <div class="create-cell"></div>
+          <div class="create-cell create-golden"></div>
+          <div class="create-cell create-golden"></div>
+          <div class="create-cell create-golden"></div>
+        </div>
+      </div>
       
-      <div class="create-camera-container">
-        <div class="create-camera-box">
-          <video id="createVideo" autoplay muted playsinline></video>
-          <div class="create-grid">
-            <div class="create-cell"></div>
-            <div class="create-cell"></div>
-            <div class="create-cell"></div>
-            <div class="create-cell create-golden"></div>
-            <div class="create-cell create-golden"></div>
-            <div class="create-cell create-golden"></div>
-          </div>
-        </div>
-        
-        <div class="create-controls">
-          <button id="createCapture" class="create-capture-btn" disabled>
-            Capture Assembly Step
-          </button>
-          <button id="createClear" class="create-clear-btn" style="display: none;">
-            Clear All Frames
-          </button>
-        </div>
+      <div class="create-controls">
+        <button id="createCapture" class="create-capture-btn" disabled>
+          Capture Assembly Step
+        </button>
+        <button id="createClear" class="create-clear-btn" style="display: none;">
+          Clear All Frames
+        </button>
       </div>
     </div>
-
-    <!-- Results Section -->
-    <div class="create-section" id="createResultsSection" style="display: none;">
-      <h3>Captured Animation Frames</h3>
-      <div class="create-instructions">
-        <p>Individual frames captured from the golden grid area</p>
-        <p>Click any frame to download, or use the animation below</p>
-      </div>
-      <div class="create-results" id="createResults"></div>
-    </div>
-
-    <!-- Animation Section -->
-    <div class="create-section" id="createAnimSection" style="display: none;">
-      <h3>Assembly Animation</h3>
-      <div class="create-animation-container">
-        <div class="create-animation-box">
-          <img id="createAnimFrame" src="" alt="Assembly animation frame">
-          <div class="create-animation-overlay" id="createAnimOverlay">
-            <span>No animation yet - capture some steps above!</span>
-          </div>
-        </div>
-        
-        <div class="create-animation-controls">
-          <button id="createPlayPause" disabled>▶ Play</button>
-          <button id="createResetAnim" disabled>⏹ Reset</button>
-          <label>
-            Speed: <input type="range" id="createSpeedSlider" min="200" max="2000" value="500" disabled>
-            <span id="createSpeedDisplay">500ms</span>
-          </label>
-        </div>
-      </div>
-    </div>
-
-    <!-- Tips & Instructions Section -->
-    <div class="create-section">
-      <h3>How to Create Great AR Animations</h3>
-      <div class="create-tips">
-        <div class="create-tip">
-          <h4>🎯 Golden Grid Positioning</h4>
-          <p>Position your subject within the highlighted golden squares for optimal capture quality and consistent framing.</p>
-        </div>
-        <div class="create-tip">
-          <h4>📱 Steady Camera Work</h4>
-          <p>Keep your device steady during capture. Use good lighting and avoid casting shadows on your subject.</p>
-        </div>
-        <div class="create-tip">
-          <h4>🔄 Smooth Animation Steps</h4>
-          <p>Capture small, incremental changes between frames to create fluid animation sequences in AR.</p>
-        </div>
-      </div>
-    </div>
-
   </div>
 
-  <!-- Bottom AR Button - Fixed Position -->
-  <div class="create-bottom-button-container">
-    <button class="create-ar-button" id="createOpenARBtn" aria-label="Open AR to view created animations">
-      🚀 Open AR Experience
-    </button>
+  <!-- Results Section -->
+  <div class="create-section" id="createResultsSection" style="display: none;">
+    <h3>Captured Animation Frames</h3>
+    <div class="create-instructions">
+      <p>Individual frames captured from the golden grid area</p>
+      <p>Click any frame to download, or use the animation controls below</p>
+    </div>
+    <div class="create-results" id="createResults"></div>
   </div>
+
+  <!-- Animation Section -->
+  <div class="create-section" id="createAnimSection" style="display: none;">
+    <h3>Assembly Animation</h3>
+    <div class="create-animation-container">
+      <div class="create-animation-box">
+        <img id="createAnimFrame" src="" alt="Assembly animation frame">
+        <div class="create-animation-overlay" id="createAnimOverlay">
+          <span>No animation yet - capture some steps above!</span>
+        </div>
+      </div>
+      
+      <div class="create-animation-controls">
+        <button id="createPlayPause" disabled>▶ Play</button>
+        <button id="createResetAnim" disabled>⏹ Reset</button>
+        <label>
+          Speed: <input type="range" id="createSpeedSlider" min="200" max="2000" value="500" disabled>
+          <span id="createSpeedDisplay">500ms</span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom AR Button -->
+<div class="create-ar-button-container">
+  <button class="animation-library-btn" id="animLibraryTopBtn" aria-label="Open animation library">Animation Library</button>
+
+  <button class="create-ar-button" id="createOpenARBtn" aria-label="Open AR to view created animations">
+    🚀 Open AR Experience
+  </button>
+</div>
 
 </section>
 

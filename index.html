@@ -1938,289 +1938,155 @@
   </script>
   <!-- Begin AI Integration Snippet -->
   <script>
-class CohereAITester {
-  constructor() {
-    this.apiKey = 'eb99UATWhfYjOpFKSt9vysoyqwCHM4WuAoZx02CU';
-    this.baseUrl = 'https://api.cohere.ai/v1/generate';
-    this.currentAnswer = '';
-    this.currentExplanation = '';
-  }
-
-  async generateScenario(seaModel, kit1, kit2) {
-    // Generate scenario structure directly in JavaScript
-    const scenario = this.buildScenario(seaModel, kit1, kit2);
-    
-    // Clean kit names for display
-    const kit1Clean = kit1.replace(/[-\s]?Model/g, '').replace(/-/g, ' ').replace(/Cam-([A-C])/g, 'Cam').replace(/Gear-([A-C])/g, '$1 Gear');
-    const kit2Clean = kit2.replace(/[-\s]?Model/g, '').replace(/-/g, ' ').replace(/Cam-([A-C])/g, 'Cam').replace(/Gear-([A-C])/g, '$1 Gear');
-    
-    // Only use AI for the explanation part
-    const prompt = `Write a 1-2 sentence mechanical engineering explanation for why ${scenario.winner} beats ${scenario.loser} in terms of ${scenario.focus}. Keep it under 30 words and focus on mechanical principles only.`;
-    
-    try {
-      const response = await fetch(this.baseUrl, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'command-light',
-          prompt,
-          max_tokens: 80,
-          temperature: 0.3,
-          k: 0,
+    // Helper to format raw scenario text with bolded headings
+    function formatScenarioOutput(rawText) {
+      return rawText
+        .split('\n')
+        .map(line => {
+          const m = line.match(/^(Mechanisms|Objective|Prompt):\s*(.*)$/);
+          if (m) {
+            return `<strong>${m[1]}</strong>: ${m[2]}`;
+          }
+          return line;
         })
-      });
-      
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const data = await response.json();
-      const aiExplanation = data.generations[0].text.trim();
-      
-      // Store answer and explanation for later reveal
-      this.currentAnswer = scenario.winner;
-      this.currentExplanation = aiExplanation;
-      
-      // Return scenario WITHOUT answer and explanation
-      return `Mechanisms: ${kit1Clean} vs. ${kit2Clean}
-Objective: ${scenario.objective}
-Prompt: "${scenario.prompt}"`;
-      
-    } catch (error) {
-      // Fallback to pre-written explanation if AI fails
-      this.currentAnswer = scenario.winner;
-      this.currentExplanation = `${scenario.winner} mechanisms provide ${scenario.reason}, making them more effective for ${seaModel} movement compared to ${scenario.loser} systems.`;
-      
-      return `Mechanisms: ${kit1Clean} vs. ${kit2Clean}
-Objective: ${scenario.objective}
-Prompt: "${scenario.prompt}"`;
+        .join('<br>');
     }
-  }
-
-  revealAnswer() {
-    return `**Answer:** ${this.currentAnswer}
-**Explanation:** ${this.currentExplanation}`;
-  }
-
-  buildScenario(seaModel, kit1, kit2) {
-    // 🎯 Mechanism hierarchy (winner determination)
-    const mechanismPower = {
-      "Worm Gear": 5, 
-      "Crank": 4, 
-      "Bevel Gear": 3, 
-      "Geneva": 2, 
-      "Cam": 1
-    };
-    
-    // Clean kit names - remove "Model" and clean up formatting
-    const kit1Clean = kit1.replace(/[-\s]?Model/g, '').replace(/-/g, ' ').replace(/Cam-([A-C])/g, 'Cam').replace(/Gear-([A-C])/g, '$1 Gear');
-    const kit2Clean = kit2.replace(/[-\s]?Model/g, '').replace(/-/g, ' ').replace(/Cam-([A-C])/g, 'Cam').replace(/Gear-([A-C])/g, '$1 Gear');
-    
-    // Determine winner
-    const power1 = mechanismPower[kit1Clean] || mechanismPower[kit1.replace(/-[A-Z]/g, '')] || 1;
-    const power2 = mechanismPower[kit2Clean] || mechanismPower[kit2.replace(/-[A-Z]/g, '')] || 1;
-    
-    const winner = power1 >= power2 ? kit1Clean : kit2Clean;
-    const loser = winner === kit1Clean ? kit2Clean : kit1Clean;
-    
-    // 🎲 Scenario templates
-    const scenarios = [
-      {
-        objective: "Compare speed of motion between two systems", 
-        prompt: `Observe the ${seaModel} operating via ${kit1Clean} and ${kit2Clean} mechanisms. Which one swims faster in AR? Why do you think this happens mechanically?`,
-        focus: "speed and continuity",
-        reason: "continuous motion"
-      },
-      {
-        objective: "Compare force transmission efficiency",
-        prompt: `Activate each system with AR and observe the ${seaModel}. Which mechanism pushes forward most efficiently? Which seems smoothest? Why?`,
-        focus: "force transmission",
-        reason: "higher torque"
-      },
-      {
-        objective: "Compare torque and power output", 
-        prompt: `Scan the ${seaModel} using each mechanism in AR. Which one shows stronger, slower movement? Why is that?`,
-        focus: "torque and power",
-        reason: "stronger force output"
-      },
-      {
-        objective: "Match motion patterns to mechanisms",
-        prompt: `Observe how the ${seaModel} moves with each system. Which movement corresponds to which mechanism? What clues led you there?`,
-        focus: "motion patterns",
-        reason: "consistent motion patterns"
-      },
-      {
-        objective: "Determine best system for resistance",
-        prompt: `The ${seaModel} is swimming against strong current. Which mechanism helps it push through more effectively? Why?`,
-        focus: "efficiency under load", 
-        reason: "better power transmission"
-      },
-      {
-        objective: "Compare precision and control systems",
-        prompt: `Watch the ${seaModel} navigate through obstacles using each mechanism. Which provides better control? Why?`,
-        focus: "precision and control",
-        reason: "better motion control"
-      },
-      {
-        objective: "Evaluate long-term energy efficiency",
-        prompt: `If the ${seaModel} had to swim for hours, which mechanism would be more efficient? What makes you think so?`,
-        focus: "energy efficiency",
-        reason: "optimal energy transfer"
+  
+    class CohereAITester {
+      constructor() {
+        this.apiKey = 'eb99UATWhfYjOpFKSt9vysoyqwCHM4WuAoZx02CU';
+        this.baseUrl = 'https://api.cohere.ai/v1/generate';
+        this.currentAnswer = '';
+        this.currentExplanation = '';
       }
-    ];
-    
-    const selectedScenario = scenarios[Math.floor(Math.random() * scenarios.length)];
-    
-    return {
-      // Removed title completely
-      objective: selectedScenario.objective,
-      prompt: selectedScenario.prompt,
-      winner: winner,
-      loser: loser,
-      focus: selectedScenario.focus,
-      reason: selectedScenario.reason
-    };
-  }
-}
-
-// Usage Integration
-const cohereTester = new CohereAITester();
-
-async function tryAutoGenerate() {
-  const sea = selectedOptions.models.name;
-  const k1 = selectedOptions.kit1.name;
-  const k2 = selectedOptions.kit2.name;
-  if (sea && k1 && k2) {
-    document.getElementById('scenarioText').textContent = '🤖 Generating educational scenario...';
-    
-    // Hide answer section and show answer button
-    hideAnswerSection();
-    showAnswerButton();
-    
-    try {
-      const scenario = await cohereTester.generateScenario(sea, k1, k2);
-      document.getElementById('scenarioText').textContent = scenario;
-    } catch (e) {
-      document.getElementById('scenarioText').textContent = 'Error generating scenario. Please try again.';
-      console.error(e);
-    }
-  }
-}
-
-function showAnswer() {
-  const answerText = cohereTester.revealAnswer();
-  const answerSection = document.getElementById('answerSection');
-  const showAnswerBtn = document.getElementById('showAnswerBtn');
   
-  if (answerSection) {
-    answerSection.textContent = answerText;
-    answerSection.style.display = 'block';
-  }
+      async generateScenario(seaModel, kit1, kit2) {
+        const scenario = this.buildScenario(seaModel, kit1, kit2);
+        const kit1Clean = kit1.replace(/[-\s]?Model/g, '').replace(/-/g, ' ').replace(/Cam-([A-C])/g, 'Cam').replace(/Gear-([A-C])/g, '$1 Gear');
+        const kit2Clean = kit2.replace(/[-\s]?Model/g, '').replace(/-/g, ' ').replace(/Cam-([A-C])/g, 'Cam').replace(/Gear-([A-C])/g, '$1 Gear');
+        const prompt = `Write a 2-3 sentence mechanical engineering explanation for why ${scenario.winner} beats ${scenario.loser} in terms of ${scenario.focus}. Keep it under 30 words and focus on mechanical principles only.`;
   
-  if (showAnswerBtn) {
-    showAnswerBtn.style.display = 'none';
-  }
-}
-
-function hideAnswerSection() {
-  const answerSection = document.getElementById('answerSection');
-  if (answerSection) {
-    answerSection.style.display = 'none';
-    answerSection.textContent = '';
-  }
-}
-
-
-
-function showAnswerButton() {
-  const showAnswerBtn = document.getElementById('showAnswerBtn');
-  if (showAnswerBtn) {
-    showAnswerBtn.style.display = 'block';
-  }
-}
-
-// Auto-generate when selections change
-(function(){
-  const originalSelect = window.selectOption;
-  window.selectOption = function(type, name, imagePath) {
-    originalSelect(type, name, imagePath);
-    tryAutoGenerate();
-  };
+        try {
+          const response = await fetch(this.baseUrl, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${this.apiKey}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ model: 'command-light', prompt, max_tokens: 80, temperature: 0.3, k: 0 })
+          });
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          const data = await response.json();
+          this.currentAnswer = scenario.winner;
+          this.currentExplanation = data.generations[0].text.trim();
+        } catch (error) {
+          this.currentAnswer = scenario.winner;
+          this.currentExplanation = `${scenario.winner} mechanisms provide ${scenario.reason}, making them more effective for ${seaModel} movement compared to ${scenario.loser} systems.`;
+        }
   
-  // Also hook into scenario popup opening to reset answer state
-  const originalOpenScenario = window.openScenario;
-  window.openScenario = function() {
-    if (originalOpenScenario) originalOpenScenario();
-    // Reset answer state when popup opens
-    hideAnswerSection();
-    if (cohereTester.currentAnswer) {
-      showAnswerButton();
+        return `Mechanisms: ${kit1Clean} vs. ${kit2Clean}\nObjective: ${scenario.objective}\nPrompt: "${scenario.prompt}"`;
+      }
+  
+      revealAnswer() {
+        return `**Answer:** ${this.currentAnswer}\n**Explanation:** ${this.currentExplanation}`;
+      }
+  
+      buildScenario(seaModel, kit1, kit2) {
+        const mechanismPower = { Worm_Gear: 5, Crank: 4, 'Bevel Gear': 3, Geneva: 2, Cam: 1 };
+        const kit1Clean = kit1.replace(/[-\s]?Model/g, '').replace(/-/g, ' ').replace(/Cam-([A-C])/g, 'Cam').replace(/Gear-([A-C])/g, '$1 Gear');
+        const kit2Clean = kit2.replace(/[-\s]?Model/g, '').replace(/-/g, ' ').replace(/Cam-([A-C])/g, 'Cam').replace(/Gear-([A-C])/g, '$1 Gear');
+        const power1 = mechanismPower[kit1Clean] || 1;
+        const power2 = mechanismPower[kit2Clean] || 1;
+        const winner = power1 >= power2 ? kit1Clean : kit2Clean;
+        const loser = winner === kit1Clean ? kit2Clean : kit1Clean;
+  
+        const scenarios = [
+          { objective: 'Compare speed of motion between two systems', prompt: `Observe the ${seaModel} operating via ${kit1Clean} and ${kit2Clean} mechanisms. Which one swims faster in AR? Why do you think this happens mechanically?`, focus: 'speed and continuity', reason: 'continuous motion' },
+          { objective: 'Compare force transmission efficiency', prompt: `Activate each system with AR and observe the ${seaModel}. Which mechanism pushes forward most efficiently? Which seems smoothest? Why?`, focus: 'force transmission', reason: 'higher torque' },
+          { objective: 'Compare torque and power output', prompt: `Scan the ${seaModel} using each mechanism in AR. Which one shows stronger, slower movement? Why is that?`, focus: 'torque and power', reason: 'stronger force output' },
+          { objective: 'Match motion patterns to mechanisms', prompt: `Observe how the ${seaModel} moves with each system. Which movement corresponds to which mechanism? What clues led you there?`, focus: 'motion patterns', reason: 'consistent motion patterns' },
+          { objective: 'Determine best system for resistance', prompt: `The ${seaModel} is swimming against strong current. Which mechanism helps it push through more effectively? Why?`, focus: 'efficiency under load', reason: 'better power transmission' },
+          { objective: 'Compare precision and control systems', prompt: `Watch the ${seaModel} navigate through obstacles using each mechanism. Which provides better control? Why?`, focus: 'precision and control', reason: 'better motion control' },
+          { objective: 'Evaluate long-term energy efficiency', prompt: `If the ${seaModel} had to swim for hours, which mechanism would be more efficient? What makes you think so?`, focus: 'energy efficiency', reason: 'optimal energy transfer' }
+        ];
+  
+        const selected = scenarios[Math.floor(Math.random() * scenarios.length)];
+        return { ...selected, winner, loser };
+      }
     }
-  };
-})();
-
-// Initialize answer section and button in popup when DOM loads
-document.addEventListener('DOMContentLoaded', function() {
-  // Find the scenario popup content
-  const scenarioContent = document.querySelector('.scenario-content');
-  if (scenarioContent) {
-    
-    // Add answer section (hidden by default)
-    const answerSection = document.createElement('div');
-    answerSection.id = 'answerSection';
-    answerSection.style.cssText = `
-      display: none;
-      background: rgba(76, 175, 80, 0.1);
-      border: 2px solid #4CAF50;
-      border-radius: 8px;
-      padding: 1rem;
-      margin-top: 1rem;
-      color: #2E7D32;
-      font-weight: 600;
-      white-space: pre-line;
-    `;
-    
-    // Add show answer button
-    const showAnswerBtn = document.createElement('button');
-    showAnswerBtn.id = 'showAnswerBtn';
-    showAnswerBtn.textContent = 'Show Answer';
-    showAnswerBtn.style.cssText = `
-      display: none;
-      background: #4CAF50;
-      color: white;
-      border: none;
-      padding: 0.8rem 1.5rem;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 600;
-      margin-top: 1rem;
-      transition: all 0.3s ease;
-    `;
-    
-    showAnswerBtn.onmouseover = function() {
-      this.style.background = '#45a049';
-      this.style.transform = 'translateY(-2px)';
-    };
-    
-    showAnswerBtn.onmouseout = function() {
-      this.style.background = '#4CAF50';
-      this.style.transform = 'translateY(0)';
-    };
-    
-    showAnswerBtn.onclick = showAnswer;
-    
-    // Insert after scenario text but before close button
-    const scenarioText = document.getElementById('scenarioText');
-    if (scenarioText) {
-      scenarioText.parentNode.insertBefore(showAnswerBtn, scenarioText.nextSibling);
-      scenarioText.parentNode.insertBefore(answerSection, showAnswerBtn.nextSibling);
+  
+    const cohereTester = new CohereAITester();
+  
+    async function tryAutoGenerate() {
+      const sea = selectedOptions.models.name;
+      const k1 = selectedOptions.kit1.name;
+      const k2 = selectedOptions.kit2.name;
+      if (sea && k1 && k2) {
+        const el = document.getElementById('scenarioText');
+        el.innerHTML = '🤖 Generating educational scenario...';
+        hideAnswerSection();
+        showAnswerButton();
+        try {
+          const scenario = await cohereTester.generateScenario(sea, k1, k2);
+          el.innerHTML = formatScenarioOutput(scenario);
+        } catch (e) {
+          el.innerHTML = 'Error generating scenario. Please try again.';
+          console.error(e);
+        }
+      }
     }
-  }
-});
-
-
+  
+    function showAnswer() {
+      const answerSection = document.getElementById('answerSection');
+      const showBtn = document.getElementById('showAnswerBtn');
+      answerSection.textContent = cohereTester.revealAnswer();
+      answerSection.style.display = 'block';
+      showBtn.style.display = 'none';
+    }
+  
+    function hideAnswerSection() {
+      const sec = document.getElementById('answerSection');
+      sec.style.display = 'none';
+      sec.textContent = '';
+    }
+  
+    function showAnswerButton() {
+      document.getElementById('showAnswerBtn').style.display = 'block';
+    }
+  
+    (function() {
+      const origSelect = window.selectOption;
+      window.selectOption = function(type, name, imagePath) {
+        origSelect(type, name, imagePath);
+        tryAutoGenerate();
+      };
+      const origOpen = window.openScenario;
+      window.openScenario = function() {
+        if (origOpen) origOpen();
+        hideAnswerSection();
+        if (cohereTester.currentAnswer) showAnswerButton();
+      };
+    })();
+  
+    document.addEventListener('DOMContentLoaded', function() {
+      const content = document.querySelector('.scenario-content');
+      if (content) {
+        const answerSection = document.createElement('div');
+        answerSection.id = 'answerSection';
+        answerSection.style.cssText = 'display:none;background:rgba(76,175,80,0.1);border:2px solid #4CAF50;border-radius:8px;padding:1rem;margin-top:1rem;color:#2E7D32;font-weight:600;white-space:pre-line;';
+        const showBtn = document.createElement('button');
+        showBtn.id = 'showAnswerBtn';
+        showBtn.textContent = 'Show Answer';
+        showBtn.style.cssText = 'display:none;background:#4CAF50;color:white;border:none;padding:0.8rem 1.5rem;border-radius:8px;cursor:pointer;font-weight:600;margin-top:1rem;transition:all 0.3s;';
+        showBtn.onmouseover = () => { showBtn.style.background = '#45a049'; showBtn.style.transform = 'translateY(-2px)'; };
+        showBtn.onmouseout = () => { showBtn.style.background = '#4CAF50'; showBtn.style.transform = 'translateY(0)'; };
+        showBtn.onclick = showAnswer;
+        const scenarioText = document.getElementById('scenarioText');
+        scenarioText.parentNode.insertBefore(showBtn, scenarioText.nextSibling);
+        scenarioText.parentNode.insertBefore(answerSection, showBtn.nextSibling);
+      }
+    });
   </script>
-
   <!-- Screen Reader Only Content -->
   <div class="sr-only" aria-live="polite" id="screen-reader-announcements"></div>
 

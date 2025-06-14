@@ -1945,13 +1945,28 @@ p, li, span {
 }
 
 /* Title and subtitle styling */
-#createScreen .modal-title {
-  font-size: clamp(1.1rem, 3.5vw, 1.8rem);
-  line-height: 1.2;
-  margin-bottom: 0.25rem;
-  font-weight: 700;
-  overflow: hidden;
-  text-overflow: ellipsis;
+#createScreen .modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  padding: clamp(1rem, 3vw, 1.5rem);
+  position: relative;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+  gap: 0.5rem;
+  min-height: 80px;
+}
+
+/* Back button - left side */
+#createScreen .modal-close-button {
+  order: 1;
+  position: static !important;
+  flex-shrink: 0;
+  margin: 0;
+  font-size: clamp(0.7rem, 2vw, 0.8rem);
+  padding: clamp(0.5rem, 1.5vw, 0.7rem) clamp(0.8rem, 2vw, 1rem);
   white-space: nowrap;
 }
 
@@ -2009,11 +2024,13 @@ p, li, span {
 
 /* Mobile responsive adjustments */
 @media (max-width: 768px) {
-  #createScreen .modal-header {
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    padding: 1rem;
-  }
+ .modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
   
   #createScreen .modal-close-button,
   #createScreen .animation-library-btn {

@@ -619,42 +619,14 @@ class CreateManager {
 
     this.libraryButton = document.createElement('button');
     this.libraryButton.id = 'animLibraryTopBtn';
-    this.libraryButton.style.cssText = `
-      position: absolute;
-      top: 1.5rem;
-      right: 2rem;
-      background: #9C27B0;
-      color: white;
-      border: 2px solid #9C27B0;
-      padding: 0.8rem 1.2rem;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 0.85rem;
-      z-index: 1001;
-      transition: all 0.3s ease;
-      box-shadow: 0 2px 8px rgba(156, 39, 176, 0.3);
-    `;
-
+    this.libraryButton.className = 'animation-library-btn';
     this.libraryButton.textContent = 'Animation Library';
     this.libraryButton.onclick = () => this.openLibrary();
     
-    this.libraryButton.onmouseenter = () => {
-      this.libraryButton.style.background = '#7B1FA2';
-      this.libraryButton.style.transform = 'translateY(-2px)';
-      this.libraryButton.style.boxShadow = '0 4px 12px rgba(156, 39, 176, 0.4)';
-    };
-    
-    this.libraryButton.onmouseleave = () => {
-      this.libraryButton.style.background = '#9C27B0';
-      this.libraryButton.style.transform = 'translateY(0)';
-      this.libraryButton.style.boxShadow = '0 2px 8px rgba(156, 39, 176, 0.3)';
-    };
-
-    header.style.position = 'relative';
+    // Append to header (now positioned at the end since AR button is removed)
     header.appendChild(this.libraryButton);
     
-    Utils.log('Animation Library button created and positioned', 'success');
+    Utils.log('Animation Library button created and positioned in simplified header', 'success');
   }
 
   updateLibraryButton() {

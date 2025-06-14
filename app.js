@@ -512,7 +512,7 @@ class CreateManager {
   async init() {
     Utils.log('Initializing Create Manager with Marker Detection', 'info');
     
-
+    this.createAnimationLibraryButton();
     await this.initCamera();
     this.setupControls();
     this.createSaveButton();
@@ -607,8 +607,16 @@ class CreateManager {
     }
   }
 
-
-
+createAnimationLibraryButton() {
+  const existing = document.querySelector('#animLibraryTopBtn');
+  if (existing) {
+    existing.onclick = () => this.openLibrary();
+    Utils.log('Animation Library button functionality added to existing button', 'success');
+    return;
+  }
+  
+  Utils.log('Animation Library button not found in DOM', 'warning');
+}
   updateLibraryButton() {
     if (this.libraryButton) {
       this.libraryButton.textContent = `Animation Library (${this.animationLibrary.size})`;

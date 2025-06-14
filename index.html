@@ -591,7 +591,7 @@
       <nav class="header-buttons" role="navigation" aria-label="Main navigation">
         <button class="header-button" id="createBtn" aria-label="Create new content">Create</button>
         <button class="header-button" id="manualsBtn" aria-label="View instruction manuals">Manuals</button>
-        <button class="header-ar-button" id="openARBtn" aria-label="Open augmented reality experience">Open AR</button>
+        <button class="header-ar-button" id="openARBtn" aria-label="Open augmented reality experience">AR</button>
         <button class="header-button" id="modelsBtn" aria-label="Download 3D models">Models</button>
         <button class="header-button" id="aiBtn" aria-label="AI learning assistant">AI</button>
       </nav>
@@ -1089,82 +1089,110 @@
 
   <!-- Create Screen -->
    <section id="createScreen" class="modal-screen" role="main" aria-labelledby="create-title">
-    <div class="modal-header">
-      <button class="modal-close-button" id="closeCreateBtn" aria-label="Close create screen">← Back</button>
-      
-      <div class="modal-header-center">
-        <div class="modal-title" id="create-title">Create Your Own AR Models</div>
-        <div class="modal-subtitle">Create your own unique AR models and markers</div>
-      </div>
-      
-      <button class="header-ar-button" id="createOpenARBtn" aria-label="Open AR to view created animations">Open AR</button>
+  
+  <!-- Header Section -->
+  <div class="modal-header">
+    <button class="modal-close-button" id="closeCreateBtn" aria-label="Close create screen">← Back</button>
+    <div class="modal-header-center">
+      <div class="modal-title" id="create-title">Create Your Own AR Models</div>
+      <div class="modal-subtitle">Create your own unique AR models and markers</div>
     </div>
+  </div>
+
+  <!-- Main Content Container -->
+  <div class="modal-content">
+    
+    <!-- Camera Section -->
+    <div class="create-section">
+      <h3>Capture Animation Grid</h3>
+      <div class="create-status" id="createStatus">Starting camera...</div>
       
-      <!-- Camera Section -->
-      <div class="create-section">
-        <h3>Capture Animation Grid</h3>
-        <div class="create-status" id="createStatus">Starting camera...</div>
+      <div class="create-camera-container">
+        <div class="create-camera-box">
+          <video id="createVideo" autoplay muted playsinline></video>
+          <div class="create-grid">
+            <div class="create-cell"></div>
+            <div class="create-cell"></div>
+            <div class="create-cell"></div>
+            <div class="create-cell create-golden"></div>
+            <div class="create-cell create-golden"></div>
+            <div class="create-cell create-golden"></div>
+          </div>
+        </div>
         
-        <div class="create-camera-container">
-          <div class="create-camera-box">
-            <video id="createVideo" autoplay muted playsinline></video>
-           <div class="create-grid">
-        <div class="create-cell"></div><div class="create-cell"></div>
-        <div class="create-cell "></div><div class="create-cell create-golden"></div>
-        <div class="create-cell create-golden"></div><div class="create-cell create-golden"></div>
-      </div>
-
-          </div>
-          
-          <div class="create-controls">
-            <button id="createCapture" class="create-capture-btn" disabled>
-              Capture Assembly Step
-            </button>
-            <button id="createClear" class="create-clear-btn" style="display: none;">
-              Clear All Frames
-            </button>
-          </div>
+        <div class="create-controls">
+          <button id="createCapture" class="create-capture-btn" disabled>
+            Capture Assembly Step
+          </button>
+          <button id="createClear" class="create-clear-btn" style="display: none;">
+            Clear All Frames
+          </button>
         </div>
       </div>
-
-      <!-- Results Section -->
-      <div class="create-section" id="createResultsSection" style="display: none;">
-        <h3>Capture Animation Grids</h3>
-        <div class="create-instructions">
-          <p> Individual frames captured from the golden grid area</p>
-          <p> Click any frame to download, or use the animation below</p>
-        </div>
-        <div class="create-results" id="createResults"></div>
-      </div>
-
-      <!-- Animation Section -->
-      <div class="create-section" id="createAnimSection" style="display: none;">
-        <h3>Assembly Animation</h3>
-        <div class="create-animation-container">
-          <div class="create-animation-box">
-            <img id="createAnimFrame" src="" alt="Assembly animation frame">
-            <div class="create-animation-overlay" id="createAnimOverlay">
-              <span>No animation yet - capture some steps above!</span>
-            </div>
-          </div>
-          <div class="create-animation-controls">
-            <button id="createPlayPause" disabled>▶ Play</button>
-            <button id="createResetAnim" disabled>⏹ Reset</button>
-            <label>
-              Speed: <input type="range" id="createSpeedSlider" min="200" max="2000" value="500" disabled> 
-              <span id="createSpeedDisplay">500ms</span>
-            </label>
-          </div>
-          
-        </div>
-
-         
-      </div>
-
-     </div>
-
     </div>
-  </section>
+
+    <!-- Results Section -->
+    <div class="create-section" id="createResultsSection" style="display: none;">
+      <h3>Captured Animation Frames</h3>
+      <div class="create-instructions">
+        <p>Individual frames captured from the golden grid area</p>
+        <p>Click any frame to download, or use the animation below</p>
+      </div>
+      <div class="create-results" id="createResults"></div>
+    </div>
+
+    <!-- Animation Section -->
+    <div class="create-section" id="createAnimSection" style="display: none;">
+      <h3>Assembly Animation</h3>
+      <div class="create-animation-container">
+        <div class="create-animation-box">
+          <img id="createAnimFrame" src="" alt="Assembly animation frame">
+          <div class="create-animation-overlay" id="createAnimOverlay">
+            <span>No animation yet - capture some steps above!</span>
+          </div>
+        </div>
+        
+        <div class="create-animation-controls">
+          <button id="createPlayPause" disabled>▶ Play</button>
+          <button id="createResetAnim" disabled>⏹ Reset</button>
+          <label>
+            Speed: <input type="range" id="createSpeedSlider" min="200" max="2000" value="500" disabled>
+            <span id="createSpeedDisplay">500ms</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tips & Instructions Section -->
+    <div class="create-section">
+      <h3>How to Create Great AR Animations</h3>
+      <div class="create-tips">
+        <div class="create-tip">
+          <h4>🎯 Golden Grid Positioning</h4>
+          <p>Position your subject within the highlighted golden squares for optimal capture quality and consistent framing.</p>
+        </div>
+        <div class="create-tip">
+          <h4>📱 Steady Camera Work</h4>
+          <p>Keep your device steady during capture. Use good lighting and avoid casting shadows on your subject.</p>
+        </div>
+        <div class="create-tip">
+          <h4>🔄 Smooth Animation Steps</h4>
+          <p>Capture small, incremental changes between frames to create fluid animation sequences in AR.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Bottom AR Button - Fixed Position -->
+  <div class="create-bottom-button-container">
+    <button class="create-ar-button" id="createOpenARBtn" aria-label="Open AR to view created animations">
+      🚀 Open AR Experience
+    </button>
+  </div>
+
+</section>
+
 
   <!-- JavaScript Files -->
   <script src="app.js"></script>

@@ -512,7 +512,7 @@ class CreateManager {
   async init() {
     Utils.log('Initializing Create Manager with Marker Detection', 'info');
     
-    this.createAnimationLibraryButton();
+
     await this.initCamera();
     this.setupControls();
     this.createSaveButton();
@@ -607,27 +607,7 @@ class CreateManager {
     }
   }
 
-  createAnimationLibraryButton() {
-    const existing = document.querySelector('#animLibraryTopBtn');
-    if (existing) existing.remove();
 
-    const createScreen = Utils.$('createScreen');
-    if (!createScreen) return;
-
-    const header = createScreen.querySelector('.modal-header');
-    if (!header) return;
-
-    this.libraryButton = document.createElement('button');
-    this.libraryButton.id = 'animLibraryTopBtn';
-    this.libraryButton.className = 'animation-library-btn';
-    this.libraryButton.textContent = 'Animation Library';
-    this.libraryButton.onclick = () => this.openLibrary();
-    
-    // Append to header (now positioned at the end since AR button is removed)
-    header.appendChild(this.libraryButton);
-    
-    Utils.log('Animation Library button created and positioned in simplified header', 'success');
-  }
 
   updateLibraryButton() {
     if (this.libraryButton) {

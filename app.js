@@ -1918,21 +1918,25 @@ class ARManager {
       font-size: 1.2rem;
       transition: all 0.3s ease;
       box-shadow: 0 4px 12px rgba(156, 39, 176, 0.3);
-      margin-top: 1.5rem;
+      margin-bottom: 1rem;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 0.5rem;
+      text-transform: uppercase;
+      font-weight: 700;
     `;
 
     this.settingsButton.onmouseover = () => {
       this.settingsButton.style.transform = 'translateY(-2px)';
       this.settingsButton.style.background = '#9C27B0';
+      this.settingsButton.style.boxShadow = '0 6px 18px rgba(156, 39, 176, 0.4)';
     };
 
     this.settingsButton.onmouseout = () => {
       this.settingsButton.style.transform = 'translateY(0)';
       this.settingsButton.style.background = 'rgba(156, 39, 176, 0.9)';
+      this.settingsButton.style.boxShadow = '0 4px 12px rgba(156, 39, 176, 0.3)';
     };
 
     this.settingsButton.onclick = () => this.showSettingsMenu();
@@ -1940,14 +1944,20 @@ class ARManager {
     // Add text to the button
     const buttonText = document.createElement('span');
     buttonText.textContent = 'Animation Settings';
-    buttonText.style.fontSize = '0.9rem';
-    buttonText.style.fontWeight = '600';
+    buttonText.style.fontSize = '0.8rem';
+    buttonText.style.fontWeight = '700';
     
     this.settingsButton.appendChild(buttonText);
 
-    // Find the AR sidebar and add the button there
+    // Find the AR sidebar and add the button before the debug button
     const arSidebar = document.querySelector('.ar-sidebar');
-    if (arSidebar) {
+    const debugButton = document.getElementById('debugSideBtn');
+    
+    if (arSidebar && debugButton) {
+      // Insert the animation settings button before the debug button
+      arSidebar.insertBefore(this.settingsButton, debugButton);
+    } else if (arSidebar) {
+      // If no debug button found, add to end of sidebar
       arSidebar.appendChild(this.settingsButton);
     } else {
       // Fallback: add to AR screen

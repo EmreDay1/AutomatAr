@@ -1909,8 +1909,8 @@ class ARManager {
     this.settingsButton.title = 'Animation Preferences';
     this.settingsButton.style.cssText = `
       position: absolute;
-      bottom: clamp(1rem, 3vw, 1.5rem);
-      right: clamp(1rem, 3vw, 1.5rem);
+      top: 80px;
+      left: 130px;
       background: rgba(156, 39, 176, 0.9);
       color: white;
       border: 2px solid #9C27B0;
@@ -1919,7 +1919,7 @@ class ARManager {
       border-radius: 50%;
       cursor: pointer;
       font-size: 1.2rem;
-      z-index: 25;
+      z-index: 30;
       transition: all 0.3s ease;
       box-shadow: 0 4px 12px rgba(156, 39, 176, 0.3);
     `;
@@ -1936,9 +1936,15 @@ class ARManager {
 
     this.settingsButton.onclick = () => this.showSettingsMenu();
 
-    const arScreen = document.getElementById('arScreen');
-    if (arScreen) {
-      arScreen.appendChild(this.settingsButton);
+    // Add to the three container (where the camera view is) instead of arScreen
+    const threeContainer = Utils.$('threeContainer');
+    if (threeContainer) {
+      threeContainer.appendChild(this.settingsButton);
+    } else {
+      const arScreen = document.getElementById('arScreen');
+      if (arScreen) {
+        arScreen.appendChild(this.settingsButton);
+      }
     }
   }
 
@@ -2232,6 +2238,7 @@ class ARManager {
 
   createAnimationOptionCard(animation, markerId, isSelected = false) {
     const card = document.createElement('div');
+    card.className = 'animation-option-card';
     card.style.cssText = `
       background: ${isSelected ? 'rgba(255, 140, 0, 0.2)' : 'rgba(255, 255, 255, 0.05)'};
       border: 2px solid ${isSelected ? '#FF8C00' : 'rgba(255, 255, 255, 0.1)'};
@@ -2258,12 +2265,47 @@ class ARManager {
       }
     };
 
-    // Preview image
+    // Preview image container with selection button in TOP-LEFT corner
     const preview = document.createElement('div');
+    preview.className = 'animation-preview';
     preview.style.cssText = `
       width: 80px; height: 60px; background: rgba(0, 0, 0, 0.3); border-radius: 8px;
       display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0;
+      position: relative;
     `;
+
+    // Selection button positioned in TOP-LEFT corner of preview (camera view)
+    const selectionButton = document.createElement('div');
+    selectionButton.className = 'selection-indicator';
+    selectionButton.style.cssText = `
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      width: 20px;
+      height: 20px;
+      border: 3px solid ${isSelected ? '#FF8C00' : 'rgba(255, 140, 0, 0.8)'};
+      border-radius: 50%;
+      background: ${isSelected ? '#FF8C00' : 'transparent'};
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      z-index: 10;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+      cursor: pointer;
+    `;
+
+    if (isSelected) {
+      const checkmark = document.createElement('div');
+      checkmark.style.cssText = `
+        width: 8px;
+        height: 8px;
+        background: white;
+        border-radius: 50%;
+      `;
+      selectionButton.appendChild(checkmark);
+      card.classList.add('selected');
+    }
 
     if (animation.frames && animation.frames.length > 0 && animation.frames[0].url) {
       const img = document.createElement('img');
@@ -2271,11 +2313,15 @@ class ARManager {
       img.style.cssText = 'width: 100%; height: 100%; object-fit: cover; border-radius: 6px;';
       img.onerror = () => {
         preview.innerHTML = '<span style="color: rgba(255,255,255,0.5); font-size: 0.8rem;">No Preview</span>';
+        preview.appendChild(selectionButton); // Re-add button after error
       };
       preview.appendChild(img);
     } else {
       preview.innerHTML = '<span style="color: rgba(255,255,255,0.5); font-size: 0.8rem;">No Preview</span>';
     }
+
+    // Add selection button to TOP-LEFT of preview
+    preview.appendChild(selectionButton);
 
     // Animation info
     const info = document.createElement('div');
@@ -2296,23 +2342,11 @@ class ARManager {
     details.innerHTML = `${frameCount} frames • ${frameRate.toFixed(1)} FPS<br>
       <span style="font-size: 0.75rem; opacity: 0.8;">Created: ${createdAt}</span>`;
 
-    // Selection indicator
-    const indicator = document.createElement('div');
-    indicator.style.cssText = `
-      width: 20px; height: 20px; border: 2px solid ${isSelected ? '#FF8C00' : 'rgba(255, 255, 255, 0.3)'};
-      border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.3s ease;
-    `;
-
-    if (isSelected) {
-      indicator.innerHTML = '<div style="width: 10px; height: 10px; background: #FF8C00; border-radius: 50%;"></div>';
-      card.classList.add('selected');
-    }
-
     info.appendChild(name);
     info.appendChild(details);
+    
     card.appendChild(preview);
     card.appendChild(info);
-    card.appendChild(indicator);
 
     card.onclick = () => this.selectAnimation(markerId, animation.id, card);
 
@@ -2326,27 +2360,35 @@ class ARManager {
 
     // Update UI to show new selection
     const content = document.getElementById('animationSelectorContent');
-    const cards = content.querySelectorAll('div');
+    const cards = content.querySelectorAll('.animation-option-card');
     
     cards.forEach(card => {
+      // Find the indicator (positioned absolutely in the preview container)
+      const preview = card.querySelector('.animation-preview');
+      const indicator = preview ? preview.querySelector('.selection-indicator') : null;
+      
       if (card === selectedCard) {
+        // Selected card styling
         card.style.background = 'rgba(255, 140, 0, 0.2)';
         card.style.borderColor = '#FF8C00';
         card.classList.add('selected');
         
-        const indicator = card.querySelector('div:last-child');
+        // Update indicator for selected state
         if (indicator) {
           indicator.style.borderColor = '#FF8C00';
-          indicator.innerHTML = '<div style="width: 10px; height: 10px; background: #FF8C00; border-radius: 50%;"></div>';
+          indicator.style.background = '#FF8C00';
+          indicator.innerHTML = '<div style="width: 6px; height: 6px; background: white; border-radius: 50%;"></div>';
         }
       } else {
+        // Unselected card styling
         card.style.background = 'rgba(255, 255, 255, 0.05)';
         card.style.borderColor = 'rgba(255, 255, 255, 0.1)';
         card.classList.remove('selected');
         
-        const indicator = card.querySelector('div:last-child');
+        // Update indicator for unselected state
         if (indicator) {
-          indicator.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+          indicator.style.borderColor = 'rgba(255, 255, 255, 0.6)';
+          indicator.style.background = 'transparent';
           indicator.innerHTML = '';
         }
       }

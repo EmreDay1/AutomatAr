@@ -1908,39 +1908,49 @@ class ARManager {
     this.settingsButton.innerHTML = '⚙️';
     this.settingsButton.title = 'Animation Preferences';
     this.settingsButton.style.cssText = `
-      position: absolute;
-      top: 80px;
-      left: 130px;
       background: rgba(156, 39, 176, 0.9);
       color: white;
       border: 2px solid #9C27B0;
-      width: 50px;
+      width: 100%;
       height: 50px;
-      border-radius: 50%;
+      border-radius: 8px;
       cursor: pointer;
       font-size: 1.2rem;
-      z-index: 30;
       transition: all 0.3s ease;
       box-shadow: 0 4px 12px rgba(156, 39, 176, 0.3);
+      margin-top: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
     `;
 
     this.settingsButton.onmouseover = () => {
-      this.settingsButton.style.transform = 'scale(1.1)';
+      this.settingsButton.style.transform = 'translateY(-2px)';
       this.settingsButton.style.background = '#9C27B0';
     };
 
     this.settingsButton.onmouseout = () => {
-      this.settingsButton.style.transform = 'scale(1)';
+      this.settingsButton.style.transform = 'translateY(0)';
       this.settingsButton.style.background = 'rgba(156, 39, 176, 0.9)';
     };
 
     this.settingsButton.onclick = () => this.showSettingsMenu();
 
-    // Add to the three container (where the camera view is) instead of arScreen
-    const threeContainer = Utils.$('threeContainer');
-    if (threeContainer) {
-      threeContainer.appendChild(this.settingsButton);
+    // Add text to the button
+    const buttonText = document.createElement('span');
+    buttonText.textContent = 'Animation Settings';
+    buttonText.style.fontSize = '0.9rem';
+    buttonText.style.fontWeight = '600';
+    
+    this.settingsButton.appendChild(buttonText);
+
+    // Find the AR sidebar and add the button there
+    const arSidebar = document.querySelector('.ar-sidebar');
+    if (arSidebar) {
+      arSidebar.appendChild(this.settingsButton);
     } else {
+      // Fallback: add to AR screen
       const arScreen = document.getElementById('arScreen');
       if (arScreen) {
         arScreen.appendChild(this.settingsButton);

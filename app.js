@@ -1641,6 +1641,10 @@ class ARManager {
     this.isMenuVisible = false;
     this.currentMarkerForSelection = null;
     this.settingsButton = null;
+    
+    // Currently detected markers tracking
+    this.currentlyDetectedMarkers = new Map(); // markerId -> marker object
+    this.markersWithMultipleAnimations = new Map(); // markerId -> animations array
   }
 
   async init() {
@@ -1939,7 +1943,7 @@ class ARManager {
       this.settingsButton.style.boxShadow = '0 4px 12px rgba(156, 39, 176, 0.3)';
     };
 
-    this.settingsButton.onclick = () => this.showSettingsMenu();
+    this.settingsButton.onclick = () => this.handleSettingsButtonClick();
 
     // Add text to the button
     const buttonText = document.createElement('span');
@@ -2115,17 +2119,21 @@ class ARManager {
       const animations = this.animationsByMarker.get(normalizedId);
 
       if (!animations || animations.length === 0) {
-        // Show "no animations" message briefly
-        this.showNoAnimationsMessage(normalizedId);
+        // Remove from multiple animations tracking if it was there
+        this.markersWithMultipleAnimations.delete(normalizedId);
         return null;
       }
 
       if (animations.length === 1) {
         // Only one animation available - use it directly
+        this.markersWithMultipleAnimations.delete(normalizedId);
         return animations[0];
       }
 
-      // Multiple animations available - check user preference
+      // Multiple animations available - track this marker but don't show menu automatically
+      this.markersWithMultipleAnimations.set(normalizedId, animations);
+
+      // Check user preference
       const preferredAnimationId = this.markerAnimationPreferences.get(normalizedId);
       
       if (preferredAnimationId) {
@@ -2135,12 +2143,7 @@ class ARManager {
         }
       }
 
-      // No preference set - show selection menu only if not already visible for this marker
-      if (!this.isMenuVisible || this.currentMarkerForSelection !== normalizedId) {
-        this.showAnimationSelectionMenu(normalizedId, animations);
-      }
-      
-      // Return the first animation as default while user makes selection
+      // No preference set - return first animation as default (menu will only show when button pressed)
       return animations[0];
       
     } catch (error) {
@@ -2493,109 +2496,181 @@ class ARManager {
     }, 300);
   }
 
-  showSettingsMenu() {
-    // Only show settings if there are preferences to manage
-    if (this.markerAnimationPreferences.size === 0 && this.animationsByMarker.size === 0) {
-      this.showNoAnimationsMessage('Settings');
+  handleSettingsButtonClick() {
+    // Check for currently detected markers with multiple animations
+    const markersWithMultiple = Array.from(this.markersWithMultipleAnimations.keys());
+    
+    if (markersWithMultiple.length === 0) {
+      // No markers with multiple animations detected
+      this.showNoMultipleAnimationsMessage();
       return;
     }
+    
+    if (markersWithMultiple.length === 1) {
+      // Only one marker with multiple animations - show selection menu directly
+      const markerId = markersWithMultiple[0];
+      const animations = this.markersWithMultipleAnimations.get(markerId);
+      this.showAnimationSelectionMenu(markerId, animations);
+      return;
+    }
+    
+    // Multiple markers with multiple animations - show marker selection menu
+    this.showMarkerSelectionMenu(markersWithMultiple);
+  }
 
-    const existingSettings = document.getElementById('animationSettingsMenu');
-    if (existingSettings) {
-      existingSettings.remove();
+  showNoMultipleAnimationsMessage() {
+    let message = 'No markers with multiple animations detected.';
+    
+    if (this.currentlyDetectedMarkers.size === 0) {
+      message = 'No markers detected. Point camera at a marker first.';
+    } else {
+      const detectedIds = Array.from(this.currentlyDetectedMarkers.keys());
+      message = `Detected markers (${detectedIds.join(', ')}) don't have multiple animations available.`;
+    }
+    
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+      position: fixed;
+      top: 20%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255, 152, 0, 0.9);
+      color: white;
+      padding: 1.2rem 2rem;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      z-index: 3500;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      opacity: 0;
+      transition: all 0.3s ease;
+      max-width: 400px;
+      text-align: center;
+    `;
+    
+    notification.textContent = message;
+    
+    const arScreen = document.getElementById('arScreen');
+    if (arScreen) {
+      arScreen.appendChild(notification);
+    } else {
+      document.body.appendChild(notification);
+    }
+    
+    // Show with animation
+    setTimeout(() => {
+      notification.style.opacity = '1';
+      notification.style.transform = 'translateX(-50%) translateY(10px)';
+    }, 10);
+    
+    // Auto-hide after 3 seconds
+    setTimeout(() => {
+      notification.style.opacity = '0';
+      notification.style.transform = 'translateX(-50%) translateY(-10px)';
+      setTimeout(() => {
+        if (notification.parentNode) {
+          notification.parentNode.removeChild(notification);
+        }
+      }, 300);
+    }, 3000);
+  }
+
+  showMarkerSelectionMenu(markerIds) {
+    const existingMenu = document.getElementById('markerSelectionMenu');
+    if (existingMenu) {
+      existingMenu.remove();
     }
 
-    const settingsMenu = document.createElement('div');
-    settingsMenu.id = 'animationSettingsMenu';
-    settingsMenu.style.cssText = `
-      position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    const markerMenu = document.createElement('div');
+    markerMenu.id = 'markerSelectionMenu';
+    markerMenu.style.cssText = `
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
       background: linear-gradient(145deg, rgba(0, 0, 0, 0.95), rgba(20, 20, 20, 0.95));
-      border: 2px solid #9C27B0; border-radius: 16px; padding: 2rem; z-index: 3000; color: white;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(156, 39, 176, 0.3);
-      backdrop-filter: blur(10px); max-width: 600px; max-height: 80vh; overflow-y: auto;
+      border: 2px solid #FF8C00;
+      border-radius: 16px;
+      padding: 2rem;
+      z-index: 3000;
+      color: white;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(255, 140, 0, 0.3);
+      backdrop-filter: blur(10px);
+      max-width: 500px;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     `;
 
     const header = document.createElement('div');
     header.innerHTML = `
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-        <h3 style="margin: 0; color: #9C27B0; font-size: 1.4rem;">Animation Preferences</h3>
-        <button onclick="document.getElementById('animationSettingsMenu').remove()" 
-                style="background: rgba(156, 39, 176, 0.2); border: 1px solid #9C27B0; color: #9C27B0; 
+        <h3 style="margin: 0; color: #FF8C00; font-size: 1.4rem;">Choose Marker</h3>
+        <button onclick="document.getElementById('markerSelectionMenu').remove()" 
+                style="background: rgba(255, 140, 0, 0.2); border: 1px solid #FF8C00; color: #FF8C00; 
                        width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-size: 1.2rem;">×</button>
       </div>
       <p style="margin: 0 0 1.5rem 0; color: rgba(255, 255, 255, 0.8); line-height: 1.4;">
-        Manage your animation preferences for markers with multiple animations available.
+        Multiple markers with animation choices detected. Select which marker to configure:
       </p>
     `;
 
     const content = document.createElement('div');
-    
-    if (this.markerAnimationPreferences.size === 0) {
-      content.innerHTML = `
-        <div style="text-align: center; padding: 2rem; color: rgba(255, 255, 255, 0.6);">
-          <div style="font-size: 2rem; margin-bottom: 1rem;">📱</div>
-          <p>No animation preferences set yet.</p>
-          <p style="font-size: 0.9rem;">Scan markers with multiple animations to set preferences.</p>
+    content.style.cssText = 'display: grid; gap: 1rem;';
+
+    markerIds.forEach(markerId => {
+      const animations = this.markersWithMultipleAnimations.get(markerId);
+      const selectedAnimationId = this.markerAnimationPreferences.get(markerId);
+      const selectedAnimation = selectedAnimationId ? 
+        animations.find(a => a.id === selectedAnimationId) : animations[0];
+
+      const markerCard = document.createElement('div');
+      markerCard.style.cssText = `
+        background: rgba(255, 140, 0, 0.1);
+        border: 2px solid rgba(255, 140, 0, 0.3);
+        border-radius: 12px;
+        padding: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      `;
+
+      markerCard.onmouseover = () => {
+        markerCard.style.background = 'rgba(255, 140, 0, 0.2)';
+        markerCard.style.borderColor = '#FF8C00';
+      };
+
+      markerCard.onmouseout = () => {
+        markerCard.style.background = 'rgba(255, 140, 0, 0.1)';
+        markerCard.style.borderColor = 'rgba(255, 140, 0, 0.3)';
+      };
+
+      markerCard.innerHTML = `
+        <div>
+          <div style="color: white; font-weight: 600; margin-bottom: 0.3rem;">Marker ID: ${markerId}</div>
+          <div style="color: rgba(255, 255, 255, 0.7); font-size: 0.9rem;">
+            Current: ${selectedAnimation.name} (${animations.length} available)
+          </div>
         </div>
+        <div style="color: #FF8C00; font-size: 1.2rem;">→</div>
       `;
-    } else {
-      content.innerHTML = '<div style="display: grid; gap: 1rem;"></div>';
-      const grid = content.querySelector('div');
 
-      this.markerAnimationPreferences.forEach((animationId, markerId) => {
-        const animations = this.animationsByMarker.get(markerId);
-        if (animations && animations.length > 1) {
-          const selectedAnimation = animations.find(a => a.id === animationId);
-          
-          const preferenceCard = document.createElement('div');
-          preferenceCard.style.cssText = `
-            background: rgba(156, 39, 176, 0.1); border: 1px solid rgba(156, 39, 176, 0.3);
-            border-radius: 12px; padding: 1rem; display: flex; justify-content: space-between; align-items: center;
-          `;
+      markerCard.onclick = () => {
+        document.getElementById('markerSelectionMenu').remove();
+        this.showAnimationSelectionMenu(markerId, animations);
+      };
 
-          preferenceCard.innerHTML = `
-            <div>
-              <div style="color: white; font-weight: 600; margin-bottom: 0.3rem;">Marker ID: ${markerId}</div>
-              <div style="color: rgba(255, 255, 255, 0.7); font-size: 0.9rem;">
-                Selected: ${selectedAnimation ? selectedAnimation.name : 'Unknown'} (${animations.length} available)
-              </div>
-            </div>
-            <button onclick="window.App.arManager.resetMarkerPreference(${markerId})" 
-                    style="background: #f44336; color: white; border: none; padding: 0.4rem 0.8rem; 
-                           border-radius: 6px; cursor: pointer; font-size: 0.8rem;">Change</button>
-          `;
-          
-          grid.appendChild(preferenceCard);
-        }
-      });
+      content.appendChild(markerCard);
+    });
 
-      // Add summary info
-      const summary = document.createElement('div');
-      summary.style.cssText = `
-        background: rgba(255, 255, 255, 0.05); border-radius: 8px; padding: 1rem; margin-top: 1rem;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-      `;
-      
-      const markersWithMultiple = Array.from(this.animationsByMarker.entries())
-        .filter(([markerId, animations]) => animations.length > 1).length;
-      
-      summary.innerHTML = `
-        <div style="color: rgba(255, 255, 255, 0.8); font-size: 0.9rem; text-align: center;">
-          <strong>${markersWithMultiple}</strong> markers have multiple animations available<br>
-          <strong>${this.markerAnimationPreferences.size}</strong> preferences currently set
-        </div>
-      `;
-      
-      content.appendChild(summary);
-    }
+    markerMenu.appendChild(header);
+    markerMenu.appendChild(content);
+    document.body.appendChild(markerMenu);
 
-    settingsMenu.appendChild(header);
-    settingsMenu.appendChild(content);
-    document.body.appendChild(settingsMenu);
-
-    settingsMenu.onclick = (e) => {
-      if (e.target === settingsMenu) settingsMenu.remove();
+    markerMenu.onclick = (e) => {
+      if (e.target === markerMenu) markerMenu.remove();
     };
   }
 
@@ -2896,6 +2971,12 @@ class ARManager {
     const markerMap = new Map();
     markers.forEach(marker => markerMap.set(marker.id, marker));
 
+    // Update currently detected markers tracking
+    this.currentlyDetectedMarkers.clear();
+    markers.forEach(marker => {
+      this.currentlyDetectedMarkers.set(marker.id, marker);
+    });
+
     // Stop animations for markers that are no longer visible
     for (let markerId of this.activeOverlays.keys()) {
       if (!markerMap.has(markerId)) {
@@ -3171,6 +3252,10 @@ class ARManager {
     this.animationsByMarker.clear();
     this.animationsLoaded = false;
     this.loadingAnimations = false;
+    
+    // Clear marker tracking
+    this.currentlyDetectedMarkers.clear();
+    this.markersWithMultipleAnimations.clear();
     
     // Clean up selection menu
     if (this.selectorMenu) {
